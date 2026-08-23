@@ -3,30 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nussy Cooperation — Corporate Holding & Technology Pioneer</title>
-  
+  <title>Nussy Corporation — Corporate Holding &amp; Technology Pioneer</title>
+  <meta name="description" content="Nussy Corporation is a registered corporate holding governing high-tier software engineering, competitive esports, and broadcast event execution." />
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- AOS Animation CSS -->
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+
+  <link rel="icon" href="assets/logo.jpg" type="image/jpeg">
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
+          fontFamily: {
+            display: ['Cinzel', 'serif'],
+            sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+          },
           colors: {
             brand: {
-              50: '#f0fdf4',
-              100: '#dcfce7',
-              200: '#bbf7d0',
-              500: '#10b981', 
-              600: '#059669',
-              700: '#047857',
-              800: '#065f46',
-              900: '#064e3b',
-              950: '#022c22',
+              50: '#fbf6e9',
+              100: '#f5e9c6',
+              200: '#ecd694',
+              300: '#e0bd5e',
+              400: '#d4af37',
+              500: '#c19a2e',
+              600: '#a17d22',
+              700: '#7d611c',
+              800: '#5c4715',
+              900: '#3a2c0d',
+              950: '#1f1707',
             }
           },
           animation: {
@@ -39,8 +52,8 @@
               '50%': { transform: 'translateY(-10px)' },
             },
             pulseSubtle: {
-              '0%, 100%': { opacity: '0.8', transform: 'scale(1)' },
-              '50%': { opacity: '1', transform: 'scale(1.02)' },
+              '0%, 100%': { opacity: '0.7', transform: 'scale(1)' },
+              '50%': { opacity: '1', transform: 'scale(1.03)' },
             }
           }
         }
@@ -48,45 +61,51 @@
     }
   </script>
   <style>
-    .glass-light {
-      background: rgba(255, 255, 255, 0.85);
+    body { background-color: #030303; }
+    .glass-dark {
+      background: rgba(5, 5, 6, 0.75);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
     }
     .grid-pattern {
-      background-image: radial-gradient(#10b981 0.75px, transparent 0.75px);
+      background-image: radial-gradient(#d4af37 0.75px, transparent 0.75px);
       background-size: 24px 24px;
-      opacity: 0.08;
+      opacity: 0.12;
     }
     .glow-effect {
-      box-shadow: 0 0 40px -10px rgba(16, 185, 129, 0.5);
+      box-shadow: 0 0 50px -10px rgba(212, 175, 55, 0.45);
     }
+    .gold-text {
+      background: linear-gradient(90deg, #ecd694, #d4af37 45%, #f5e9c6 55%, #b8860b);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .letter-space { letter-spacing: 0.22em; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-brand-500 selection:text-white overflow-x-hidden">
+<body class="bg-black text-neutral-300 font-sans antialiased selection:bg-brand-400 selection:text-black overflow-x-hidden">
 
   <!-- Navigation -->
-  <nav class="fixed top-0 w-full z-50 glass-light border-b border-slate-200/80 shadow-sm" data-aos="fade-down" data-aos-duration="800">
+  <nav class="fixed top-0 w-full z-50 glass-dark border-b border-brand-400/20 shadow-lg shadow-black/40" data-aos="fade-down" data-aos-duration="800">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-      
+
       <a href="#" class="flex items-center gap-3.5 group">
-        <div class="relative flex items-center justify-center w-11 h-11">
-          <div class="absolute inset-0 bg-brand-500/30 rounded-xl blur-md group-hover:bg-brand-500/50 transition duration-300"></div>
-          <div class="relative w-full h-full bg-gradient-to-br from-brand-600 to-brand-800 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300 border border-brand-400/30">
-            <span class="font-black text-xl text-white tracking-tighter">NC</span>
-          </div>
+        <div class="relative flex items-center justify-center w-12 h-12 shrink-0">
+          <div class="absolute inset-0 bg-brand-400/25 rounded-full blur-md group-hover:bg-brand-400/40 transition duration-300"></div>
+          <img src="assets/logo.jpg" alt="Nussy Corporation crest" class="relative w-full h-full object-cover rounded-full border border-brand-400/40 shadow-lg group-hover:scale-110 transition-all duration-300" />
         </div>
         <div class="flex flex-col">
-          <span class="font-bold text-lg leading-none tracking-tight text-slate-900 group-hover:text-brand-600 transition">NUSSY</span>
-          <span class="text-[10px] uppercase font-bold tracking-[0.25em] text-brand-600">Cooperation</span>
+          <span class="font-display font-bold text-lg leading-none tracking-wide text-white group-hover:text-brand-300 transition">NUSSY</span>
+          <span class="text-[10px] uppercase font-bold letter-space text-brand-400">Corporation</span>
         </div>
       </a>
 
-      <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-        <a href="#about" class="hover:text-brand-600 transition">About Holding</a>
-        <a href="#divisions" class="hover:text-brand-600 transition">Divisions</a>
-        <a href="#pricing" class="hover:text-brand-600 transition">Pricing</a>
-        <a href="#contact" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-bold shadow-lg shadow-brand-500/30 transition duration-300 transform hover:-translate-y-1">
+      <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-neutral-300">
+        <a href="#about" class="hover:text-brand-300 transition">About Holding</a>
+        <a href="#divisions" class="hover:text-brand-300 transition">Divisions</a>
+        <a href="#pricing" class="hover:text-brand-300 transition">Pricing</a>
+        <a href="#contact" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-300 hover:from-brand-400 hover:to-brand-200 text-black font-bold shadow-lg shadow-brand-500/20 transition duration-300 transform hover:-translate-y-1">
           Partner With Us
         </a>
       </div>
@@ -94,31 +113,35 @@
   </nav>
 
   <!-- Hero Section -->
-  <section class="relative pt-40 pb-20 md:pt-52 md:pb-32 overflow-hidden bg-white">
+  <section class="relative pt-40 pb-20 md:pt-52 md:pb-32 overflow-hidden bg-black">
     <div class="absolute inset-0 grid-pattern pointer-events-none"></div>
-    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-brand-200 blur-[120px] rounded-full pointer-events-none animate-pulse-subtle"></div>
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-brand-400/20 blur-[140px] rounded-full pointer-events-none animate-pulse-subtle"></div>
 
     <div class="max-w-7xl mx-auto px-6 relative z-10 text-center">
-      <div data-aos="fade-down" data-aos-delay="200">
-        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-50 border border-brand-200 text-brand-700 text-xs font-bold uppercase tracking-widest mb-6 shadow-sm animate-float">
-          <i data-lucide="shield-check" class="w-4 h-4 text-brand-600"></i> Registered Corporate Holding & Strategic Operations
+      <div data-aos="fade-down" data-aos-delay="150" class="mb-8 flex justify-center">
+        <img src="assets/logo.jpg" alt="Nussy Corporation crest emblem" class="w-28 h-28 md:w-32 md:h-32 rounded-full border border-brand-400/40 shadow-2xl glow-effect animate-float object-cover" />
+      </div>
+
+      <div data-aos="fade-down" data-aos-delay="250">
+        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-400/10 border border-brand-400/30 text-brand-300 text-xs font-bold uppercase letter-space mb-6 shadow-sm">
+          <i data-lucide="shield-check" class="w-4 h-4 text-brand-400"></i> Registered Corporate Holding &amp; Strategic Operations
         </span>
       </div>
 
-      <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 max-w-5xl mx-auto leading-[1.12]" data-aos="zoom-in" data-aos-delay="300">
+      <h1 class="font-display text-4xl md:text-6xl font-bold tracking-tight text-white max-w-5xl mx-auto leading-[1.2]" data-aos="zoom-in" data-aos-delay="350">
         Excellence Through Structure. <br />
-        <span class="bg-gradient-to-r from-brand-600 via-brand-500 to-emerald-400 bg-clip-text text-transparent">Driven by Innovation.</span>
+        <span class="gold-text">Driven by Innovation.</span>
       </h1>
 
-      <p class="mt-8 text-lg md:text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-normal" data-aos="fade-up" data-aos-delay="400">
-        Nussy Cooperation provides governance, technology, and strategic investment to empower three market-leading branches: high-tier software engineering, competitive esports, and broadcast event execution.
+      <p class="mt-8 text-lg md:text-xl text-neutral-400 max-w-3xl mx-auto leading-relaxed font-normal" data-aos="fade-up" data-aos-delay="450">
+        Nussy Corporation provides governance, technology, and strategic investment to empower three market-leading branches: high-tier software engineering, competitive esports, and broadcast event execution.
       </p>
 
-      <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center" data-aos="fade-up" data-aos-delay="500">
-        <a href="#divisions" class="px-8 py-4 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold shadow-xl shadow-brand-600/30 transition transform hover:-translate-y-1 flex items-center justify-center gap-2">
+      <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center" data-aos="fade-up" data-aos-delay="550">
+        <a href="#divisions" class="px-8 py-4 rounded-xl bg-gradient-to-r from-brand-500 to-brand-300 hover:from-brand-400 hover:to-brand-200 text-black font-bold shadow-xl shadow-brand-500/20 transition transform hover:-translate-y-1 flex items-center justify-center gap-2">
           Explore Divisions <i data-lucide="arrow-right" class="w-5 h-5"></i>
         </a>
-        <a href="#pricing" class="px-8 py-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-semibold shadow-sm hover:shadow-md transition transform hover:-translate-y-1">
+        <a href="#pricing" class="px-8 py-4 rounded-xl bg-neutral-950 hover:bg-neutral-900 border border-brand-400/30 text-neutral-200 font-semibold shadow-sm hover:shadow-md transition transform hover:-translate-y-1">
           View Website Offers
         </a>
       </div>
@@ -126,40 +149,40 @@
   </section>
 
   <!-- Trust Bar -->
-  <section id="trust" class="py-12 border-y border-slate-200 bg-gradient-to-b from-brand-50/50 to-white">
+  <section id="trust" class="py-12 border-y border-brand-400/15 bg-gradient-to-b from-neutral-950 to-black">
     <div class="max-w-7xl mx-auto px-6">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-        
-        <div class="p-6 bg-white rounded-2xl border border-slate-100 shadow-md hover:shadow-xl transform hover:-translate-y-2 transition duration-300" data-aos="fade-up" data-aos-delay="100">
-          <div class="w-12 h-12 mx-auto mb-4 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center">
+
+        <div class="p-6 bg-neutral-950 rounded-2xl border border-brand-400/15 shadow-md hover:shadow-xl hover:border-brand-400/40 transform hover:-translate-y-2 transition duration-300" data-aos="fade-up" data-aos-delay="100">
+          <div class="w-12 h-12 mx-auto mb-4 rounded-xl bg-brand-400/10 text-brand-400 flex items-center justify-center">
             <i data-lucide="shield" class="w-6 h-6"></i>
           </div>
-          <div class="text-3xl font-black text-slate-900">100%</div>
-          <div class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-2">In-House Operations</div>
+          <div class="text-3xl font-black text-white">100%</div>
+          <div class="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-2">In-House Operations</div>
         </div>
 
-        <div class="p-6 bg-white rounded-2xl border border-slate-100 shadow-md hover:shadow-xl transform hover:-translate-y-2 transition duration-300" data-aos="fade-up" data-aos-delay="200">
-          <div class="w-12 h-12 mx-auto mb-4 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center">
+        <div class="p-6 bg-neutral-950 rounded-2xl border border-brand-400/15 shadow-md hover:shadow-xl hover:border-brand-400/40 transform hover:-translate-y-2 transition duration-300" data-aos="fade-up" data-aos-delay="200">
+          <div class="w-12 h-12 mx-auto mb-4 rounded-xl bg-brand-400/10 text-brand-400 flex items-center justify-center">
             <i data-lucide="award" class="w-6 h-6"></i>
           </div>
-          <div class="text-3xl font-black text-slate-900">Verified</div>
-          <div class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-2">Quality Standards</div>
+          <div class="text-3xl font-black text-white">Verified</div>
+          <div class="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-2">Quality Standards</div>
         </div>
 
-        <div class="p-6 bg-white rounded-2xl border border-slate-100 shadow-md hover:shadow-xl transform hover:-translate-y-2 transition duration-300" data-aos="fade-up" data-aos-delay="300">
-          <div class="w-12 h-12 mx-auto mb-4 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center">
+        <div class="p-6 bg-neutral-950 rounded-2xl border border-brand-400/15 shadow-md hover:shadow-xl hover:border-brand-400/40 transform hover:-translate-y-2 transition duration-300" data-aos="fade-up" data-aos-delay="300">
+          <div class="w-12 h-12 mx-auto mb-4 rounded-xl bg-brand-400/10 text-brand-400 flex items-center justify-center">
             <i data-lucide="zap" class="w-6 h-6"></i>
           </div>
-          <div class="text-3xl font-black text-slate-900">High-End</div>
-          <div class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-2">Tech Stack</div>
+          <div class="text-3xl font-black text-white">High-End</div>
+          <div class="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-2">Tech Stack</div>
         </div>
 
-        <div class="p-6 bg-white rounded-2xl border border-slate-100 shadow-md hover:shadow-xl transform hover:-translate-y-2 transition duration-300" data-aos="fade-up" data-aos-delay="400">
-          <div class="w-12 h-12 mx-auto mb-4 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center">
+        <div class="p-6 bg-neutral-950 rounded-2xl border border-brand-400/15 shadow-md hover:shadow-xl hover:border-brand-400/40 transform hover:-translate-y-2 transition duration-300" data-aos="fade-up" data-aos-delay="400">
+          <div class="w-12 h-12 mx-auto mb-4 rounded-xl bg-brand-400/10 text-brand-400 flex items-center justify-center">
             <i data-lucide="users" class="w-6 h-6"></i>
           </div>
-          <div class="text-3xl font-black text-slate-900">Leagues</div>
-          <div class="text-xs text-slate-500 font-bold uppercase tracking-wider mt-2">Esports Partnerships</div>
+          <div class="text-3xl font-black text-white">Leagues</div>
+          <div class="text-xs text-neutral-500 font-bold uppercase tracking-wider mt-2">Esports Partnerships</div>
         </div>
 
       </div>
@@ -167,70 +190,70 @@
   </section>
 
   <!-- Divisions Section -->
-  <section id="divisions" class="py-28 bg-white">
+  <section id="divisions" class="py-28 bg-black">
     <div class="max-w-7xl mx-auto px-6">
       <div class="text-center max-w-3xl mx-auto mb-20" data-aos="fade-up">
-        <span class="text-brand-600 font-black text-xs uppercase tracking-widest">Our Corporate Portfolio</span>
-        <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mt-3">The Operating Entities</h2>
-        <div class="w-20 h-1 bg-brand-500 mx-auto mt-6 rounded-full"></div>
+        <span class="text-brand-400 font-black text-xs uppercase letter-space">Our Corporate Portfolio</span>
+        <h2 class="font-display text-3xl md:text-5xl font-bold text-white mt-3">The Operating Entities</h2>
+        <div class="w-20 h-1 bg-gradient-to-r from-brand-500 to-brand-200 mx-auto mt-6 rounded-full"></div>
       </div>
 
       <div class="grid lg:grid-cols-3 gap-8">
-        
+
         <!-- Nussy Motorsport -->
-        <div class="rounded-3xl bg-slate-50 border border-slate-200 p-8 transition-all duration-500 hover:shadow-2xl hover:border-brand-400 hover:-translate-y-3 flex flex-col justify-between group" data-aos="fade-up" data-aos-delay="100">
+        <div class="rounded-3xl bg-neutral-950 border border-brand-400/15 p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-brand-400/10 hover:border-brand-400/50 hover:-translate-y-3 flex flex-col justify-between group" data-aos="fade-up" data-aos-delay="100">
           <div>
-            <div class="w-16 h-16 rounded-2xl bg-white shadow-md text-brand-600 border border-slate-100 flex items-center justify-center mb-6 group-hover:bg-brand-600 group-hover:text-white transition duration-500 group-hover:rotate-6">
+            <div class="w-16 h-16 rounded-2xl bg-black shadow-md text-brand-400 border border-brand-400/20 flex items-center justify-center mb-6 group-hover:bg-brand-400 group-hover:text-black transition duration-500 group-hover:rotate-6">
               <i data-lucide="trophy" class="w-8 h-8"></i>
             </div>
-            <span class="px-3 py-1.5 rounded-full bg-brand-100 text-brand-800 text-[10px] font-black uppercase tracking-widest">Sim Racing & Esports</span>
-            <h3 class="text-2xl font-bold text-slate-900 mt-4 mb-3">Nussy Motorsport</h3>
-            <p class="text-slate-600 text-sm leading-relaxed mb-6">
+            <span class="px-3 py-1.5 rounded-full bg-brand-400/10 text-brand-300 text-[10px] font-black uppercase letter-space border border-brand-400/20">Sim Racing &amp; Esports</span>
+            <h3 class="font-display text-2xl font-bold text-white mt-4 mb-3">Nussy Motorsport</h3>
+            <p class="text-neutral-400 text-sm leading-relaxed mb-6">
               Our high-performance esports squad competing in top-tier sim racing leagues while building real-world karting and motorsport infrastructure.
             </p>
           </div>
-          <ul class="space-y-3 pt-6 border-t border-slate-200 text-sm font-medium text-slate-700">
-            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-500"></i> Competitive ACC & F1 Leagues</li>
-            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-500"></i> Real-World Karting Expansion</li>
-            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-500"></i> Professional Driver Roster</li>
+          <ul class="space-y-3 pt-6 border-t border-brand-400/10 text-sm font-medium text-neutral-300">
+            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-400"></i> Competitive ACC &amp; F1 Leagues</li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-400"></i> Real-World Karting Expansion</li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-400"></i> Professional Driver Roster</li>
           </ul>
         </div>
 
         <!-- Rapidly Racing Events -->
-        <div class="rounded-3xl bg-slate-50 border border-slate-200 p-8 transition-all duration-500 hover:shadow-2xl hover:border-brand-400 hover:-translate-y-3 flex flex-col justify-between group" data-aos="fade-up" data-aos-delay="200">
+        <div class="rounded-3xl bg-neutral-950 border border-brand-400/15 p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-brand-400/10 hover:border-brand-400/50 hover:-translate-y-3 flex flex-col justify-between group" data-aos="fade-up" data-aos-delay="200">
           <div>
-            <div class="w-16 h-16 rounded-2xl bg-white shadow-md text-brand-600 border border-slate-100 flex items-center justify-center mb-6 group-hover:bg-brand-600 group-hover:text-white transition duration-500 group-hover:rotate-6">
+            <div class="w-16 h-16 rounded-2xl bg-black shadow-md text-brand-400 border border-brand-400/20 flex items-center justify-center mb-6 group-hover:bg-brand-400 group-hover:text-black transition duration-500 group-hover:rotate-6">
               <i data-lucide="flag" class="w-8 h-8"></i>
             </div>
-            <span class="px-3 py-1.5 rounded-full bg-brand-100 text-brand-800 text-[10px] font-black uppercase tracking-widest">Event Hosting</span>
-            <h3 class="text-2xl font-bold text-slate-900 mt-4 mb-3">Rapidly Racing Events</h3>
-            <p class="text-slate-600 text-sm leading-relaxed mb-6">
+            <span class="px-3 py-1.5 rounded-full bg-brand-400/10 text-brand-300 text-[10px] font-black uppercase letter-space border border-brand-400/20">Event Hosting</span>
+            <h3 class="font-display text-2xl font-bold text-white mt-4 mb-3">Rapidly Racing Events</h3>
+            <p class="text-neutral-400 text-sm leading-relaxed mb-6">
               Organizer of competitive esports tournaments, championship leagues, live broadcast productions, and community motorsport experiences.
             </p>
           </div>
-          <ul class="space-y-3 pt-6 border-t border-slate-200 text-sm font-medium text-slate-700">
-            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-500"></i> Full Event & Broadcast Production</li>
-            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-500"></i> Tournament Management</li>
-            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-500"></i> Custom League Regulations</li>
+          <ul class="space-y-3 pt-6 border-t border-brand-400/10 text-sm font-medium text-neutral-300">
+            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-400"></i> Full Event &amp; Broadcast Production</li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-400"></i> Tournament Management</li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-400"></i> Custom League Regulations</li>
           </ul>
         </div>
 
         <!-- Nussy Development -->
-        <div class="rounded-3xl bg-slate-50 border border-slate-200 p-8 transition-all duration-500 hover:shadow-2xl hover:border-brand-400 hover:-translate-y-3 flex flex-col justify-between group" data-aos="fade-up" data-aos-delay="300">
+        <div class="rounded-3xl bg-neutral-950 border border-brand-400/15 p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-brand-400/10 hover:border-brand-400/50 hover:-translate-y-3 flex flex-col justify-between group" data-aos="fade-up" data-aos-delay="300">
           <div>
-            <div class="w-16 h-16 rounded-2xl bg-white shadow-md text-brand-600 border border-slate-100 flex items-center justify-center mb-6 group-hover:bg-brand-600 group-hover:text-white transition duration-500 group-hover:rotate-6">
+            <div class="w-16 h-16 rounded-2xl bg-black shadow-md text-brand-400 border border-brand-400/20 flex items-center justify-center mb-6 group-hover:bg-brand-400 group-hover:text-black transition duration-500 group-hover:rotate-6">
               <i data-lucide="code-2" class="w-8 h-8"></i>
             </div>
-            <span class="px-3 py-1.5 rounded-full bg-brand-100 text-brand-800 text-[10px] font-black uppercase tracking-widest">Software Engineering</span>
-            <h3 class="text-2xl font-bold text-slate-900 mt-4 mb-3">Nussy Development</h3>
-            <p class="text-slate-600 text-sm leading-relaxed mb-6">
+            <span class="px-3 py-1.5 rounded-full bg-brand-400/10 text-brand-300 text-[10px] font-black uppercase letter-space border border-brand-400/20">Software Engineering</span>
+            <h3 class="font-display text-2xl font-bold text-white mt-4 mb-3">Nussy Development</h3>
+            <p class="text-neutral-400 text-sm leading-relaxed mb-6">
               The technological engine building custom web applications, telemetry processing tools, and digital solutions powering the entire holding.
             </p>
           </div>
-          <ul class="space-y-3 pt-6 border-t border-slate-200 text-sm font-medium text-slate-700">
-            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-500"></i> Web Application Engineering</li>
-            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-500"></i> UDP Telemetry Servers</li>
-            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-500"></i> Scalable Cloud Infrastructure</li>
+          <ul class="space-y-3 pt-6 border-t border-brand-400/10 text-sm font-medium text-neutral-300">
+            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-400"></i> Web Application Engineering</li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-400"></i> UDP Telemetry Servers</li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-brand-400"></i> Scalable Cloud Infrastructure</li>
           </ul>
         </div>
 
@@ -239,74 +262,74 @@
   </section>
 
   <!-- PRICING SECTION -->
-  <section id="pricing" class="py-28 bg-gradient-to-b from-slate-50 to-white border-t border-slate-200">
+  <section id="pricing" class="py-28 bg-gradient-to-b from-black to-neutral-950 border-t border-brand-400/15">
     <div class="max-w-7xl mx-auto px-6">
       <div class="text-center max-w-3xl mx-auto mb-20" data-aos="fade-up">
-        <span class="text-brand-600 font-black text-xs uppercase tracking-widest">Nussy Development Services</span>
-        <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mt-3">Transparent Web Offers</h2>
-        <div class="w-20 h-1 bg-brand-500 mx-auto mt-6 rounded-full"></div>
+        <span class="text-brand-400 font-black text-xs uppercase letter-space">Nussy Development Services</span>
+        <h2 class="font-display text-3xl md:text-5xl font-bold text-white mt-3">Transparent Web Offers</h2>
+        <div class="w-20 h-1 bg-gradient-to-r from-brand-500 to-brand-200 mx-auto mt-6 rounded-full"></div>
       </div>
 
       <div class="grid lg:grid-cols-3 gap-8 items-center">
-        
+
         <!-- Standard Package -->
-        <div class="rounded-3xl bg-white border border-slate-200 p-8 shadow-sm hover:shadow-xl transition-all duration-300" data-aos="fade-right" data-aos-delay="200">
-          <h3 class="text-xl font-bold text-slate-900">Starter Web</h3>
-          <p class="text-slate-500 text-sm mt-1">Perfect for small projects & teams</p>
+        <div class="rounded-3xl bg-neutral-950 border border-brand-400/15 p-8 shadow-sm hover:shadow-xl hover:shadow-brand-400/10 transition-all duration-300" data-aos="fade-right" data-aos-delay="200">
+          <h3 class="text-xl font-bold text-white">Starter Web</h3>
+          <p class="text-neutral-500 text-sm mt-1">Perfect for small projects &amp; teams</p>
           <div class="my-8">
-            <span class="text-4xl font-extrabold text-slate-900">€15</span>
-            <span class="text-slate-500 font-medium">/ month</span>
+            <span class="text-4xl font-extrabold text-white">€15</span>
+            <span class="text-neutral-500 font-medium">/ month</span>
           </div>
-          <ul class="space-y-4 text-sm text-slate-600 mb-8">
-            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-500"></i> Responsive Single Page</li>
-            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-500"></i> Standard SSL & Security</li>
-            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-500"></i> Basic Contact Form</li>
-            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-500"></i> Business Hours Support</li>
+          <ul class="space-y-4 text-sm text-neutral-400 mb-8">
+            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-400"></i> Responsive Single Page</li>
+            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-400"></i> Standard SSL &amp; Security</li>
+            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-400"></i> Basic Contact Form</li>
+            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-400"></i> Business Hours Support</li>
           </ul>
-          <a href="#contact" class="block w-full py-4 text-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold transition">Select Plan</a>
+          <a href="#contact" class="block w-full py-4 text-center rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-brand-400/20 text-neutral-200 font-bold transition">Select Plan</a>
         </div>
 
         <!-- HIGHLIGHTED OFFER -->
-        <div class="relative rounded-3xl bg-gradient-to-b from-slate-900 to-slate-950 text-white p-10 shadow-2xl glow-effect border border-brand-500/50 transform hover:-translate-y-2 transition-all duration-500 z-10" data-aos="zoom-in" data-aos-delay="100">
-          <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full bg-gradient-to-r from-brand-500 to-brand-400 text-slate-950 font-black text-xs uppercase tracking-widest shadow-lg">
+        <div class="relative rounded-3xl bg-gradient-to-b from-neutral-900 to-black text-white p-10 shadow-2xl glow-effect border border-brand-400/50 transform hover:-translate-y-2 transition-all duration-500 z-10" data-aos="zoom-in" data-aos-delay="100">
+          <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-5 py-1.5 rounded-full bg-gradient-to-r from-brand-500 to-brand-200 text-black font-black text-xs uppercase letter-space shadow-lg">
             Most Popular Offer
           </div>
 
-          <h3 class="text-2xl font-bold text-white text-center">Full-Service Web Offer</h3>
-          <p class="text-slate-400 text-sm mt-2 text-center">Complete custom website managed 24/7</p>
+          <h3 class="font-display text-2xl font-bold text-white text-center">Full-Service Web Offer</h3>
+          <p class="text-neutral-400 text-sm mt-2 text-center">Complete custom website managed 24/7</p>
 
           <div class="my-8 text-center">
             <span class="text-5xl font-black text-white">€30</span>
-            <span class="text-brand-400 font-semibold">/ month</span>
+            <span class="text-brand-300 font-semibold">/ month</span>
           </div>
 
-          <ul class="space-y-4 text-sm text-slate-300 mb-10">
-            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-6 h-6 text-brand-400"></i> <strong class="text-white">All Functions Included</strong></li>
-            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-6 h-6 text-brand-400"></i> <strong class="text-white">24/7 Full Technical Service</strong></li>
-            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-6 h-6 text-brand-400"></i> <strong class="text-white">Custom Domain Included</strong></li>
-            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-6 h-6 text-brand-400"></i> Tailored UI/UX & Animations</li>
-            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-6 h-6 text-brand-400"></i> Fast Cloud Hosting</li>
+          <ul class="space-y-4 text-sm text-neutral-300 mb-10">
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-6 h-6 text-brand-300"></i> <strong class="text-white">All Functions Included</strong></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-6 h-6 text-brand-300"></i> <strong class="text-white">24/7 Full Technical Service</strong></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-6 h-6 text-brand-300"></i> <strong class="text-white">Custom Domain Included</strong></li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-6 h-6 text-brand-300"></i> Tailored UI/UX &amp; Animations</li>
+            <li class="flex items-center gap-3"><i data-lucide="check-circle-2" class="w-6 h-6 text-brand-300"></i> Fast Cloud Hosting</li>
           </ul>
 
-          <a href="#contact" class="block w-full py-4 text-center rounded-xl bg-gradient-to-r from-brand-600 to-brand-400 hover:from-brand-500 hover:to-brand-300 text-white font-black text-lg shadow-lg shadow-brand-500/40 transition transform hover:scale-105">
+          <a href="#contact" class="block w-full py-4 text-center rounded-xl bg-gradient-to-r from-brand-500 to-brand-200 hover:from-brand-400 hover:to-brand-100 text-black font-black text-lg shadow-lg shadow-brand-400/30 transition transform hover:scale-105">
             Get Started Now
           </a>
         </div>
 
         <!-- Custom Package -->
-        <div class="rounded-3xl bg-white border border-slate-200 p-8 shadow-sm hover:shadow-xl transition-all duration-300" data-aos="fade-left" data-aos-delay="200">
-          <h3 class="text-xl font-bold text-slate-900">Custom Engineering</h3>
-          <p class="text-slate-500 text-sm mt-1">For complex web apps & telemetry</p>
+        <div class="rounded-3xl bg-neutral-950 border border-brand-400/15 p-8 shadow-sm hover:shadow-xl hover:shadow-brand-400/10 transition-all duration-300" data-aos="fade-left" data-aos-delay="200">
+          <h3 class="text-xl font-bold text-white">Custom Engineering</h3>
+          <p class="text-neutral-500 text-sm mt-1">For complex web apps &amp; telemetry</p>
           <div class="my-8">
-            <span class="text-4xl font-extrabold text-slate-900">Custom</span>
+            <span class="text-4xl font-extrabold text-white">Custom</span>
           </div>
-          <ul class="space-y-4 text-sm text-slate-600 mb-8">
-            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-500"></i> Custom Software & APIs</li>
-            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-500"></i> Telemetry Data Servers</li>
-            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-500"></i> Tournament Systems</li>
-            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-500"></i> Dedicated Infrastructure</li>
+          <ul class="space-y-4 text-sm text-neutral-400 mb-8">
+            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-400"></i> Custom Software &amp; APIs</li>
+            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-400"></i> Telemetry Data Servers</li>
+            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-400"></i> Tournament Systems</li>
+            <li class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-brand-400"></i> Dedicated Infrastructure</li>
           </ul>
-          <a href="#contact" class="block w-full py-4 text-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold transition">Contact Sales</a>
+          <a href="#contact" class="block w-full py-4 text-center rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-brand-400/20 text-neutral-200 font-bold transition">Contact Sales</a>
         </div>
 
       </div>
@@ -314,61 +337,61 @@
   </section>
 
   <!-- Governance Section -->
-  <section id="about" class="py-28 bg-brand-50/40 border-t border-slate-200 overflow-hidden">
+  <section id="about" class="py-28 bg-neutral-950 border-t border-brand-400/15 overflow-hidden">
     <div class="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
       <div data-aos="fade-right">
-        <span class="text-brand-600 font-black text-xs uppercase tracking-widest">Why Work With Us</span>
-        <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 mt-3 mb-6 leading-tight">Built on Trust, Transparency & Innovation</h2>
-        <p class="text-slate-600 text-lg leading-relaxed mb-8">
-          At Nussy Cooperation, we operate with a clear management structure designed to support long-term partnerships, high data integrity, and professional execution in every project.
+        <span class="text-brand-400 font-black text-xs uppercase letter-space">Why Work With Us</span>
+        <h2 class="font-display text-3xl md:text-5xl font-bold text-white mt-3 mb-6 leading-tight">Built on Trust, Transparency &amp; Innovation</h2>
+        <p class="text-neutral-400 text-lg leading-relaxed mb-8">
+          At Nussy Corporation, we operate with a clear management structure designed to support long-term partnerships, high data integrity, and professional execution in every project.
         </p>
 
         <div class="space-y-6">
-          <div class="p-6 bg-white rounded-2xl border border-slate-100 shadow-md flex items-start gap-5 hover:shadow-lg transition">
-            <div class="w-12 h-12 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center shrink-0">
+          <div class="p-6 bg-black rounded-2xl border border-brand-400/15 shadow-md flex items-start gap-5 hover:border-brand-400/40 hover:shadow-lg transition">
+            <div class="w-12 h-12 rounded-xl bg-brand-400/10 text-brand-400 flex items-center justify-center shrink-0">
               <i data-lucide="check-square" class="w-6 h-6"></i>
             </div>
             <div>
-              <h4 class="font-bold text-slate-900 text-lg">Professional Standards</h4>
-              <p class="text-slate-500 mt-1">Clear structure for driver memberships, partner agreements, and client projects.</p>
+              <h4 class="font-bold text-white text-lg">Professional Standards</h4>
+              <p class="text-neutral-500 mt-1">Clear structure for driver memberships, partner agreements, and client projects.</p>
             </div>
           </div>
 
-          <div class="p-6 bg-white rounded-2xl border border-slate-100 shadow-md flex items-start gap-5 hover:shadow-lg transition">
-            <div class="w-12 h-12 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center shrink-0">
+          <div class="p-6 bg-black rounded-2xl border border-brand-400/15 shadow-md flex items-start gap-5 hover:border-brand-400/40 hover:shadow-lg transition">
+            <div class="w-12 h-12 rounded-xl bg-brand-400/10 text-brand-400 flex items-center justify-center shrink-0">
               <i data-lucide="lock" class="w-6 h-6"></i>
             </div>
             <div>
-              <h4 class="font-bold text-slate-900 text-lg">Data Privacy & Security</h4>
-              <p class="text-slate-500 mt-1">All internal tools and web deployments follow strict data security practices.</p>
+              <h4 class="font-bold text-white text-lg">Data Privacy &amp; Security</h4>
+              <p class="text-neutral-500 mt-1">All internal tools and web deployments follow strict data security practices.</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Interactive Data Card -->
-      <div class="p-8 md:p-10 rounded-3xl bg-white border border-slate-200 shadow-2xl relative" data-aos="fade-left" data-aos-delay="200">
-        <div class="absolute -top-6 -right-6 w-32 h-32 bg-brand-100 rounded-full blur-3xl opacity-60"></div>
-        
-        <h3 class="text-2xl font-bold text-slate-900 mb-8 flex items-center gap-3">
-          <div class="w-3 h-3 rounded-full bg-brand-500 animate-pulse"></div>
+      <div class="p-8 md:p-10 rounded-3xl bg-black border border-brand-400/20 shadow-2xl relative" data-aos="fade-left" data-aos-delay="200">
+        <div class="absolute -top-6 -right-6 w-32 h-32 bg-brand-400/10 rounded-full blur-3xl opacity-60"></div>
+
+        <h3 class="font-display text-2xl font-bold text-white mb-8 flex items-center gap-3">
+          <div class="w-3 h-3 rounded-full bg-brand-400 animate-pulse"></div>
           Corporate Synergy Live
         </h3>
 
         <div class="space-y-5 relative z-10">
-          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-brand-200 transition-colors flex justify-between items-center group">
-            <span class="font-bold text-slate-700 group-hover:text-brand-700 transition">Software Deployments</span>
-            <span class="px-3 py-1 bg-brand-100 text-brand-700 text-xs font-black uppercase tracking-wider rounded-full shadow-sm">Active</span>
+          <div class="p-5 rounded-2xl bg-neutral-950 border border-brand-400/10 hover:border-brand-400/40 transition-colors flex justify-between items-center group">
+            <span class="font-bold text-neutral-300 group-hover:text-brand-300 transition">Software Deployments</span>
+            <span class="px-3 py-1 bg-brand-400/10 text-brand-300 text-xs font-black uppercase tracking-wider rounded-full border border-brand-400/20">Active</span>
           </div>
 
-          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-brand-200 transition-colors flex justify-between items-center group">
-            <span class="font-bold text-slate-700 group-hover:text-brand-700 transition">Sim Racing Drivers</span>
-            <span class="px-3 py-1 bg-brand-100 text-brand-700 text-xs font-black uppercase tracking-wider rounded-full shadow-sm">Verified</span>
+          <div class="p-5 rounded-2xl bg-neutral-950 border border-brand-400/10 hover:border-brand-400/40 transition-colors flex justify-between items-center group">
+            <span class="font-bold text-neutral-300 group-hover:text-brand-300 transition">Sim Racing Drivers</span>
+            <span class="px-3 py-1 bg-brand-400/10 text-brand-300 text-xs font-black uppercase tracking-wider rounded-full border border-brand-400/20">Verified</span>
           </div>
 
-          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-brand-200 transition-colors flex justify-between items-center group">
-            <span class="font-bold text-slate-700 group-hover:text-brand-700 transition">Live Broadcasts</span>
-            <span class="px-3 py-1 bg-brand-100 text-brand-700 text-xs font-black uppercase tracking-wider rounded-full shadow-sm">HD Ready</span>
+          <div class="p-5 rounded-2xl bg-neutral-950 border border-brand-400/10 hover:border-brand-400/40 transition-colors flex justify-between items-center group">
+            <span class="font-bold text-neutral-300 group-hover:text-brand-300 transition">Live Broadcasts</span>
+            <span class="px-3 py-1 bg-brand-400/10 text-brand-300 text-xs font-black uppercase tracking-wider rounded-full border border-brand-400/20">HD Ready</span>
           </div>
         </div>
       </div>
@@ -376,44 +399,44 @@
   </section>
 
   <!-- Contact Form Section -->
-  <section id="contact" class="py-28 bg-white relative">
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent"></div>
-    
+  <section id="contact" class="py-28 bg-black relative">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-brand-400/30 to-transparent"></div>
+
     <div class="max-w-3xl mx-auto px-6">
       <div class="text-center mb-16" data-aos="fade-up">
-        <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900">Contact Us!</h2>
-        <p class="mt-4 text-slate-600 text-lg">Reach out directly to Nussy Cooperation or one of our entities.</p>
+        <h2 class="font-display text-3xl md:text-5xl font-bold text-white">Contact Us!</h2>
+        <p class="mt-4 text-neutral-400 text-lg">Reach out directly to Nussy Corporation or one of our entities.</p>
       </div>
 
-      <form id="contactForm" class="p-8 md:p-12 rounded-3xl bg-white border border-slate-200 shadow-2xl space-y-6" data-aos="fade-up" data-aos-delay="150">
+      <form id="contactForm" class="p-8 md:p-12 rounded-3xl bg-neutral-950 border border-brand-400/15 shadow-2xl space-y-6" data-aos="fade-up" data-aos-delay="150">
         <div class="grid md:grid-cols-2 gap-6">
           <div>
-            <label class="block text-sm font-bold text-slate-700 mb-2">Full Name</label>
-            <input type="text" required class="w-full px-5 py-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none text-slate-900 transition-all font-medium" placeholder="John Doe">
+            <label class="block text-sm font-bold text-neutral-300 mb-2">Full Name</label>
+            <input type="text" required class="w-full px-5 py-4 rounded-xl bg-black border border-brand-400/20 focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 focus:outline-none text-white transition-all font-medium placeholder:text-neutral-600" placeholder="John Doe">
           </div>
           <div>
-            <label class="block text-sm font-bold text-slate-700 mb-2">Email Address</label>
-            <input type="email" required class="w-full px-5 py-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none text-slate-900 transition-all font-medium" placeholder="john@example.com">
+            <label class="block text-sm font-bold text-neutral-300 mb-2">Email Address</label>
+            <input type="email" required class="w-full px-5 py-4 rounded-xl bg-black border border-brand-400/20 focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 focus:outline-none text-white transition-all font-medium placeholder:text-neutral-600" placeholder="john@example.com">
           </div>
         </div>
 
         <div>
-          <label class="block text-sm font-bold text-slate-700 mb-2">Target Service / Division</label>
-          <select class="w-full px-5 py-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none text-slate-900 transition-all font-medium cursor-pointer">
+          <label class="block text-sm font-bold text-neutral-300 mb-2">Target Service / Division</label>
+          <select class="w-full px-5 py-4 rounded-xl bg-black border border-brand-400/20 focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 focus:outline-none text-white transition-all font-medium cursor-pointer">
             <option>Website Offer (€30/mo - All Functions + 24/7 Service + Domain)</option>
-            <option>Nussy Cooperation (General Corporate Request)</option>
-            <option>Nussy Motorsport (Driver Roster & Sponsorship)</option>
-            <option>Rapidly Racing Events (League Hosting & Broadcasts)</option>
+            <option>Nussy Corporation (General Corporate Request)</option>
+            <option>Nussy Motorsport (Driver Roster &amp; Sponsorship)</option>
+            <option>Rapidly Racing Events (League Hosting &amp; Broadcasts)</option>
             <option>Nussy Development (Custom Software Project)</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-sm font-bold text-slate-700 mb-2">Message</label>
-          <textarea rows="5" required class="w-full px-5 py-4 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none text-slate-900 transition-all font-medium resize-none" placeholder="Describe your project or collaboration proposal..."></textarea>
+          <label class="block text-sm font-bold text-neutral-300 mb-2">Message</label>
+          <textarea rows="5" required class="w-full px-5 py-4 rounded-xl bg-black border border-brand-400/20 focus:border-brand-400 focus:ring-2 focus:ring-brand-400/20 focus:outline-none text-white transition-all font-medium resize-none placeholder:text-neutral-600" placeholder="Describe your project or collaboration proposal..."></textarea>
         </div>
 
-        <button type="submit" class="w-full py-5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white font-black text-lg transition-all duration-300 shadow-xl shadow-brand-500/30 transform hover:-translate-y-1">
+        <button type="submit" class="w-full py-5 rounded-xl bg-gradient-to-r from-brand-500 to-brand-200 hover:from-brand-400 hover:to-brand-100 text-black font-black text-lg transition-all duration-300 shadow-xl shadow-brand-400/20 transform hover:-translate-y-1">
           Submit Official Inquiry
         </button>
       </form>
@@ -421,17 +444,15 @@
   </section>
 
   <!-- Footer -->
-  <footer class="py-12 bg-slate-950 text-slate-400 text-sm">
+  <footer class="py-12 bg-black text-neutral-500 text-sm border-t border-brand-400/15">
     <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
       <div class="flex items-center gap-4">
-        <div class="w-10 h-10 rounded-xl bg-brand-600/20 border border-brand-500/30 flex items-center justify-center font-black text-brand-500 text-sm">
-          NC
-        </div>
-        <p class="font-medium">&copy; 2026 Nussy Cooperation. All rights reserved.</p>
+        <img src="assets/logo.jpg" alt="Nussy Corporation crest" class="w-10 h-10 rounded-full border border-brand-400/30 object-cover" />
+        <p class="font-medium">&copy; 2026 Nussy Corporation. All rights reserved.</p>
       </div>
-      <div class="flex gap-8 font-bold text-slate-500">
-        <a href="#" class="hover:text-white transition">Legal Notice</a>
-        <a href="#" class="hover:text-white transition">Privacy Policy</a>
+      <div class="flex gap-8 font-bold text-neutral-600">
+        <a href="#" class="hover:text-brand-300 transition">Legal Notice</a>
+        <a href="#" class="hover:text-brand-300 transition">Privacy Policy</a>
       </div>
     </div>
   </footer>
@@ -453,7 +474,7 @@
     // Form Handling
     document.getElementById('contactForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      alert('Thank you! Your official inquiry has been submitted to Nussy Cooperation.');
+      alert('Thank you! Your official inquiry has been submitted to Nussy Corporation.');
     });
   </script>
 </body>

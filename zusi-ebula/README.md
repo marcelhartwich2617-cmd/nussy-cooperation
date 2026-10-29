@@ -21,10 +21,12 @@ Zusi 3 (TCP-Server, Port 1436) ──► bridge.js (Node.js) ──► Browser /
   und Namen rechts werden ebenfalls angezeigt.
 - **Verspätung** in Minuten (±), live berechnet aus Ist- und Sollzeiten
 - **Meldezeile**: nächster Halt mit Entfernung und Restzeit, Abfahrts-Countdown am Bahnsteig und Verbindungsmeldungen
-- **Halte-Liste** (Taste 2) mit Soll- und Ist-Zeiten und Verspätung je Halt
-- **Geschwindigkeitsprofil** (Taste 0 „G“): zulässige und gefahrene Geschwindigkeit über die Strecke, mit Zoom
-- **Zugdaten** (Taste 1): Baureihe, Vmax, Länge, Masse, Bremshundertstel und Bremsstellung
-- **Fahrplandatei laden** (Taste 3): `*.timetable.xml` oder `*.trn` lassen sich auch ohne Zusi ansehen
+- **Bedienung wie am EBuLa-Bordgerät** (siehe „Bedienung“): Anmeldung über die Zugnummer, Grundmenü, die drei
+  Steuerungsarten Ortung, Zeitsteuerung und Manuell, FSD, Gleiswechsel, Störungsübersicht mit Abhilfetexten und
+  Bremshundertstel-Rechner
+- **Fahrplanspeicher**: Fahrpläne von Zusi und eingelesene Dateien (`*.timetable.xml`, `*.trn`) werden gespeichert und
+  über ihre Zugnummer angemeldet
+- **Geschwindigkeitsprofil** (Grundmenü ▸ 4): zulässige und gefahrene Geschwindigkeit über die Strecke, mit Zoom
 - **Demo-Fahrt** zum Ausprobieren, mit Zeitraffer bis ×20
 - **Tag-/Nachtmodus**, Helligkeit, Bildschirm aus, **Drehen um 90° / 180° / 270°** (UD) für ein hochkant montiertes iPad,
   Zeilenhöhe, Filter „nur Betriebsstellen“ und Vollbild
@@ -64,28 +66,47 @@ Unter `datenVerzeichnisse` können zusätzliche Zusi-Datenordner für die Suche 
 `http://localhost:8080/debug` zeigt alle Werte, die Zusi sendet (Führerstandsanzeigen mit ID), und die Programmdaten.
 Zusätzliche IDs lassen sich in `config.json` unter `extraFsIds` (dezimal) anfordern.
 
-## Tastenbelegung
+## Bedienung (wie am Bordgerät)
+
+**Zug anmelden:** Nach dem Einschalten (mit Selbsttest) zeigt das Gerät das Grundbild mit „Zug“ und „G“.
+Taste **1 „Zug“** drücken, die Zugnummer mit den Ziffern eingeben und mit **E** bestätigen. Der Fahrplan wird geladen
+(blauer Balken). Meldet Zusi einen Zug, ist seine Nummer schon vorgeschlagen, dann reicht 1 und E. Wer das nicht will,
+stellt unter Systemdienste „Zug von Zusi automatisch anmelden“ ein.
+
+**Steuerungsarten** (Softkey **7 „Zeit“**):
+
+| Art | Ortsmarker | ▲ ▼ |
+|---|---|---|
+| 1 Ortung | folgt der Kilometrierung aus Zusi (GPS-Symbol aktiv) | Vorschau blättern |
+| 2 Zeitsteuerung | läuft nach Fahrplanzeit. Der Tf startet sie bei der Abfahrt mit **E** (E erneut = anhalten) | Ortsmarker korrigieren, die Verspätung wird neu berechnet |
+| 3 Manuell | steht, bis der Tf ihn weiterschaltet | Ortsmarker weiterschalten |
+
+Nach dem Blättern (▲ ▼ ◄ ►) springt die Anzeige nach 10 s von selbst zum Ortsmarker zurück, oder sofort mit C.
 
 | Taste | Funktion |
 |---|---|
+| 1 Zug | Zug anmelden (Zugnummer) |
+| 2 FSD | Fahrplan-Stammdaten: Zugdaten und Halteliste mit Ist-Zeiten (◄ ► umschalten) |
+| 6 GW | Gleiswechsel Regelgleis /r ↔ Gegengleis /l |
+| 7 Zeit | Steuerungsart wählen |
+| 0 G | Grundmenü: 0 Fahrplan · 1 Zug · 2 Systemdienste · 3 Datei einlesen · 4 Geschwindigkeitsprofil · 5 Zug abmelden · 6 Information · 7 Störungen · 9 BRH berechnen |
+| St | Störungsübersicht |
+| V>0 / V=0 | Abhilfetext zur Störung: kurz während der Fahrt / ausführlich im Stillstand |
+| i | Information zur aktuellen Seite |
+| S | Systemdienste (Einstellungen) |
 | ☀ aus | Bildschirm aus / an |
-| S | Einstellungen (Datenquelle, Bridge-Adresse, Laufrichtung, Drehung, Demo …) |
-| i | Info und Tastenbelegung |
-| St | Standort: zurück zur aktuellen Position, Ortung wieder automatisch |
-| V>0 / V=0 | Position manuell eine Zeile vor / zurück |
-| ☀ | Helligkeit in Stufen |
-| ◐ | Tag-/Nachtmodus |
-| UD | Anzeige um 90° drehen |
-| ▲ ▼ | im Fahrplan vorausschauen und zurückblättern / Auswahl in Listen |
-| ◄ ► | seitenweise blättern / Wert ändern / Zoom in der Grafik |
-| E | Bestätigen |
-| C | Zurück / Meldung löschen |
-| 1 Zug · 2 Halte · 3 Datei · 4 Filter · 9 Info · 0 G | Softkeys der Hauptansicht |
+| ☀ / ◐ | Helligkeit / Kontrast (Tag- und Nachtdarstellung) |
+| UD | Display umschalten (um 90° drehen, z. B. für ein hochkant montiertes iPad) |
+| ◄ ► | seitenweise blättern / Werte ändern |
+| E / C | bestätigen / zurück bzw. Ziffer löschen |
 
-Tastatur: Ziffern, Enter (E), Esc (C), Pfeiltasten, Bild↑/↓ (V>0/V=0), Pos1 (St), `n` (Tag/Nacht), `u` (Drehen), `f` (Vollbild).
+Tastatur: Ziffern, Enter (E), Esc (C), Pfeiltasten, Bild↑/↓ (V>0/V=0), `t` (St), `s` (S), `i`, `n` (Tag/Nacht), `u` (UD), `f` (Vollbild).
 
-LEDs: **KBD** leuchtet bei Tastendruck. **TEMP** ist grün bei Live-Daten, gelb wenn die Bridge läuft, aber Zusi nicht
-verbunden ist, und rot ohne Verbindung zur Bridge. **GPS** ist durchgestrichen, wenn nicht über die Kilometrierung geortet wird.
+LEDs: **KBD** leuchtet bei Tastendruck, **TEMP** leuchtet gelb, solange eine Störung vorliegt (Details mit St).
+**GPS** ist durchgestrichen, wenn nicht über die Kilometrierung geortet wird.
+
+Im Handy-Layout liegen Zug, FSD, GW, Zeit, G und St sowie C, Pfeile und E als Touch-Tasten unten. Für die Zugnummer
+erscheint ein Ziffernblock. i und S erreichst du über das Grundmenü (G ▸ 6 und G ▸ 2).
 
 ## Handy-App
 
@@ -124,7 +145,7 @@ Eine App für den App Store braucht einen Mac und ein Apple-Entwicklerkonto. Sta
 
 ## Ohne Zusi
 
-`public/index.html` lässt sich auch direkt im Browser öffnen. Dann startet die Demo-Fahrt. Über Taste 3 lässt sich jede
+`public/index.html` lässt sich auch direkt im Browser öffnen. Dann startet die Demo-Fahrt (Zug 4711). Über G ▸ 3 lässt sich jede
 `*.timetable.xml` aus dem Zusi-Datenverzeichnis ansehen. Eine Beispieldatei liegt in `beispiele/`.
 
 ## Technik

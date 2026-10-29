@@ -225,6 +225,50 @@ sup.s { font-size: 11px; margin-left: 1px; vertical-align: 6px; color: var(--scr
 .phone #conn { align-items: flex-start; padding-top: 4vh; }
 #c-status { margin-top: 10px; font-size: 14px; min-height: 1.4em; color: var(--accent); }
 #c-found button { display: block; width: 100%; margin-top: 6px; background: #00691f; color: #fff; border-color: #00691f; }
+.field { display: inline-block; min-width: 200px; padding: 6px 12px; border: 2px solid var(--scr-line); font: 700 30px/1.15 ui-monospace, Menlo, Consolas, monospace; letter-spacing: 3px; background: rgba(128,128,128,.08); min-height: 1.6em; }
+.field.cursor::after { content: '_'; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.zin { display: flex; align-items: center; gap: 14px; padding: 14px; font-size: 20px; }
+.zhint { padding: 0 14px 8px; font-size: 15px; color: var(--scr-dim); min-height: 24px; }
+.zhint.err { color: #ff5a4f; font-weight: 700; }
+.list.static { position: static; }
+.li .znr { width: 90px; font-weight: 700; }
+.li .zsrc { margin-left: 10px; font-size: 13px; color: var(--scr-dim); max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.li.sel .zsrc, .li.sel small { color: #000; }
+.li .code { width: 60px; font-weight: 700; color: var(--accent); }
+.li.sel .code { color: #000; }
+.pad { display: none; grid-template-columns: repeat(6, 1fr); gap: 6px; padding: 8px 10px; }
+.phone .pad { display: grid; }
+.pad .tb { height: 44px; }
+.tabs { margin-left: 8px; }
+.tabs span { padding: 2px 10px; margin-right: 6px; border: 1px solid var(--scr-dim); border-radius: 3px; font-size: 15px; font-weight: 400; }
+.tabs span.on { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+#abhilfe { position: absolute; left: 0; right: 0; bottom: 0; min-height: 130px; border-top: 2px solid var(--scr-line); padding: 10px 14px; font-size: 16px; white-space: pre-line; line-height: 1.45; background: var(--scr-bg); }
+.help .ctx { margin-bottom: 10px; color: var(--scr-fg); column-span: all; line-height: 1.45; }
+#empty small.dim { color: var(--scr-dim); font-size: 15px; }
+#marker.paused { opacity: .55; }
+#boot { position: absolute; inset: 0; z-index: 35; background: #000; color: #d9e2ea; font: 16px/1.7 ui-monospace, Menlo, Consolas, monospace; padding: 40px 60px; display: none; }
+#boot.show { display: block; }
+#boot h3 { font: 700 28px "Helvetica Neue", Arial, sans-serif; margin: 0 0 6px; color: #fff; }
+#boot-log { margin-top: 18px; }
+#boot .bar { margin-top: 22px; height: 16px; border: 1px solid #8a98a6; }
+#boot .bar i { display: block; height: 100%; width: 0; background: var(--blue); transition: width .25s linear; }
+#msgbox.load { background: linear-gradient(90deg, var(--blue) var(--pr, 0%), #121a36 var(--pr, 0%)); }
+.tb.dis { opacity: .4; }
+.brh { padding: 8px 14px; font-size: 18px; }
+.brh .row2 { display: flex; align-items: center; gap: 12px; margin: 6px 0; }
+.brh .row2 .lbl { width: 230px; color: var(--scr-dim); }
+.brh .field { min-width: 150px; font-size: 24px; cursor: pointer; }
+.brh .field:not(.sel)::after { content: none; }
+.brh .field.sel { border-color: var(--accent); }
+.brh .res { margin: 12px 0 4px; font-size: 22px; font-weight: 700; }
+.brh .zhint { padding: 8px 0 0; }
+.phone .brh .row2 .lbl { width: 120px; font-size: 14px; }
+.phone .brh { font-size: 15px; } .phone .brh .res { font-size: 18px; }
+.phone .zin { font-size: 15px; padding: 10px; gap: 10px; } .phone .zin .field { font-size: 24px; min-width: 130px; }
+.phone .li .znr { width: 60px; } .phone .li .zsrc { display: none; }
+.phone #boot { padding: 24px 18px; font-size: 13px; }
+.phone #abhilfe { font-size: 14px; min-height: 160px; }
 #toast { position: absolute; left: 50%; top: 210px; transform: translateX(-50%); z-index: 30; background: var(--accent); color: #000; font-size: 20px; font-weight: 700; padding: 10px 18px; border-radius: 4px; display: none; white-space: nowrap; }
 </style>
 </head>
@@ -259,15 +303,25 @@ sup.s { font-size: 11px; margin-left: 1px; vertical-align: 6px; color: var(--scr
         <div class="col-line" style="left:var(--ca)"></div>
         <div class="col-line" style="left:var(--cb)"></div>
         <div id="marker"></div>
-        <div id="scrollhint">Vorschau – St: zurück zur Position</div>
+        <div id="scrollhint">Vorschau – C: zurück zum Ortsmarker</div>
         <div id="empty"></div>
       </div>
 
-      <div class="page" id="p-zug"><h2>Zugdaten</h2><div class="kv" id="zugkv"></div></div>
-      <div class="page" id="p-halte"><h2>Halte <small>▲▼ auswählen · E im Fahrplan anzeigen · C zurück</small></h2><div class="list" id="haltlist"></div></div>
-      <div class="page" id="p-graf"><h2>Geschwindigkeitsprofil <small>◄► zoomen · ▲▼ verschieben · St Position</small></h2><canvas id="cv" width="944" height="414"></canvas></div>
-      <div class="page" id="p-menu"><h2>Einstellungen <small>▲▼ wählen · ◄► ändern · E ausführen · C zurück</small></h2><div class="list" id="menulist"></div></div>
-      <div class="page" id="p-info"><h2>Info &amp; Tastenbelegung <small id="verinfo"></small></h2><div class="help" id="helptext"></div></div>
+      <div class="page" id="p-zug"><h2>Zug anmelden <small>Zugnummer mit 0–9 · E bestätigen · C löschen · ▲ ▼ gespeicherte Züge</small></h2>
+        <div class="zin"><span>Zugnummer</span><span id="zug-in" class="field cursor"></span></div>
+        <div class="zhint" id="zug-hint"></div>
+        <div class="list static" id="zug-list"></div>
+        <div class="pad" id="zug-pad"></div>
+      </div>
+      <div class="page" id="p-fsd"><h2 id="fsd-h">FSD</h2><div id="fsd-body"></div></div>
+      <div class="page" id="p-zeit"><h2>Steuerungsart <small>1–3 wählen · E bestätigen · C zurück</small></h2><div class="list static" id="zeitlist"></div><div class="zhint" id="zeit-hint"></div></div>
+      <div class="page" id="p-grund"><h2>EBuLa Grundmenü <small>Ziffer wählen · ▲ ▼ E · C zurück</small></h2><div class="list" id="grundlist"></div></div>
+      <div class="page" id="p-menu"><h2>Systemdienste EBuLa <small>▲ ▼ wählen · ◄ ► ändern · E ausführen · C zurück</small></h2><div class="list" id="menulist"></div></div>
+      <div class="page" id="p-brh"><h2>BRH berechnen <small>▲ ▼ Feld · 0–9 Eingabe · C löschen · E weiter</small></h2><div id="brh-body"></div><div class="pad" id="brh-pad"></div></div>
+      <div class="page" id="p-stoer"><h2>Störungsübersicht <small>V&gt;0 Abhilfe Fahrt · V=0 Abhilfe Stillstand · C zurück</small></h2><div class="list" id="stoerlist"></div><div id="abhilfe"></div></div>
+      <div class="page" id="p-info"><h2 id="info-h">Information</h2><div class="help" id="helptext"></div></div>
+      <div class="page" id="p-graf"><h2>Geschwindigkeitsprofil <small>◄ ► zoomen · ▲ ▼ verschieben · E Position · C zurück</small></h2><canvas id="cv" width="944" height="414"></canvas></div>
+      <div id="boot"><h3>EBuLa-Bordgerät</h3><div>Elektronischer Buchfahrplan · Software 2.0 (Zusi 3)</div><div id="boot-log"></div><div class="bar"><i id="boot-bar"></i></div></div>
 
       <div id="msg">
         <div id="msgbox"></div>
@@ -298,7 +352,11 @@ sup.s { font-size: 11px; margin-left: 1px; vertical-align: 6px; color: var(--scr
 'use strict';
 /* =====================================================================
  *  Nussy EBuLa – elektronischer Buchfahrplan für Zusi 3
- *  Datenquellen: Zusi 3 (über bridge.js), Demo-Fahrt, Fahrplandatei
+ *  Bedienung nach dem Vorbild des EBuLa-Bordgeräts (EBG):
+ *  Anmeldung über Zugnummer (Taste 1 „Zug“), Grundmenü (Taste 0 „G“),
+ *  Steuerungsarten Ortung / Zeitsteuerung / Manuell, FSD, Gleiswechsel,
+ *  Störungsübersicht (St) mit Abhilfetexten (V>0 / V=0).
+ *  Datenquellen: Zusi 3 (über bridge.js), Demo-Fahrt, Fahrplandateien
  * ===================================================================== */
 
 const $ = (id) => document.getElementById(id);
@@ -307,7 +365,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // ------------------------------------------------------------ Einstellungen
-const DEF = { layout: 'auto', source: 'auto', dir: 'up', rot: 0, day: false, bright: 100, secs: true, demoSpeed: 1, filter: 'alle', sound: true, rowH: 38, bridgeUrl: '' };
+const DEF = { layout: 'auto', source: 'auto', dir: 'up', rot: 0, day: false, bright: 100, secs: true, demoSpeed: 1, filter: 'alle', sound: true, rowH: 38, bridgeUrl: '', autoLogin: false, boot: true };
 const S = Object.assign({}, DEF);
 try { Object.assign(S, JSON.parse(localStorage.getItem('ebula-settings') || '{}')); } catch (e) { /* privat */ }
 function saveS() { try { localStorage.setItem('ebula-settings', JSON.stringify(S)); } catch (e) { /* egal */ } }
@@ -315,21 +373,25 @@ function saveS() { try { localStorage.setItem('ebula-settings', JSON.stringify(S
 // ------------------------------------------------------------ Zustand
 const st = {
   source: 'demo',            // zusi | demo | offline
-  fpl: null,                 // { meta, rows, hasKm, hasTimes, origin }
-  view: [],                  // Indizes der angezeigten Zeilen (Filter)
+  fpl: null,                 // angemeldeter Fahrplan { meta, rows, hasKm, hasTimes, origin }
+  loggedKey: null,           // Zugnummer des angemeldeten Zuges
+  view: [],                  // Indizes der angezeigten Zeilen (Filter, Gleiswechsel)
   live: { v: null, km: null, time: null, date: null, weg: null, vStrecke: null, afb: null, at: 0 },
-  bridge: { ok: false, zusi: false, version: '', error: '', zugnummer: '', zugdatei: '', ladepause: null, xmlRev: -1 },
-  pos: { p: 0, mode: 'keine', init: false, gps: false },
-  scroll: 0,                 // manuelle Vorschau (Zeilen)
-  manual: false,
-  actual: {},                // Ist-Zeiten je Zeile { an, ab }
-  delayMin: null,
-  screen: 'main',
-  sel: { halte: 0, menu: 0 },
-  graf: { zoom: 1, off: 0 },
-  trace: [],                 // [laufweg/Index, v km/h]
-  off: false,
-  msg: null,                 // { text, cls, until }
+  bridge: { ok: false, zusi: false, version: '', error: '', zugnummer: '', zugdatei: '', ladepause: null, xmlRev: -1, zusiKey: null },
+  pos: { p: 0, init: false, gps: false },
+  ctl: 'manuell',            // Steuerungsart: ortung | zeit | manuell
+  zeit: { run: false, off: 0 }, // Zeitsteuerung: läuft? Versatz Uhrzeit → Fahrplanzeit (Tage)
+  gw: 'r',                   // Gleiswechsel: r = Regelgleis, l = Gegengleis
+  scroll: 0, scrollAt: 0,    // Vorschau (Zeilen), springt nach 10 s zum Ortsmarker zurück
+  actual: {}, atHalt: null, delayMin: null,
+  screen: 'main', infoFrom: 'main',
+  sel: { halte: 0, menu: 0, grund: 0, zug: -1, zeit: 0, stoer: 0, brh: 0 },
+  fsdTab: 0,
+  zugIn: '', zugMsg: '', zugErr: false,
+  brh: { masse: '', bg: '' },
+  abhilfe: null,             // fahrt | stand
+  graf: { zoom: 1, off: 0 }, trace: [],
+  off: false, msg: null, loading: null, booting: false,
 };
 
 // ------------------------------------------------------------ Zeit-Helfer (Tage seit 30.12.1899 wie Zusi)
@@ -416,8 +478,7 @@ function parseTimetable(bf) {
 
 function parseTrn(zug) {
   const a = (n) => zug.getAttribute(n);
-  const meta = { gattung: a('Gattung') || '', nummer: a('Nummer') || '', zuglauf: a('Zuglauf') || '', br: '', masse: null, vmax: num(a('spAnfang')) , bremsh: null, mbrh: num(a('MBrh')), laenge: null, kmStart: null, bremsstellung: a('BremsstellungZug') || '' };
-  meta.vmax = null;
+  const meta = { gattung: a('Gattung') || '', nummer: a('Nummer') || '', zuglauf: a('Zuglauf') || '', br: '', masse: null, vmax: null, bremsh: null, mbrh: num(a('MBrh')), laenge: null, kmStart: null, bremsstellung: a('BremsstellungZug') || '' };
   const rows = [];
   for (const e of zug.getElementsByTagName('FahrplanEintrag')) {
     const name = e.getAttribute('Betrst') || '';
@@ -459,6 +520,7 @@ function finishFahrplan(f) {
   }
   f.hasTimes = rows.some((r) => r.t != null);
   f.hasWeg = rows.length > 1 && rows.every((r) => r.laufweg != null);
+  f.hasGleis = rows.some((r) => /^[123]$/.test(r.gleis || ''));
   // Tagesbezug, falls Zeiten ohne Datum
   const t0 = rows.find((r) => r.t != null);
   f.baseDay = t0 ? Math.floor(t0.t) : null;
@@ -467,35 +529,120 @@ function finishFahrplan(f) {
 
 function zugTitel(f) {
   const m = f?.meta || {};
-  const t = ((m.gattung || '') + ' ' + (m.nummer || '')).trim();
-  return t || st.bridge.zugnummer || '';
+  return ((m.gattung || '') + ' ' + (m.nummer || '')).trim();
 }
 
-// ------------------------------------------------------------ Fahrplan laden / Sichtbarkeit
-function loadFahrplan(f, quiet) {
+// ------------------------------------------------------------ Fahrplanspeicher (wie die Daten im Bordgerät)
+const LIB = new Map(); // Zugnummer -> { xml, origin, persist, at, f }
+const LIB_KEY = 'ebula-lib';
+function libLoad() {
+  try {
+    const o = JSON.parse(localStorage.getItem(LIB_KEY) || '{}');
+    for (const [k, v] of Object.entries(o)) LIB.set(k, { xml: v.xml, origin: v.origin, at: v.at, persist: true });
+  } catch (e) { /* kein Speicher */ }
+}
+function libSave() {
+  const dump = () => { const o = {}; for (const [k, v] of LIB) if (v.persist) o[k] = { xml: v.xml, origin: v.origin, at: v.at }; return JSON.stringify(o); };
+  for (let tries = 0; tries < 20; tries++) {
+    try { localStorage.setItem(LIB_KEY, dump()); return; } catch (e) {
+      // Speicher voll: ältesten gespeicherten Fahrplan verwerfen
+      const old = [...LIB.entries()].filter(([, v]) => v.persist).sort((a, b) => a[1].at - b[1].at)[0];
+      if (!old) return;
+      old[1].persist = false;
+    }
+  }
+}
+function libAdd(xml, origin, persist) {
+  const f = parseFahrplan(xml, origin);
+  const key = String(f.meta.nummer || '').trim() || st.bridge.zugnummer || ('?' + (LIB.size + 1));
+  LIB.set(key, { xml, origin, persist: !!persist, at: Date.now(), f });
+  if (persist) libSave();
+  return { key, f };
+}
+function libEntry(key) {
+  const e = LIB.get(key);
+  if (e && !e.f) { try { e.f = parseFahrplan(e.xml, e.origin); } catch (err) { return null; } }
+  return e;
+}
+function libFind(input) {
+  const n = String(input).trim();
+  if (!n) return null;
+  if (LIB.has(n)) return n;
+  for (const k of LIB.keys()) {
+    if (k.split(/[^0-9A-Za-z]+/).includes(n) || k.replace(/\D/g, '') === n) return k;
+  }
+  return null;
+}
+function libList() {
+  return [...LIB.entries()].sort((a, b) => (b[1].origin.startsWith('Zusi') - a[1].origin.startsWith('Zusi')) || (b[1].at - a[1].at));
+}
+
+// ------------------------------------------------------------ Anmelden / Abmelden
+const CTL_NAME = { ortung: 'Ortung', zeit: 'Zeitsteuerung', manuell: 'Manuell' };
+let loadTimer = null;
+function anmelden(key, quiet) {
+  if (!libEntry(key)) { flash('Fahrplan für Zug ' + key + ' fehlerhaft', 'warn'); return; }
+  st.screen = 'main';
+  st.loading = { key, start: Date.now(), dur: quiet ? 0 : 1600 };
+  clearInterval(loadTimer);
+  if (quiet) return finishLogin();
+  loadTimer = setInterval(() => { if (Date.now() - st.loading.start >= st.loading.dur) finishLogin(); else render(); }, 80);
+  render();
+}
+function finishLogin() {
+  clearInterval(loadTimer);
+  const L = st.loading;
+  st.loading = null;
+  const e = L && libEntry(L.key);
+  if (!e) return render();
+  loadFahrplan(e.f);
+  st.loggedKey = L.key;
+  st.ctl = defaultCtl();
+  st.zeit = { run: false, off: 0 };
+  updatePosition();
+  flash(`Zug ${zugTitel(st.fpl) || L.key} angemeldet · Steuerung: ${CTL_NAME[st.ctl]}${st.ctl === 'zeit' ? ' – E bei Abfahrt' : ''}`, 'ok', 6000);
+  render();
+}
+function defaultCtl() {
+  const live = st.source === 'zusi' || st.source === 'demo';
+  if (live && st.fpl.hasKm) return 'ortung';
+  if (st.fpl.hasTimes) return 'zeit';
+  return 'manuell';
+}
+function abmelden() {
+  st.fpl = null; st.loggedKey = null; st.scroll = 0;
+  buildView();
+  flash('Zug abgemeldet', '');
+}
+function loadFahrplan(f) {
   st.fpl = f;
   st.actual = {};
   st.trace = [];
   st.delayMin = null;
   st.atHalt = null;
-  st.pos = { p: 0, mode: 'keine', init: false, gps: false };
-  st.scroll = 0; st.manual = false; st.sel.halte = 0; st.graf = { zoom: 1, off: 0 };
+  st.pos = { p: 0, init: false, gps: false };
+  st.scroll = 0; st.sel.halte = 0; st.graf = { zoom: 1, off: 0 }; st.gw = 'r';
   buildView();
-  if (!quiet) flash(`Fahrplan geladen: ${zugTitel(f) || 'unbenannt'} (${f.rows.length} Zeilen, ${f.origin})`, 'ok');
-  render();
 }
 
+// ------------------------------------------------------------ Sichtbare Zeilen (Filter, Gleiswechsel)
+function gleisOk(r) {
+  const g = parseInt(r.gleis, 10);
+  if (!(g >= 1 && g <= 3)) return true;
+  return (g & (st.gw === 'l' ? 2 : 1)) !== 0;
+}
 function rowVisible(r) {
+  if (!gleisOk(r)) return false;
   if (S.filter === 'alle') return true;
   return r.halt || r.pass || r.vChange || r.wende || r.sprung || r.i === 0 || r.i === st.fpl.rows.length - 1 || (r.name && !r.sig);
 }
 function buildView() {
   st.view = st.fpl ? st.fpl.rows.filter(rowVisible).map((r) => r.i) : [];
+  softCache = ''; tbCache = '';
 }
 // Fahrplan-Position (Zeilenindex) -> Anzeigeposition (Index in st.view)
 function toViewPos(p) {
   const v = st.view; if (!v.length) return 0;
-  const i = Math.floor(p), f = p - i;
   let lo = 0, hi = v.length - 1;
   if (p <= v[0]) return 0;
   if (p >= v[hi]) return hi;
@@ -504,7 +651,7 @@ function toViewPos(p) {
   return lo + (p - a) / (b - a || 1);
 }
 
-// ------------------------------------------------------------ Position bestimmen
+// ------------------------------------------------------------ Uhrzeit und Position
 function simTime() {
   const L = st.live;
   if (L.time == null) return null;
@@ -525,6 +672,7 @@ function simTime() {
 function locateKm(km) {
   const rows = st.fpl.rows, n = rows.length;
   const seg = (j) => {
+    if (!gleisOk(rows[j]) || !gleisOk(rows[j + 1])) return null;
     const k1 = rows[j].kmA, k2 = rows[j + 1].km;
     if (k1 == null || k2 == null) return null;
     const tol = 0.03;
@@ -540,23 +688,43 @@ function locateKm(km) {
   const cand = [];
   for (let j = 0; j < n - 1; j++) { const r = seg(j); if (r != null) cand.push(r); }
   if (!cand.length) return null;
-  const ref = st.pos.init ? st.pos.p : (timePos() ?? 0);
+  const t = simTime();
+  const ref = st.pos.init ? st.pos.p : ((t != null ? timePosAt(t) : null) ?? 0);
   cand.sort((a, b) => Math.abs(a - ref) - Math.abs(b - ref));
   return cand[0];
 }
 
-function timePos() {
-  const f = st.fpl, t = simTime();
+// Fahrplanzeit -> Position (für die Zeitsteuerung)
+function timePosAt(t) {
+  const f = st.fpl;
   if (!f || !f.hasTimes || t == null) return null;
   const T = f.timed, R = f.rows;
-  if (t <= R[T[0]].t) return T[0];
+  const first = R[T[0]];
+  if (t <= (first.abf ?? first.t)) return T[0];
   for (let k = 0; k < T.length - 1; k++) {
     const a = R[T[k]], b = R[T[k + 1]];
     const ta = a.abf ?? a.t, tb = b.ank ?? b.t;
-    if (t >= a.t && t < (a.abf ?? a.t)) return a.i; // Haltezeit
     if (t >= ta && t < tb) return a.i + (b.i - a.i) * (t - ta) / ((tb - ta) || 1e-9);
+    if (b.ank != null && b.abf != null && t >= b.ank && t < b.abf) return b.i; // Haltezeit
   }
   return T[T.length - 1];
+}
+// Position -> Fahrplanzeit
+function planTimeAt(p) {
+  const f = st.fpl;
+  if (!f || !f.timed.length) return null;
+  const T = f.timed, R = f.rows;
+  if (p <= T[0]) return R[T[0]].abf ?? R[T[0]].t;
+  for (let k = 0; k < T.length - 1; k++) {
+    const a = R[T[k]], b = R[T[k + 1]];
+    if (p >= a.i && p <= b.i) {
+      const ta = a.abf ?? a.t, tb = b.ank ?? b.t;
+      if (p - a.i < 1e-6) return ta;
+      return ta + (tb - ta) * (p - a.i) / (b.i - a.i);
+    }
+  }
+  const l = R[T[T.length - 1]];
+  return l.ank ?? l.t;
 }
 
 function updatePosition() {
@@ -564,38 +732,23 @@ function updatePosition() {
   if (!f || !f.rows.length) return;
   const L = st.live;
   const old = st.pos.p;
-  let p = null, mode = st.pos.mode;
-  if (st.manual) { mode = 'manuell'; p = old; }
-  else if (L.km != null && f.hasKm && st.source !== 'offline') {
-    p = locateKm(L.km);
-    if (p != null) { mode = 'km'; st.pos.gps = true; }
-    else { st.pos.gps = false; p = timePos(); mode = p != null ? 'Zeit' : 'keine'; }
-  } else {
-    st.pos.gps = false;
-    p = timePos();
-    mode = p != null ? 'Zeit' : (st.source === 'offline' ? 'manuell' : 'keine');
-  }
-  if (p == null) p = st.pos.init ? old : 0;
-  st.pos.mode = mode;
-  st.pos.p = p;
-  // Ist-Zeiten aufzeichnen
-  const t = simTime();
-  if (t != null && st.pos.init && mode !== 'manuell') {
-    const act = (i) => st.actual[i] || (st.actual[i] = {});
-    const ch = curHalt();
-    if (ch != null) { if (act(ch).an == null && ch > 0) act(ch).an = t; st.atHalt = ch; }
-    else if (st.atHalt != null) { act(st.atHalt).ab = t; st.atHalt = null; } // Abfahrt
-    if (Math.abs(p - old) <= 6) {
-      for (let i = Math.floor(old) + (old % 1 > 0.01 ? 1 : 0); i <= Math.floor(p - 0.01); i++) {
-        const r = f.rows[i];
-        if (!r || r.t == null || st.atHalt === i) continue;
-        if (act(i).ab == null && i < p - 0.01) act(i).ab = t;
-      }
+  let p = old;
+  st.pos.gps = false;
+  if (st.ctl === 'ortung') {
+    if (L.km != null && f.hasKm && st.source !== 'offline') {
+      const r = locateKm(L.km);
+      if (r != null) { p = r; st.pos.gps = true; }
     }
+  } else if (st.ctl === 'zeit' && st.zeit.run) {
+    const t = simTime();
+    const q = t != null ? timePosAt(t - st.zeit.off) : null;
+    if (q != null) p = q;
   }
+  st.pos.p = p;
+  if (st.pos.init) recordActual(old, p);
   st.pos.init = true;
   computeDelay();
-  if (L.v != null) {
+  if (L.v != null && st.ctl === 'ortung') {
     const x = xOf(p);
     const last = st.trace[st.trace.length - 1];
     if (!last || Math.abs(last[0] - x) > (f.hasWeg ? 20 : 0.02)) st.trace.push([x, L.v * 3.6]);
@@ -603,41 +756,71 @@ function updatePosition() {
   }
 }
 
+// Ist-Zeiten für die Halteliste erfassen
+function recordActual(old, p) {
+  const t = simTime(), f = st.fpl;
+  if (t == null || (st.ctl === 'zeit' && !st.zeit.run)) return;
+  const act = (i) => st.actual[i] || (st.actual[i] = {});
+  const ch = curHalt();
+  if (ch != null) { if (act(ch).an == null && ch > 0) act(ch).an = t; st.atHalt = ch; }
+  else if (st.atHalt != null) { act(st.atHalt).ab = t; st.atHalt = null; } // Abfahrt
+  if (Math.abs(p - old) > 6) return;
+  for (let i = Math.floor(old) + (old % 1 > 0.01 ? 1 : 0); i <= Math.floor(p - 0.01); i++) {
+    const r = f.rows[i];
+    if (!r || r.t == null || st.atHalt === i) continue;
+    if (act(i).ab == null && i < p - 0.01) act(i).ab = t;
+  }
+}
+
 function computeDelay() {
   const f = st.fpl, t = simTime();
-  if (!f || t == null || st.pos.mode === 'manuell') { st.delayMin = null; return; }
   let d = null;
-  // letzte erfasste Ist-Zeit
-  for (let i = Math.min(f.rows.length - 1, Math.floor(st.pos.p) + 1); i >= 0; i--) {
-    const a = st.actual[i], r = f.rows[i];
-    if (!a || !r || r.t == null) continue;
-    if (a.ab != null) { d = a.ab - (r.abf ?? r.t); break; }
-    if (a.an != null && r.ank != null) { d = a.an - r.ank; break; }
-  }
-  const ch = curHalt();
-  // nächste Zeile mit Zeit noch nicht erreicht, Planzeit aber schon vorbei
-  const nx = nextTimed(st.pos.p);
-  if (nx != null && nx !== ch) {
-    const r = f.rows[nx];
-    const plan = r.halt ? r.ank : r.t;
-    if (plan != null && t > plan) d = Math.max(d ?? -1e9, t - plan);
-  }
-  // am Halt: Abfahrtszeit überschritten
-  if (ch != null) {
-    const r = f.rows[ch];
-    if (r.abf != null && t > r.abf) d = Math.max(d ?? -1e9, t - r.abf);
+  if (!f || t == null) { st.delayMin = null; return; }
+  if (st.ctl === 'zeit') d = st.zeit.run ? st.zeit.off : null;
+  else if (st.ctl === 'manuell') d = manualDelay(t);
+  else {
+    // letzte erfasste Ist-Zeit
+    for (let i = Math.min(f.rows.length - 1, Math.floor(st.pos.p) + 1); i >= 0; i--) {
+      const a = st.actual[i], r = f.rows[i];
+      if (!a || !r || r.t == null) continue;
+      if (a.ab != null) { d = a.ab - (r.abf ?? r.t); break; }
+      if (a.an != null && r.ank != null) { d = a.an - r.ank; break; }
+    }
+    const ch = curHalt();
+    // nächste Zeile mit Zeit noch nicht erreicht, Planzeit aber schon vorbei
+    const nx = nextTimed(st.pos.p);
+    if (nx != null && nx !== ch) {
+      const r = f.rows[nx];
+      const plan = r.halt ? r.ank : r.t;
+      if (plan != null && t > plan) d = Math.max(d ?? -1e9, t - plan);
+    }
+    // am Halt: Abfahrtszeit überschritten
+    if (ch != null) {
+      const r = f.rows[ch];
+      if (r.abf != null && t > r.abf) d = Math.max(d ?? -1e9, t - r.abf);
+    }
   }
   st.delayMin = d == null ? null : Math.trunc(d * 1440 + (d > 0 ? 1e-9 : -1e-9));
+}
+function manualDelay(t) {
+  const p = st.pos.p, k = Math.round(p), r = st.fpl.rows[k];
+  if (r && Math.abs(p - k) < 0.01 && r.halt) {
+    if (r.ank != null && t < r.ank) return t - r.ank;
+    if (r.abf == null || t <= r.abf) return 0;
+    return t - r.abf;
+  }
+  const pt = planTimeAt(p);
+  return pt == null ? null : t - pt;
 }
 
 function nextTimed(p) {
   const f = st.fpl; if (!f) return null;
-  for (const i of f.timed) if (i > p + 0.02) return i;
+  for (const i of f.timed) if (i > p + 0.02 && gleisOk(f.rows[i])) return i;
   return null;
 }
 function nextHalt(p) {
   const f = st.fpl; if (!f) return null;
-  for (const i of f.timed) if (i > p + 0.02 && f.rows[i].halt) return i;
+  for (const i of f.timed) if (i > p + 0.02 && f.rows[i].halt && gleisOk(f.rows[i])) return i;
   return null;
 }
 function curHalt() {
@@ -650,7 +833,7 @@ function curHalt() {
     const r = f.rows[i];
     if (!r || !r.halt) continue;
     let d;
-    if (st.pos.mode === 'manuell' || st.pos.mode === 'Zeit') d = Math.abs(p - i) < 0.05 ? 0 : 1e9;
+    if (st.ctl !== 'ortung') d = Math.abs(p - i) < 0.05 ? 0 : 1e9;
     else if (f.hasWeg) d = Math.abs(wegAt(p) - r.laufweg) / 1000;
     else if (f.hasKm) d = Math.abs((kmAtP(p) ?? r.km) - r.km);
     else d = Math.abs(p - i) < 0.05 ? 0 : 1e9;
@@ -665,6 +848,82 @@ function wegAt(p) {
   return a.laufweg + (b.laufweg - a.laufweg) * f;
 }
 function xOf(p) { return st.fpl.hasWeg ? wegAt(p) : p; }
+function kmAtP(p) {
+  const R = st.fpl.rows, i = clamp(Math.floor(p), 0, R.length - 1), j = clamp(i + 1, 0, R.length - 1);
+  const a = R[i].kmA, b = R[j].km; if (a == null || b == null) return null;
+  return a + (b - a) * (p - i);
+}
+
+// ------------------------------------------------------------ Steuerungsarten
+function setCtl(c) {
+  if (!st.fpl) return;
+  if (c === 'ortung' && !ortungMoeglich()) { flash('Ortung nicht verfügbar – keine Kilometrierung von Zusi', 'warn'); return; }
+  if (c === 'zeit' && !st.fpl.hasTimes) { flash('Fahrplan ohne Zeiten – Zeitsteuerung nicht möglich', 'warn'); return; }
+  st.ctl = c;
+  st.zeit.run = false;
+  st.scroll = 0;
+  if (c === 'ortung') updatePosition();
+  computeDelay();
+  flash('Steuerung: ' + CTL_NAME[c] + (c === 'zeit' ? ' – Start mit E bei Abfahrt' : c === 'manuell' ? ' – Ortsmarker mit ▲ ▼' : ''), 'ok');
+}
+function ortungMoeglich() { return !!st.fpl && st.fpl.hasKm && (st.source === 'zusi' || st.source === 'demo'); }
+function zeitStart() {
+  const t = simTime(), pt = planTimeAt(st.pos.p);
+  if (t == null) { flash('Keine Uhrzeit verfügbar – Zeitsteuerung nicht möglich', 'warn'); return; }
+  if (pt == null) { flash('Fahrplan ohne Zeiten – Zeitsteuerung nicht möglich', 'warn'); return; }
+  st.zeit.off = t - pt;
+  st.zeit.run = true;
+  computeDelay();
+  flash('Zeitsteuerung läuft', 'ok');
+}
+function zeitStop() { st.zeit.run = false; computeDelay(); flash('Zeitsteuerung angehalten – E: weiter', ''); }
+function moveMarker(d) {
+  const v = st.view;
+  if (!v.length) return;
+  const k = clamp(Math.round(toViewPos(st.pos.p)) + d, 0, v.length - 1);
+  const old = st.pos.p;
+  st.pos.p = v[k];
+  st.pos.init = true;
+  st.scroll = 0;
+  recordActual(old, st.pos.p);
+}
+function zeitStep(d) {
+  moveMarker(d);
+  if (st.zeit.run) {
+    const t = simTime(), pt = planTimeAt(st.pos.p);
+    if (t != null && pt != null) st.zeit.off = t - pt;
+  }
+  computeDelay();
+}
+function preview(d) {
+  const n = st.view.length;
+  st.scroll = clamp(st.scroll + d, -n, n);
+  st.scrollAt = Date.now();
+}
+
+// ------------------------------------------------------------ Störungen (St) mit Abhilfetexten (V>0 / V=0)
+function stoerungen() {
+  const L = [];
+  const b = st.bridge;
+  if (st.source === 'zusi') {
+    if (!b.ok) L.push({ code: 'S01', text: 'Keine Verbindung zur Bridge',
+      kurz: 'Bridge (start.bat) auf dem Zusi-PC starten, WLAN prüfen.',
+      lang: '1. Auf dem Zusi-PC start.bat starten.\n2. Gerät und PC müssen im selben WLAN sein.\n3. Adresse prüfen: G ▸ 2 Systemdienste ▸ Bridge-Adresse.\n4. Windows-Firewall: Node.js im privaten Netzwerk zulassen.' });
+    else if (!b.zusi) L.push({ code: 'S02', text: 'Keine Verbindung zu Zusi 3',
+      kurz: 'Zusi 3 starten, TCP-Server aktivieren.',
+      lang: '1. Zusi 3 starten.\n2. TCP-Server in Zusi aktiv (Port 1436)?\n3. Läuft Zusi auf einem anderen PC: Bridge mit --zusi <IP>:1436 starten.\n4. Diagnose im Browser: http://<PC>:8080/debug' });
+    else if (b.zugnummer && !b.zusiKey) L.push({ code: 'S20', text: `Kein Buchfahrplan für Zug ${b.zugnummer}`,
+      kurz: 'Fahrplandatei einlesen: G ▸ 3.',
+      lang: 'Zusi hat keinen Buchfahrplan übertragen und die Bridge hat keine passende *.timetable.xml gefunden.\n1. G ▸ 3 Fahrplandatei einlesen und die *.timetable.xml des Zuges wählen.\n2. Oder in config.json der Bridge das Zusi-Datenverzeichnis eintragen.' });
+  }
+  if (st.fpl && st.ctl === 'ortung' && !st.pos.gps) L.push({ code: 'S10', text: 'Ortung gestört – Position nicht ermittelbar',
+    kurz: 'Softkey 7 „Zeit“: auf Zeitsteuerung oder Manuell umschalten.',
+    lang: 'Die Kilometrierung von Zusi passt nicht zum angemeldeten Fahrplan oder fehlt.\n1. Prüfen, ob die richtige Zugnummer angemeldet ist (Taste 1 „Zug“).\n2. Gleiswechsel prüfen (Softkey 6 „GW“).\n3. Softkey 7 „Zeit“ ▸ 2 Zeitsteuerung oder 3 Manuell wählen.' });
+  if (st.fpl && st.ctl === 'zeit' && simTime() == null) L.push({ code: 'S11', text: 'Keine Uhrzeit für die Zeitsteuerung',
+    kurz: 'Auf manuelle Steuerung umschalten (Softkey 7 ▸ 3).',
+    lang: 'Ohne Uhrzeit kann die Zeitsteuerung den Ortsmarker nicht weiterschalten.\nSoftkey 7 „Zeit“ ▸ 3 Manuell wählen und den Ortsmarker mit ▲ ▼ führen.' });
+  return L;
+}
 
 // ------------------------------------------------------------ Darstellung
 let renderQueued = false;
@@ -687,41 +946,36 @@ function doRender() {
 
 function renderHeader() {
   const f = st.fpl, t = simTime();
-  $('h-zug').textContent = zugTitel(f) || '—';
+  $('h-zug').textContent = zugTitel(f) || (f ? st.loggedKey : '');
   const nh = f ? nextHalt(st.pos.p) : null;
   const ch = curHalt();
   let lauf = '';
-  if (!f) lauf = '<small>Zuglauf</small>–';
+  if (!f) lauf = '';
   else if (ch != null) lauf = `<small>Halt</small><b>${esc(f.rows[ch].name)}</b>`;
   else if (nh != null) lauf = `<small>nächster Halt</small><b>${esc(f.rows[nh].name)}</b>&nbsp;${fmtHM(f.rows[nh].ank)}`;
   else lauf = `<small>Zuglauf</small>${esc(f.meta.zuglauf || '–')}`;
   $('h-lauf').innerHTML = lauf;
-  $('h-uhr').textContent = t != null ? fmtHM(t, true) : '--:--:--';
+  $('h-uhr').textContent = t != null ? fmtHM(t, true) : '';
   const vs = $('h-vsp');
   vs.classList.remove('late', 'early');
-  if (st.delayMin == null) vs.textContent = '';
+  if (st.delayMin == null || !f) vs.textContent = '';
   else if (st.delayMin > 0) { vs.textContent = '+' + st.delayMin; vs.classList.add('late'); }
   else if (st.delayMin < 0) { vs.textContent = String(st.delayMin); vs.classList.add('early'); }
   else vs.textContent = '±0';
-  $('h-km').textContent = st.live.km != null && st.source !== 'offline' ? fmtKm(st.live.km, 2) : (f && f.hasKm && st.pos.init ? fmtKm(kmAtP(st.pos.p), 1) : '–');
+  $('h-km').textContent = !f ? '' : st.live.km != null && st.source !== 'offline' ? fmtKm(st.live.km, 2) : (f.hasKm && st.pos.init ? fmtKm(kmAtP(st.pos.p), 1) : '–');
+  $('h-kmc').style.visibility = f ? 'visible' : 'hidden';
   $('h-datum').textContent = t != null && t > 1000 ? fmtDate(t) : '';
-  $('h-mode').textContent = { km: 'Ortung km', Zeit: 'Ortung Zeit', manuell: 'Manuell', keine: 'keine Ortung' }[st.pos.mode] || '';
+  $('h-mode').textContent = !f ? '' : (st.ctl === 'zeit' ? (st.zeit.run ? 'Zeit ▶' : 'Zeit ‖') : CTL_NAME[st.ctl]) + (f.hasGleis || st.gw === 'l' ? '  /' + st.gw : '');
   let info = '';
   if (f) {
-    const m = f.meta;
-    const parts = [];
+    const m = f.meta, parts = [];
     if (m.zuglauf) parts.push(esc(m.zuglauf));
     if (m.br) parts.push('BR ' + esc(m.br));
     if (m.vmax) parts.push('Vmax ' + Math.round(m.vmax * 3.6));
     if (st.live.vStrecke != null && st.source !== 'offline') parts.push('Strecke ' + Math.round(st.live.vStrecke * 3.6) + ' km/h');
     info = parts.join(' · ');
-  } else info = st.source === 'zusi' ? 'Warte auf Fahrplan von Zusi …' : 'Kein Fahrplan geladen';
+  }
   $('h-info').innerHTML = info;
-}
-function kmAtP(p) {
-  const R = st.fpl.rows, i = clamp(Math.floor(p), 0, R.length - 1), j = clamp(i + 1, 0, R.length - 1);
-  const a = R[i].kmA, b = R[j].km; if (a == null || b == null) return null;
-  return a + (b - a) * (p - i);
 }
 
 function renderTable() {
@@ -731,12 +985,14 @@ function renderTable() {
   if (!f || !st.view.length) {
     box.innerHTML = '';
     $('marker').style.display = 'none';
+    $('scrollhint').style.display = 'none';
     const e = $('empty');
     e.style.display = 'block';
-    e.innerHTML = st.source === 'zusi'
-      ? (st.bridge.ok ? (st.bridge.zusi ? 'Verbunden mit Zusi – warte auf Buchfahrplan …<br><small>Zug in Zusi starten oder Fahrplandatei laden (Taste 3)</small>' : 'Bridge läuft – Zusi 3 nicht verbunden<br><small>Zusi starten, TCP-Server aktiv? Port 1436</small>') : 'Keine Verbindung zur Bridge<br><small>bridge.js auf dem Zusi-PC starten · Einstellungen: Taste S</small>')
-      : 'Kein Fahrplan geladen<br><small>Taste 3: Fahrplandatei (*.timetable.xml) laden · Taste S: Demo</small>';
-    $('scrollhint').style.display = 'none';
+    let sub = '';
+    if (st.source === 'zusi') sub = !st.bridge.ok ? 'Keine Verbindung zur Bridge – Taste St' : !st.bridge.zusi ? 'Keine Verbindung zu Zusi 3 – Taste St' : st.bridge.zusiKey ? `Zusi meldet Zug ${esc(st.bridge.zusiKey)}` : 'Zusi verbunden – Zug in Zusi starten';
+    else if (st.source === 'demo') sub = 'Demo-Fahrt: Zugnummer 4711';
+    else sub = 'Offline – Fahrplandateien über G ▸ 3 einlesen';
+    e.innerHTML = st.loading ? 'Fahrplan wird geladen …' : `Kein Zug angemeldet<br><small>Taste 1 „Zug“: Zugnummer eingeben, mit E bestätigen</small><br><small class="dim">${sub}</small>`;
     return;
   }
   $('empty').style.display = 'none';
@@ -757,7 +1013,6 @@ function renderTable() {
     if (r.i < st.pos.p - 0.02 && st.pos.init) cls.push('past');
     if (r.i === nh) cls.push('nexthalt');
     if (st.screen === 'main' && st.scroll !== 0 && k === Math.round(center)) cls.push('sel');
-    // Geschwindigkeitslinie bis zur nächsten angezeigten Zeile
     let vcell = '';
     if (r.vEff != null) vcell += '<span class="vline" style="top:0;height:100%"></span>';
     if (r.vChange) vcell += `<span class="vnum">${r.vEff}</span>`;
@@ -768,12 +1023,9 @@ function renderTable() {
     const sigTxt = r.sig != null && SIGTYP[r.sig] && !(r.name || '').toLowerCase().includes(SIGTYP[r.sig].toLowerCase()) ? SIGTYP[r.sig] : '';
     if (r.name) name += `<span class="nm">${esc(r.name)}</span>`;
     if (sigTxt) name += `<span class="sig">${sigTxt}</span>`;
-    if (r.gleis === '2' || r.gleis === 'Gegengleis') name += '<span class="sig">Ggl</span>';
     if (r.nameR) name += `<span class="nmr">${esc(r.nameR)}</span>`;
-    const act = st.actual[r.i];
-    let an = r.ank != null ? fmtTimeCell(r.ank) : '';
-    let ab = r.abf != null ? fmtTimeCell(r.abf) : '';
-    if (r.halt && r.abf == null && r.i === f.rows.length - 1) ab = '';
+    const an = r.ank != null ? fmtTimeCell(r.ank) : '';
+    const ab = r.abf != null ? fmtTimeCell(r.abf) : '';
     html += `<div class="${cls.join(' ')}" style="top:${y.toFixed(1)}px;height:${H}px">` +
       `<div class="r-v">${vcell}</div><div class="r-km">${km}</div>` +
       `<div class="r-name">${name}${r.saege ? '<span class="saege"></span>' : ''}</div>` +
@@ -784,16 +1036,21 @@ function renderTable() {
   const my = yOf(vp);
   mk.style.display = my > -5 && my < TH + 5 ? 'block' : 'none';
   mk.style.top = my.toFixed(1) + 'px';
-  mk.classList.toggle('manual', st.pos.mode !== 'km');
+  mk.classList.toggle('manual', st.ctl !== 'ortung');
+  mk.classList.toggle('paused', st.ctl === 'zeit' && !st.zeit.run);
   $('scrollhint').style.display = st.scroll !== 0 ? 'block' : 'none';
 }
 
 function defaultMsg() {
   const f = st.fpl, t = simTime();
-  if (st.source === 'zusi' && !st.bridge.ok) return ['Keine Verbindung zur Bridge (bridge.js)', 'warn'];
-  if (st.source === 'zusi' && !st.bridge.zusi) return ['Bridge aktiv – keine Verbindung zu Zusi 3', 'warn'];
+  const stoer = stoerungen();
+  if (stoer.length) return [`${stoer[0].code}  ${stoer[0].text} – Taste St`, 'warn'];
   if (st.source === 'zusi' && st.bridge.ladepause === 1) return ['Zusi lädt die Strecke …', ''];
-  if (!f) return ['Kein Fahrplan geladen', ''];
+  if (!f) {
+    if (st.source === 'zusi' && st.bridge.zusiKey) return [`Zusi: Zug ${st.bridge.zusiKey} bereit – Taste 1 „Zug“, E`, 'ok'];
+    return ['Bitte Zug anmelden – Taste 1 „Zug“', ''];
+  }
+  if (st.ctl === 'zeit' && !st.zeit.run) return ['Zeitsteuerung angehalten – Start mit E bei Abfahrt', ''];
   const ch = curHalt();
   if (ch != null) {
     const r = f.rows[ch];
@@ -820,54 +1077,85 @@ function defaultMsg() {
 function renderMsg() {
   const box = $('msgbox');
   let text, cls;
-  if (st.msg && st.msg.until > Date.now()) { text = st.msg.text; cls = st.msg.cls; }
+  if (st.loading) {
+    const pr = st.loading.dur ? clamp((Date.now() - st.loading.start) / st.loading.dur, 0, 1) : 1;
+    box.style.setProperty('--pr', Math.round(pr * 100) + '%');
+    text = `Fahrplan Zug ${st.loading.key} wird geladen … ${Math.round(pr * 100)} %`;
+    cls = 'load';
+  } else if (st.msg && st.msg.until > Date.now()) { text = st.msg.text; cls = st.msg.cls; }
   else [text, cls] = defaultMsg();
   box.textContent = text;
   box.className = cls || '';
-  $('i-gps').classList.toggle('off', !(st.pos.gps && st.pos.mode === 'km'));
+  $('i-gps').classList.toggle('off', !(st.fpl && st.pos.gps && st.ctl === 'ortung'));
   const live = st.source === 'demo' || (st.source === 'zusi' && st.bridge.zusi);
-  $('i-zusi').textContent = st.source === 'demo' ? 'DEMO' : 'ZUSI';
+  $('i-zusi').textContent = st.source === 'demo' ? 'DEMO' : st.source === 'zusi' ? 'ZUSI' : 'OFFLINE';
   $('i-zusi').classList.toggle('off', !live);
   $('i-v').textContent = st.live.v != null && st.source !== 'offline' ? Math.round(Math.abs(st.live.v) * 3.6) + ' km/h' : '';
 }
 
-const SOFT = {
-  main: { 1: 'Zug', 2: 'Halte', 3: 'Datei', 4: 'Filter', 9: 'Info', 0: 'G' },
-  zug: { 3: 'Datei', 0: 'Zurück' },
-  halte: { 0: 'Zurück' },
-  graf: { 0: 'Zurück' },
-  menu: { 0: 'Zurück' },
-  info: { 0: 'Zurück' },
-};
+// Softkeys über den Zifferntasten – Belegung wie am Bordgerät
+function softDef() {
+  if (st.loading || st.booting) return {};
+  if (st.screen === 'main') return st.fpl ? { 1: 'Zug', 2: 'FSD', 6: 'GW<br>/' + st.gw, 7: 'Zeit', 0: 'G' } : { 1: 'Zug', 0: 'G' };
+  if (st.screen === 'fsd') return { 2: 'FSD' };
+  if (st.screen === 'zeit') return { 1: 'Ortung', 2: 'Zeitst.', 3: 'Manuell', 7: 'Zeit' };
+  return {};
+}
 let softCache = '';
 function renderSoft() {
-  const def = SOFT[st.screen] || {};
-  const key = st.screen + S.filter;
+  const def = softDef();
+  const key = JSON.stringify(def);
   if (softCache === key) return;
   softCache = key;
   let html = '';
   for (let i = 0; i < 10; i++) {
     const n = (i + 1) % 10;
-    let label = def[n] || '';
-    if (st.screen === 'main' && n === 4) label = S.filter === 'alle' ? 'Filter<br>alle' : 'Filter<br>Bst';
-    html += `<div class="sk" data-k="${n}" style="left:${36 + i * 97}px">${label}</div>`;
+    html += `<div class="sk" data-k="${n}" style="left:${36 + i * 97}px">${def[n] || ''}</div>`;
   }
   $('soft').innerHTML = html;
 }
 
+const PAGES = ['zug', 'fsd', 'zeit', 'grund', 'menu', 'brh', 'stoer', 'info', 'graf'];
 function renderPages() {
-  for (const p of ['zug', 'halte', 'graf', 'menu', 'info']) $('p-' + p).classList.toggle('show', st.screen === p);
-  if (st.screen === 'zug') renderZug();
-  if (st.screen === 'halte') renderHalte();
-  if (st.screen === 'graf') renderGraf();
-  if (st.screen === 'menu') renderMenu();
-  if (st.screen === 'info') renderInfo();
+  for (const p of PAGES) $('p-' + p).classList.toggle('show', st.screen === p);
+  const fn = { zug: renderZugPage, fsd: renderFsd, zeit: renderZeit, grund: renderGrund, menu: renderMenu, brh: renderBrh, stoer: renderStoer, info: renderInfo, graf: renderGraf }[st.screen];
+  if (fn) fn();
 }
 
-function renderZug() {
+// Bildschirmtastatur für Ziffern im Handy-Layout
+function padHtml() {
+  return ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].map((d) => `<div class="tb" data-k="${d}">${d}</div>`).join('') +
+    '<div class="tb small" data-k="C">⌫ C</div><div class="tb small" data-k="E">E ✓</div>';
+}
+
+function renderZugPage() {
+  $('zug-in').textContent = st.zugIn;
+  const h = $('zug-hint');
+  h.textContent = st.zugMsg;
+  h.classList.toggle('err', st.zugErr);
+  const L = libList();
+  st.sel.zug = clamp(st.sel.zug, -1, L.length - 1);
+  const vis = LAY.phone ? 3 : 6;
+  const start = clamp(st.sel.zug - Math.floor(vis / 2), 0, Math.max(0, L.length - vis));
+  let html = '<div class="li head"><span class="c1">Gespeicherte Fahrpläne (▲ ▼ wählen)</span></div>';
+  html += L.slice(start, start + vis).map(([k, e], j) => {
+    const i = start + j, m = libEntry(k)?.f?.meta || {};
+    return `<div class="li${i === st.sel.zug ? ' sel' : ''}" data-zi="${i}"><span class="znr">${esc(k)}</span><span class="c1">${esc(((m.gattung || '') + ' ' + (m.zuglauf || '')).trim())}</span><span class="zsrc">${esc(e.origin.replace(/^Datei /, ''))}</span></div>`;
+  }).join('');
+  if (!L.length) html += '<div class="li">Noch keine Fahrpläne – Zusi verbinden oder G ▸ 3 Datei einlesen</div>';
+  $('zug-list').innerHTML = html;
+  if (!$('zug-pad').innerHTML) $('zug-pad').innerHTML = padHtml();
+}
+
+function renderFsd() {
+  const tabs = ['Zugdaten', 'Halteliste'];
+  $('fsd-h').innerHTML = 'FSD <span class="tabs">' + tabs.map((t, i) => `<span class="${i === st.fsdTab ? 'on' : ''}">${t}</span>`).join('') + '</span><small>◄ ► umschalten</small>';
+  if (st.fsdTab === 0) renderZugdaten(); else renderHalte();
+}
+function renderZugdaten() {
   const f = st.fpl, m = f?.meta || {};
   const kv = [
-    ['Zug', zugTitel(f) || '–'],
+    ['Zug', zugTitel(f) || st.loggedKey || '–'],
     ['Zuglauf', m.zuglauf || '–'],
     ['Baureihe', m.br || '–'],
     ['Höchstgeschwindigkeit', m.vmax ? Math.round(m.vmax * 3.6) + ' km/h' : '–'],
@@ -875,14 +1163,12 @@ function renderZug() {
     ['Zugmasse', m.masse ? Math.round(m.masse / 1000) + ' t' : '–'],
     ['Bremshundertstel', m.bremsh ? Math.round(m.bremsh * 100) + ' %' : (m.mbrh ? Math.round(m.mbrh * 100) + ' % (Mindest)' : '–')],
     ['Bremsstellung', m.bremsstellung ? ({ 0: 'G', 1: 'P', 2: 'P+Mg', 3: 'R', 4: 'R+Mg', 5: 'R+Mg (K)' }[m.bremsstellung] || m.bremsstellung) : '–'],
-    ['Fahrplanzeilen', f ? f.rows.length + ' (' + f.rows.filter((r) => r.halt).length + ' Halte)' : '–'],
+    ['Steuerungsart', CTL_NAME[st.ctl] + ' · Gleis /' + st.gw],
     ['Datenquelle', f ? f.origin : '–'],
   ];
-  if (st.bridge.zugdatei && st.source === 'zusi') kv.push(['Zugdatei', st.bridge.zugdatei]);
-  $('zugkv').innerHTML = kv.map(([k, v]) => `<div>${esc(k)}</div><div>${esc(v)}</div>`).join('');
+  $('fsd-body').innerHTML = '<div class="kv">' + kv.map(([k, v]) => `<div>${esc(k)}</div><div>${esc(v)}</div>`).join('') + '</div>';
 }
-
-function halteListe() { return st.fpl ? st.fpl.rows.filter((r) => r.halt || r.pass || r.i === 0) : []; }
+function halteListe() { return st.fpl ? st.fpl.rows.filter((r) => (r.halt || r.pass || r.i === 0) && gleisOk(r)) : []; }
 function renderHalte() {
   const L = halteListe();
   st.sel.halte = clamp(st.sel.halte, 0, Math.max(0, L.length - 1));
@@ -898,7 +1184,132 @@ function renderHalte() {
       `<span class="c2">${fmtHM(r.ank)}</span><span class="c3">${fmtHM(r.abf)}</span><span class="c4">${ist != null ? fmtHM(ist) : ''}</span><span class="c5">${d}</span></div>`;
   });
   if (!L.length) html += '<div class="li">Keine Halte vorhanden</div>';
-  $('haltlist').innerHTML = html;
+  $('fsd-body').innerHTML = '<div class="list">' + html + '</div>';
+}
+
+const ZEIT_OPT = [
+  { c: 'ortung', l: 'Ortung', d: () => ortungMoeglich() ? 'Position aus der Kilometrierung von Zusi' : 'nicht verfügbar (keine Kilometrierung)' },
+  { c: 'zeit', l: 'Zeitsteuerung', d: () => st.fpl?.hasTimes ? 'Ortsmarker läuft nach Fahrplanzeit, Start mit E bei Abfahrt' : 'nicht verfügbar (Fahrplan ohne Zeiten)' },
+  { c: 'manuell', l: 'Manuell', d: () => 'Ortsmarker mit ▲ ▼ weiterschalten' },
+];
+function renderZeit() {
+  st.sel.zeit = clamp(st.sel.zeit, 0, ZEIT_OPT.length - 1);
+  $('zeitlist').innerHTML = ZEIT_OPT.map((o, i) => `<div class="li${i === st.sel.zeit ? ' sel' : ''}" data-ti="${i}"><span class="znr">${i + 1}</span><span class="c1"><b>${o.l}</b> <small>${esc(o.d())}</small></span><span class="val">${st.ctl === o.c ? '●' : ''}</span></div>`).join('');
+  const t = simTime();
+  const src = st.source === 'zusi' ? 'Zusi' : st.source === 'demo' ? 'Demo' : 'Geräteuhr';
+  let h = `Uhrzeit: ${t != null ? fmtHM(t, true) : '–'} (${src})`;
+  if (st.ctl === 'zeit') h += ` · Zeitsteuerung ${st.zeit.run ? 'läuft' : 'angehalten'}${st.zeit.run ? ' · Versatz ' + (st.delayMin > 0 ? '+' : '') + st.delayMin + ' min' : ''}`;
+  $('zeit-hint').textContent = h;
+}
+
+const GRUND = [
+  { n: 0, l: 'EBuLa Fahrplan', a: () => go('main') },
+  { n: 1, l: 'Zug anmelden (Zugnummer)', a: () => openZug() },
+  { n: 2, l: 'Systemdienste EBuLa', a: () => { st.sel.menu = 0; go('menu'); } },
+  { n: 3, l: 'Fahrplandatei einlesen', a: () => $('fileinp').click() },
+  { n: 4, l: 'Geschwindigkeitsprofil', a: () => { if (!st.fpl) return flash('Kein Zug angemeldet', 'warn'); st.graf.off = 0; go('graf'); } },
+  { n: 5, l: 'Zug abmelden', a: () => { if (!st.fpl) return flash('Kein Zug angemeldet', 'warn'); abmelden(); go('main'); } },
+  { n: 6, l: 'Information / Tastenbelegung', a: () => openInfo('grund') },
+  { n: 7, l: 'Störungsübersicht', a: () => { st.abhilfe = null; go('stoer'); } },
+  { n: 9, l: 'Sonstige Systemdienste: BRH berechnen', a: () => openBrh() },
+];
+function renderGrund() {
+  st.sel.grund = clamp(st.sel.grund, 0, GRUND.length - 1);
+  $('grundlist').innerHTML = GRUND.map((g, i) => `<div class="li${i === st.sel.grund ? ' sel' : ''}" data-gi="${i}"><span class="znr">${g.n}</span><span class="c1">${esc(g.l)}</span></div>`).join('');
+}
+
+const MENU = [
+  { l: 'Datenquelle', v: () => ({ zusi: 'Zusi 3 (Bridge)', demo: 'Demo-Fahrt', offline: 'Nur Dateien (offline)' }[st.source]), ch: (d) => { const o = ['zusi', 'demo', 'offline']; setSource(o[(o.indexOf(st.source) + d + 3) % 3]); } },
+  { l: 'Bridge-Adresse', v: () => S.bridgeUrl ? S.bridgeUrl.replace(/^https?:\/\//, '') : 'automatisch (diese Seite)', a: () => openConn() },
+  { l: 'Zusi neu verbinden', a: () => { fetch(bridgeBase() + '/api/reconnect', { method: 'POST' }).then(() => flash('Neuverbindung angefordert', 'ok')).catch(() => flash('Bridge nicht erreichbar', 'warn')); } },
+  { l: 'Zug von Zusi automatisch anmelden', v: () => S.autoLogin ? 'an' : 'aus (Zugnummer eingeben)', ch: () => { S.autoLogin = !S.autoLogin; } },
+  { l: 'Laufrichtung der Anzeige', v: () => S.dir === 'up' ? 'aufwärts (EBuLa)' : 'abwärts', ch: () => { S.dir = S.dir === 'up' ? 'down' : 'up'; } },
+  { l: 'Bildschirm drehen', v: () => S.rot + '°', ch: (d) => { S.rot = (S.rot + d * 90 + 360) % 360; layout(); } },
+  { l: 'Tag-/Nachtmodus', v: () => S.day ? 'Tag (hell)' : 'Nacht (dunkel)', ch: () => { S.day = !S.day; } },
+  { l: 'Helligkeit', v: () => S.bright + ' %', ch: (d) => { S.bright = clamp(S.bright + d * 10, 20, 100); } },
+  { l: 'Zeilenhöhe', v: () => ({ 30: 'klein', 38: 'mittel', 46: 'groß', 56: 'sehr groß' }[S.rowH] || S.rowH), ch: (d) => { const o = [30, 38, 46, 56]; S.rowH = o[clamp(o.indexOf(S.rowH) + d, 0, 3)] || 38; } },
+  { l: 'Zehntelminuten anzeigen', v: () => S.secs ? 'an' : 'aus', ch: () => { S.secs = !S.secs; } },
+  { l: 'Zeilen', v: () => S.filter === 'alle' ? 'alle (inkl. Signale)' : 'nur Betriebsstellen', ch: () => { S.filter = S.filter === 'alle' ? 'bst' : 'alle'; buildView(); } },
+  { l: 'Demo-Zeitraffer', v: () => '×' + S.demoSpeed, ch: (d) => { const o = [1, 2, 5, 10, 20]; S.demoSpeed = o[clamp(o.indexOf(S.demoSpeed) + d, 0, 4)] || 1; } },
+  { l: 'Demo-Fahrt neu starten', a: () => setSource('demo', true) },
+  { l: 'Tastenton', v: () => S.sound ? 'an' : 'aus', ch: () => { S.sound = !S.sound; } },
+  { l: 'Layout', v: () => ({ auto: 'automatisch', geraet: 'EBuLa-Gerät', handy: 'Handy' }[S.layout] || 'automatisch'), ch: (d) => { const o = ['auto', 'geraet', 'handy']; S.layout = o[(o.indexOf(S.layout) + d + 3) % 3]; saveS(); layout(); } },
+  { l: 'Selbsttest beim Start', v: () => S.boot ? 'an' : 'aus', ch: () => { S.boot = !S.boot; } },
+  { l: 'Vollbild', a: () => toggleFullscreen() },
+  { l: 'Ist-Zeiten zurücksetzen', a: () => { st.actual = {}; st.trace = []; flash('Ist-Zeiten gelöscht', 'ok'); } },
+  { l: 'Fahrplanspeicher leeren', a: () => { for (const [k, v] of [...LIB]) if (v.persist) LIB.delete(k); libSave(); flash('Gespeicherte Fahrpläne gelöscht', 'ok'); } },
+  { l: 'Alle Einstellungen zurücksetzen', a: () => { Object.assign(S, DEF); saveS(); layout(); buildView(); flash('Standardwerte geladen', 'ok'); } },
+];
+if (IS_APP) MENU.splice(MENU.findIndex((m) => m.l === 'Vollbild'), 1);
+function renderMenu() {
+  st.sel.menu = clamp(st.sel.menu, 0, MENU.length - 1);
+  const vis = Math.min(MENU.length, Math.max(3, Math.floor((LAY.th - LAY.h2) / LAY.li))), start = clamp(st.sel.menu - Math.floor(vis / 2), 0, MENU.length - vis);
+  $('menulist').innerHTML = MENU.slice(start, start + vis).map((m, k) => {
+    const i = start + k;
+    return `<div class="li${i === st.sel.menu ? ' sel' : ''}" data-mi="${i}"><span>${p2(i + 1)}&nbsp;&nbsp;${esc(m.l)}</span>${m.v ? `<span class="val">◄ ${esc(m.v())} ►</span>` : '<span class="val">E ▸</span>'}</div>`;
+  }).join('');
+}
+
+// Bremshundertstel-Rechner (Sonstige Systemdienste)
+function openBrh() {
+  const m = st.fpl?.meta;
+  if (!st.brh.masse && m?.masse) st.brh.masse = String(Math.round(m.masse / 1000));
+  if (!st.brh.bg && m?.masse && m?.bremsh) st.brh.bg = String(Math.round(m.masse / 1000 * m.bremsh));
+  st.sel.brh = 0;
+  go('brh');
+}
+function brhWert() {
+  const ms = +st.brh.masse, bg = +st.brh.bg;
+  return ms > 0 && bg > 0 ? Math.floor(bg / ms * 100) : null;
+}
+function renderBrh() {
+  const v = brhWert();
+  const zugart = v == null ? '–' : v >= 111 ? 'O (obere Zugart)' : v >= 66 ? 'M (mittlere Zugart)' : 'U (untere Zugart)';
+  const fld = (i, lbl, val, unit) => `<div class="row2"><span class="lbl">${lbl}</span><span class="field${st.sel.brh === i ? ' sel cursor' : ''}" data-bi="${i}">${esc(val)}</span><span>${unit}</span></div>`;
+  $('brh-body').innerHTML = '<div class="brh">' +
+    fld(0, 'Zugmasse', st.brh.masse, 't') + fld(1, 'Bremsgewicht', st.brh.bg, 't') +
+    `<div class="res">Bremshundertstel: ${v == null ? '–' : v + ' %'}</div>` +
+    `<div class="row2"><span class="lbl">Eingabe ZDE (BRH)</span><b>${v == null ? '–' : Math.floor(v / 10)}</b></div>` +
+    `<div class="row2"><span class="lbl">PZB-Zugart</span><b>${zugart}</b></div>` +
+    '<div class="zhint">Bremshundertstel = Bremsgewicht ÷ Zugmasse × 100. Werte aus den Zugdaten sind vorbelegt.</div></div>';
+  if (!$('brh-pad').innerHTML) $('brh-pad').innerHTML = padHtml();
+}
+
+function renderStoer() {
+  const L = stoerungen();
+  st.sel.stoer = clamp(st.sel.stoer, 0, Math.max(0, L.length - 1));
+  $('stoerlist').innerHTML = L.length
+    ? L.map((s, i) => `<div class="li${i === st.sel.stoer ? ' sel' : ''}" data-si="${i}"><span class="code">${s.code}</span><span class="c1">${esc(s.text)}</span></div>`).join('')
+    : '<div class="li">Keine Störung vorhanden</div>';
+  const s = L[st.sel.stoer];
+  let ab = 'V>0: Abhilfe während der Fahrt · V=0: ausführliche Abhilfe im Stillstand';
+  if (s && st.abhilfe === 'fahrt') ab = 'Abhilfe (Fahrt): ' + s.kurz;
+  else if (s && st.abhilfe === 'stand') ab = (st.live.v ?? 0) < 0.5 || st.source === 'offline' ? 'Abhilfe (Stillstand):\n' + s.lang : 'Ausführliche Abhilfe nur bei stehendem Zug (V=0) – Abhilfe während der Fahrt: ' + s.kurz;
+  $('abhilfe').textContent = L.length ? ab : '';
+}
+
+const HELP = {
+  main: 'Fahrplan von unten nach oben lesen. Der rote Ortsmarker zeigt die aktuelle Position. ▲ ▼ blättern bei Ortung in der Vorschau, bei Zeitsteuerung und Manuell verschieben sie den Ortsmarker. ◄ ► blättern seitenweise. Nach 10 s springt die Anzeige zum Ortsmarker zurück. E startet/hält die Zeitsteuerung.',
+  zug: 'Zugnummer mit den Zifferntasten eingeben und mit E bestätigen. C löscht die letzte Ziffer. Mit ▲ ▼ lässt sich ein gespeicherter Fahrplan auswählen.',
+  fsd: 'Fahrplan-Stammdaten: Zugdaten und Halteliste mit Soll- und Ist-Zeiten. ◄ ► schaltet um, E zeigt die gewählte Betriebsstelle im Fahrplan.',
+  zeit: '1 Ortung: Position aus der Kilometrierung von Zusi. 2 Zeitsteuerung: der Ortsmarker läuft nach Fahrplan, Start mit E bei Abfahrt. 3 Manuell: Ortsmarker mit ▲ ▼ führen.',
+  grund: 'Grundmenü: Menüpunkt über die Ziffer direkt wählen.',
+  menu: 'Systemdienste: ▲ ▼ wählen, ◄ ► Wert ändern, E ausführen.',
+  brh: 'Zugmasse und Bremsgewicht eingeben (▲ ▼ wechselt das Feld). Das Ergebnis zeigt die Bremshundertstel und die PZB-Zugart.',
+  stoer: 'V>0 zeigt die Abhilfe während der Fahrt, V=0 die ausführliche Abhilfe im Stillstand.',
+  graf: '◄ ► zoomen, ▲ ▼ verschieben, E zurück zur Position.',
+};
+function openInfo(from) { st.infoFrom = from || st.screen; st.screen = 'info'; }
+function renderInfo() {
+  $('info-h').innerHTML = 'Information <small>' + (st.source === 'zusi' ? (st.bridge.zusi ? 'Zusi ' + esc(st.bridge.version) : 'Zusi nicht verbunden') : '') + '</small>';
+  const keys = [
+    ['1 Zug', 'Zug anmelden (Zugnummer)'], ['2 FSD', 'Zugdaten und Halteliste'], ['6 GW', 'Gleiswechsel Regel-/Gegengleis'], ['7 Zeit', 'Steuerungsart: Ortung / Zeit / Manuell'], ['0 G', 'Grundmenü'],
+    ['St', 'Störungsübersicht'], ['V>0 V=0', 'Abhilfetexte Fahrt / Stillstand'], ['i', 'Information (diese Seite)'], ['S', 'Systemdienste'],
+    ['☀aus', 'Bildschirm aus'], ['☀', 'Helligkeit'], ['◑', 'Kontrast Tag/Nacht'], ['UD', 'Display umschalten (drehen)'],
+    ['▲ ▼', 'Vorschau / Ortsmarker'], ['◄ ►', 'seitenweise blättern'], ['E', 'Bestätigen / Zeitsteuerung'], ['C', 'Zurück / Löschen'],
+    ['KBD', 'Tastendruck'], ['TEMP', 'Warnung: Störung vorhanden'], ['GPS', 'durchgestrichen = keine Ortung'],
+  ];
+  $('helptext').innerHTML = `<p class="ctx">${esc(HELP[st.infoFrom] || HELP.main)}</p>` + keys.map(([k, v]) => `<p><b>${esc(k)}</b> ${esc(v)}</p>`).join('');
 }
 
 function renderGraf() {
@@ -906,12 +1317,12 @@ function renderGraf() {
   const W = cv.width, H = cv.height, cs = getComputedStyle($('device'));
   const fg = cs.getPropertyValue('--scr-fg').trim(), dim = cs.getPropertyValue('--scr-dim').trim(), line = cs.getPropertyValue('--scr-line').trim();
   g.clearRect(0, 0, W, H);
-  if (!f) { g.fillStyle = dim; g.font = '18px sans-serif'; g.fillText('Kein Fahrplan geladen', 20, 40); return; }
+  if (!f) { g.fillStyle = dim; g.font = '18px sans-serif'; g.fillText('Kein Zug angemeldet', 20, 40); return; }
   const R = f.rows, X = (r) => f.hasWeg ? r.laufweg : r.i;
   const x0 = X(R[0]), x1 = X(R[R.length - 1]);
   const span = (x1 - x0) / st.graf.zoom || 1;
   const curX = st.pos.init ? xOf(st.pos.p) : x0;
-  let from = clamp(curX - span * 0.25 + st.graf.off * span, x0, Math.max(x0, x1 - span));
+  const from = clamp(curX - span * 0.25 + st.graf.off * span, x0, Math.max(x0, x1 - span));
   const to = from + span;
   const vmax = Math.max(80, ...R.map((r) => r.vEff || 0), ...st.trace.map((p) => p[1])) * 1.1;
   const L = 48, T = 14, B = 64, PW = W - L - 12, PH = H - T - B;
@@ -921,7 +1332,6 @@ function renderGraf() {
     g.strokeStyle = 'rgba(128,128,128,.25)'; g.beginPath(); g.moveTo(L, sy(v)); g.lineTo(L + PW, sy(v)); g.stroke();
     g.fillStyle = dim; g.fillText(String(v), 8, sy(v) + 4);
   }
-  // zulässige Geschwindigkeit (Stufen)
   g.strokeStyle = fg; g.lineWidth = 2.5; g.beginPath();
   let started = false;
   for (let k = 0; k < R.length - 1; k++) {
@@ -933,11 +1343,9 @@ function renderGraf() {
     g.lineTo(sx(Math.min(b, to)), sy(r.vEff));
   }
   g.stroke();
-  // Ist-Geschwindigkeit
   g.strokeStyle = '#2f8cff'; g.lineWidth = 2; g.beginPath(); started = false;
   for (const [x, v] of st.trace) { if (x < from || x > to) { started = false; continue; } if (!started) { g.moveTo(sx(x), sy(v)); started = true; } else g.lineTo(sx(x), sy(v)); }
   g.stroke();
-  // Halte / Betriebsstellen
   g.textAlign = 'left';
   let lastLbl = -1e9;
   for (const r of R) {
@@ -951,7 +1359,6 @@ function renderGraf() {
       g.fillText(r.name.slice(0, 22), 0, 0); g.restore(); lastLbl = px;
     }
   }
-  // Position
   if (st.pos.init && curX >= from && curX <= to) {
     g.strokeStyle = '#ff3b30'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(sx(curX), T); g.lineTo(sx(curX), T + PH); g.stroke();
   }
@@ -960,64 +1367,34 @@ function renderGraf() {
   g.fillStyle = '#2f8cff'; g.fillText('— Ist', L + 8, T + 12); g.fillStyle = fg; g.fillText('— zulässig', L + 50, T + 12);
 }
 
-const MENU = [
-  { l: 'Datenquelle', v: () => ({ zusi: 'Zusi 3 (Bridge)', demo: 'Demo-Fahrt', offline: 'Nur Datei (offline)' }[st.source]), ch: (d) => { const o = ['zusi', 'demo', 'offline']; setSource(o[(o.indexOf(st.source) + d + 3) % 3]); } },
-  { l: 'Fahrplandatei laden …', a: () => $('fileinp').click() },
-  { l: 'Bridge-Adresse', v: () => S.bridgeUrl ? S.bridgeUrl.replace(/^https?:\/\//, '') : 'automatisch (diese Seite)', a: () => openConn() },
-  { l: 'Zusi neu verbinden', a: () => { fetch(bridgeBase() + '/api/reconnect', { method: 'POST' }).then(() => flash('Neuverbindung angefordert', 'ok')).catch(() => flash('Bridge nicht erreichbar', 'warn')); } },
-  { l: 'Laufrichtung der Anzeige', v: () => S.dir === 'up' ? 'aufwärts (EBuLa)' : 'abwärts', ch: () => { S.dir = S.dir === 'up' ? 'down' : 'up'; } },
-  { l: 'Bildschirm drehen', v: () => S.rot + '°', ch: (d) => { S.rot = (S.rot + d * 90 + 360) % 360; layout(); } },
-  { l: 'Tag-/Nachtmodus', v: () => S.day ? 'Tag (hell)' : 'Nacht (dunkel)', ch: () => { S.day = !S.day; } },
-  { l: 'Helligkeit', v: () => S.bright + ' %', ch: (d) => { S.bright = clamp(S.bright + d * 10, 20, 100); } },
-  { l: 'Zeilenhöhe', v: () => ({ 30: 'klein', 38: 'mittel', 46: 'groß', 56: 'sehr groß' }[S.rowH] || S.rowH), ch: (d) => { const o = [30, 38, 46, 56]; S.rowH = o[clamp(o.indexOf(S.rowH) + d, 0, 3)] || 38; } },
-  { l: 'Zehntelminuten anzeigen', v: () => S.secs ? 'an' : 'aus', ch: () => { S.secs = !S.secs; } },
-  { l: 'Zeilen', v: () => S.filter === 'alle' ? 'alle (inkl. Signale)' : 'nur Betriebsstellen', ch: () => toggleFilter() },
-  { l: 'Demo-Zeitraffer', v: () => '×' + S.demoSpeed, ch: (d) => { const o = [1, 2, 5, 10, 20]; S.demoSpeed = o[clamp(o.indexOf(S.demoSpeed) + d, 0, 4)] || 1; } },
-  { l: 'Demo-Fahrt neu starten', a: () => setSource('demo', true) },
-  { l: 'Tastenton', v: () => S.sound ? 'an' : 'aus', ch: () => { S.sound = !S.sound; } },
-  { l: 'Layout', v: () => ({ auto: 'automatisch', geraet: 'EBuLa-Gerät', handy: 'Handy' }[S.layout] || 'automatisch'), ch: (d) => { const o = ['auto', 'geraet', 'handy']; S.layout = o[(o.indexOf(S.layout) + d + 3) % 3]; saveS(); layout(); } },
-  { l: 'Position manuell vor (V>0)', a: () => { st.screen = 'main'; manualStep(1); } },
-  { l: 'Position manuell zurück (V=0)', a: () => { st.screen = 'main'; manualStep(-1); } },
-  { l: 'Hilfe / Tastenbelegung', a: () => { st.screen = 'info'; } },
-  { l: 'Vollbild', a: () => toggleFullscreen() },
-  { l: 'Ist-Zeiten zurücksetzen', a: () => { st.actual = {}; st.trace = []; flash('Ist-Zeiten gelöscht', 'ok'); } },
-  { l: 'Alle Einstellungen zurücksetzen', a: () => { Object.assign(S, DEF); saveS(); layout(); buildView(); flash('Standardwerte geladen', 'ok'); } },
-];
-if (IS_APP) MENU.splice(MENU.findIndex((m) => m.l === 'Vollbild'), 1);
-function renderMenu() {
-  st.sel.menu = clamp(st.sel.menu, 0, MENU.length - 1);
-  const vis = Math.min(MENU.length, Math.max(3, Math.floor((LAY.th - LAY.h2) / LAY.li))), start = clamp(st.sel.menu - Math.floor(vis / 2), 0, MENU.length - vis);
-  $('menulist').innerHTML = MENU.slice(start, start + vis).map((m, k) => {
-    const i = start + k;
-    return `<div class="li${i === st.sel.menu ? ' sel' : ''}" data-mi="${i}"><span>${p2(i + 1)}&nbsp;&nbsp;${esc(m.l)}</span>${m.v ? `<span class="val">◄ ${esc(m.v())} ►</span>` : '<span class="val">E ▸</span>'}</div>`;
-  }).join('');
-}
-
-function renderInfo() {
-  $('verinfo').textContent = st.source === 'zusi' ? (st.bridge.zusi ? 'Zusi ' + st.bridge.version : 'Zusi nicht verbunden') : '';
-  if ($('helptext').dataset.done) return;
-  $('helptext').dataset.done = '1';
-  $('helptext').innerHTML = [
-    ['☀aus', 'Bildschirm aus / an'], ['S', 'Einstellungen (Datenquelle, Drehung, Demo …)'], ['i', 'Diese Hilfe'],
-    ['St', 'Standort: zurück zur aktuellen Position, Ortung automatisch'], ['V>0', 'Position manuell eine Zeile vor'], ['V=0', 'Position manuell eine Zeile zurück'],
-    ['☀', 'Helligkeit stufenweise'], ['◑', 'Tag-/Nachtmodus'], ['UD', 'Anzeige um 90° drehen'],
-    ['▲ ▼', 'Fahrplan vorschauen (blättern) / Auswahl'], ['◄ ►', 'seitenweise blättern / Wert ändern'], ['E', 'Bestätigen'], ['C', 'Zurück / Meldung löschen'],
-    ['1 Zug', 'Zugdaten'], ['2 Halte', 'Haltliste mit Ist-Zeiten und Verspätung'], ['3 Datei', 'Buchfahrplan (*.timetable.xml / *.trn) laden'],
-    ['4 Filter', 'alle Zeilen / nur Betriebsstellen'], ['9 Info', 'Hilfe'], ['0 G', 'Geschwindigkeitsprofil (Grafik)'],
-    ['Tastatur', 'Ziffern, Enter, Esc, Pfeile, Bild↑/↓ = V>0/V=0, Pos1 = St'],
-    ['KBD', 'leuchtet bei Tastendruck'], ['TEMP', 'grün = Live-Daten, gelb = Bridge ohne Zusi, rot = keine Verbindung'],
-    ['GPS', 'durchgestrichen = keine Ortung über Kilometrierung'],
-  ].map(([k, v]) => `<p><b>${esc(k)}</b> ${esc(v)}</p>`).join('');
-}
-
 function renderLeds() {
-  const t = $('led-temp');
-  t.className = 'led ' + (st.source === 'demo' || (st.source === 'zusi' && st.bridge.zusi) ? 'on-g' : st.source === 'zusi' && st.bridge.ok ? 'on-y' : st.source === 'zusi' ? 'on-r' : '');
+  $('led-temp').className = 'led' + (stoerungen().length ? ' on-y' : '');
 }
 
 function flash(text, cls = '', ms = 4500) { st.msg = { text, cls, until: Date.now() + ms }; render(); setTimeout(render, ms + 50); }
 let toastT = null;
 function toast(text) { const t = $('toast'); t.textContent = text; t.style.display = 'block'; clearTimeout(toastT); toastT = setTimeout(() => { t.style.display = 'none'; }, 1300); }
+
+// ------------------------------------------------------------ Gerätestart mit Selbsttest
+let bootTimers = [];
+function startBoot() {
+  st.booting = true;
+  const b = $('boot');
+  b.classList.add('show');
+  const lines = ['Selbsttest Speicher ……………… OK', 'Selbsttest Anzeige ……………… OK', 'Selbsttest Tastatur ……………… OK', 'Fahrplanspeicher ……………… ' + LIB.size + ' Fahrpläne', 'Datenverbindung ……………… wird aufgebaut'];
+  $('boot-log').innerHTML = '';
+  lines.forEach((l, i) => bootTimers.push(setTimeout(() => {
+    $('boot-log').insertAdjacentHTML('beforeend', `<div>${esc(l)}</div>`);
+    $('boot-bar').style.width = ((i + 1) / lines.length * 100) + '%';
+  }, 280 + i * 330)));
+  bootTimers.push(setTimeout(endBoot, 280 + lines.length * 330 + 400));
+}
+function endBoot() {
+  bootTimers.forEach(clearTimeout); bootTimers = [];
+  st.booting = false;
+  $('boot').classList.remove('show');
+  render();
+}
 
 // ------------------------------------------------------------ Tasten
 const KEYS = [
@@ -1057,84 +1434,159 @@ function press(k) {
   render();
 }
 
+function go(screen) { st.screen = screen; }
+function back() {
+  const parent = { menu: 'grund', brh: 'grund', graf: 'grund', info: st.infoFrom === 'info' ? 'main' : st.infoFrom }[st.screen] || 'main';
+  st.screen = parent;
+}
+
 function handleKey(k) {
-  // global
+  if (st.booting) { endBoot(); return; }
+  if (st.loading) return;
+  // Tasten mit fester Funktion
   switch (k) {
     case 'aus': st.off = !st.off; return;
     case 'hell': S.bright = S.bright <= 30 ? 100 : S.bright - 20; saveS(); toast('Helligkeit ' + S.bright + ' %'); return;
-    case 'kontrast': S.day = !S.day; saveS(); toast(S.day ? 'Tagmodus' : 'Nachtmodus'); return;
-    case 'UD': S.rot = (S.rot + 90) % 360; saveS(); layout(); toast('Drehung ' + S.rot + '°'); return;
-    case 'S': st.screen = st.screen === 'menu' ? 'main' : 'menu'; return;
-    case 'i': case '9': if (k === 'i' || st.screen === 'main') { st.screen = st.screen === 'info' ? 'main' : 'info'; return; } break;
+    case 'kontrast': S.day = !S.day; saveS(); toast(S.day ? 'Tagdarstellung' : 'Nachtdarstellung'); return;
+    case 'UD': S.rot = (S.rot + 90) % 360; saveS(); layout(); toast('Display ' + S.rot + '°'); return;
+    case 'S': if (st.screen === 'menu') back(); else { st.sel.menu = 0; go('menu'); } return;
+    case 'i': if (st.screen === 'info') back(); else openInfo(); return;
+    case 'St': if (st.screen === 'stoer') back(); else { st.abhilfe = null; st.sel.stoer = 0; go('stoer'); } return;
+    case 'V>0': case 'V=0':
+      if (!stoerungen().length) { flash('Keine Störung – kein Abhilfetext vorhanden', ''); return; }
+      if (st.screen !== 'stoer') { st.sel.stoer = 0; go('stoer'); }
+      st.abhilfe = k === 'V>0' ? 'fahrt' : 'stand';
+      return;
   }
-  if (st.screen !== 'main' && (k === 'C' || k === '0')) { st.screen = 'main'; return; }
-  if (st.screen === 'menu') return menuKey(k);
-  if (st.screen === 'halte') return halteKey(k);
-  if (st.screen === 'graf') return grafKey(k);
-  if (st.screen === 'zug') { if (k === '3') $('fileinp').click(); if (k === 'E') st.screen = 'main'; return; }
-  if (st.screen === 'info') { if (k === 'E') st.screen = 'main'; return; }
-  // Hauptansicht
-  const n = st.view.length;
-  const page = Math.max(1, Math.floor(LAY.th / S.rowH) - 2);
+  const h = { main: mainKey, zug: zugKey, fsd: fsdKey, zeit: zeitKey, grund: grundKey, menu: menuKey, brh: brhKey, stoer: stoerKey, info: infoKey, graf: grafKey }[st.screen];
+  if (h) h(k);
+}
+
+function mainKey(k) {
+  const f = st.fpl;
+  const fwd = (key) => ((key === 'up') === (S.dir === 'up')) ? 1 : -1;
   switch (k) {
-    case 'up': st.scroll = clamp(st.scroll + (S.dir === 'up' ? 1 : -1), -n, n); break;
-    case 'down': st.scroll = clamp(st.scroll - (S.dir === 'up' ? 1 : -1), -n, n); break;
-    case 'right': st.scroll = clamp(st.scroll + page, -n, n); break;
-    case 'left': st.scroll = clamp(st.scroll - page, -n, n); break;
-    case 'St': st.scroll = 0; if (st.manual) { st.manual = false; flash('Automatische Ortung aktiv', 'ok'); } updatePosition(); break;
-    case 'V>0': manualStep(1); break;
-    case 'V=0': manualStep(-1); break;
-    case 'C': st.msg = null; st.scroll = 0; break;
-    case 'E': if (st.scroll !== 0 && st.fpl) { const r = st.fpl.rows[st.view[clamp(Math.round(toViewPos(st.pos.p) + st.scroll), 0, n - 1)]]; if (r) flash(`${r.name || 'Zeile'} · km ${fmtKm(r.km, 3)}${r.vEff ? ' · ' + r.vEff + ' km/h' : ''}`, ''); } break;
-    case '1': st.screen = 'zug'; break;
-    case '2': st.screen = 'halte'; { const L = halteListe(); const nh = nextHalt(st.pos.p - 0.5); st.sel.halte = Math.max(0, L.findIndex((r) => r.i >= (nh ?? 0))); } break;
-    case '3': $('fileinp').click(); break;
-    case '4': toggleFilter(); break;
-    case '0': st.screen = 'graf'; st.graf.off = 0; break;
+    case 'up': case 'down':
+      if (!f) return;
+      if (st.ctl === 'manuell') moveMarker(fwd(k));
+      else if (st.ctl === 'zeit') zeitStep(fwd(k));
+      else preview(fwd(k));
+      break;
+    case 'left': case 'right': {
+      if (!f) return;
+      const page = Math.max(1, Math.floor(LAY.th / S.rowH) - 2);
+      preview(k === 'right' ? page : -page);
+      break;
+    }
+    case 'E':
+      if (st.scroll) { st.scroll = 0; break; }
+      if (f && st.ctl === 'zeit') { if (st.zeit.run) zeitStop(); else zeitStart(); }
+      break;
+    case 'C': st.scroll = 0; st.msg = null; break;
+    case '1': openZug(); break;
+    case '2': if (f) { st.fsdTab = 0; go('fsd'); } break;
+    case '6':
+      if (f) {
+        st.gw = st.gw === 'r' ? 'l' : 'r';
+        buildView();
+        if (st.ctl === 'ortung') { st.pos.init = false; updatePosition(); }
+        toast(st.gw === 'r' ? 'Regelgleis  /r' : 'Gegengleis  /l');
+      }
+      break;
+    case '7': if (f) { st.sel.zeit = ZEIT_OPT.findIndex((o) => o.c === st.ctl); go('zeit'); } break;
+    case '0': st.sel.grund = 0; go('grund'); break;
   }
 }
 
-function toggleFilter() {
-  S.filter = S.filter === 'alle' ? 'bst' : 'alle'; saveS(); buildView(); softCache = '';
-  toast(S.filter === 'alle' ? 'Alle Zeilen' : 'Nur Betriebsstellen');
+function openZug() {
+  const b = st.bridge;
+  st.zugIn = '';
+  if (st.source === 'zusi' && b.zusiKey && b.zusiKey !== st.loggedKey) st.zugIn = b.zusiKey;
+  else if (st.source === 'demo' && st.loggedKey !== '4711') st.zugIn = '4711';
+  st.zugMsg = st.zugIn ? 'Vorschlag ' + (st.source === 'zusi' ? 'von Zusi' : 'Demo') + ' – mit E übernehmen' : 'Zugnummer eingeben';
+  st.zugErr = false;
+  st.sel.zug = -1;
+  go('zug');
 }
-
-function manualStep(d) {
-  if (!st.fpl) return;
-  if (!st.manual) { st.manual = true; flash('Manuelle Positionierung – St: zurück zur Automatik', ''); }
-  const v = st.view;
-  let k = Math.round(toViewPos(st.pos.p)) + d;
-  k = clamp(k, 0, v.length - 1);
-  st.pos.p = v[k]; st.pos.mode = 'manuell'; st.pos.init = true; st.scroll = 0;
+function zugKey(k) {
+  const L = libList();
+  if (/^[0-9]$/.test(k)) {
+    if (st.zugIn.length < 8) st.zugIn += k;
+    st.zugMsg = ''; st.zugErr = false; st.sel.zug = -1;
+  } else if (k === 'C') {
+    if (st.zugIn) { st.zugIn = st.zugIn.slice(0, -1); st.zugMsg = ''; st.zugErr = false; } else back();
+  } else if (k === 'up' || k === 'down') {
+    if (!L.length) return;
+    st.sel.zug = clamp(st.sel.zug + (k === 'down' ? 1 : -1), 0, L.length - 1);
+    st.zugIn = L[st.sel.zug][0];
+    st.zugMsg = ''; st.zugErr = false;
+  } else if (k === 'E') {
+    if (!st.zugIn) { st.zugMsg = 'Bitte Zugnummer eingeben'; st.zugErr = true; return; }
+    const key = libFind(st.zugIn);
+    if (!key) {
+      st.zugErr = true;
+      st.zugMsg = `Zug ${st.zugIn} nicht gefunden` + (st.source === 'zusi' ? (st.bridge.zusiKey ? ` – Zusi meldet ${st.bridge.zusiKey}` : ' – Zusi hat noch keinen Fahrplan geschickt') : ' – Fahrplandatei über G ▸ 3 einlesen');
+      return;
+    }
+    anmelden(key);
+  }
 }
-
+function fsdKey(k) {
+  const L = halteListe();
+  if (k === 'C' || k === '2') st.screen = 'main';
+  else if (k === '0') { st.sel.grund = 0; go('grund'); }
+  else if (k === 'left' || k === 'right') { st.fsdTab = 1 - st.fsdTab; if (st.fsdTab === 1) { const nh = nextHalt(st.pos.p - 0.5); st.sel.halte = Math.max(0, L.findIndex((r) => r.i >= (nh ?? 0))); } }
+  else if (st.fsdTab === 1 && (k === 'up' || k === 'down')) st.sel.halte = clamp(st.sel.halte + (k === 'down' ? 1 : -1), 0, Math.max(0, L.length - 1));
+  else if (k === 'E') {
+    if (st.fsdTab === 1 && L[st.sel.halte]) {
+      const r = L[st.sel.halte];
+      st.screen = 'main';
+      st.scroll = toViewPos(r.i) - toViewPos(st.pos.p) || 1e-6;
+      st.scrollAt = Date.now();
+    } else st.screen = 'main';
+  }
+}
+function zeitKey(k) {
+  if (k === 'C' || k === '7') { st.screen = 'main'; return; }
+  if (/^[1-3]$/.test(k)) { st.sel.zeit = +k - 1; setCtl(ZEIT_OPT[st.sel.zeit].c); st.screen = 'main'; return; }
+  if (k === 'up' || k === 'down') st.sel.zeit = clamp(st.sel.zeit + (k === 'down' ? 1 : -1), 0, ZEIT_OPT.length - 1);
+  if (k === 'E') { setCtl(ZEIT_OPT[st.sel.zeit].c); st.screen = 'main'; }
+}
+function grundKey(k) {
+  if (k === 'C') { st.screen = 'main'; return; }
+  if (/^[0-9]$/.test(k)) { const g = GRUND.find((x) => String(x.n) === k); if (g) g.a(); return; }
+  if (k === 'up' || k === 'down') st.sel.grund = (st.sel.grund + (k === 'down' ? 1 : -1) + GRUND.length) % GRUND.length;
+  if (k === 'E') GRUND[st.sel.grund].a();
+}
 function menuKey(k) {
   const m = MENU[st.sel.menu];
-  if (k === 'up') st.sel.menu = (st.sel.menu - 1 + MENU.length) % MENU.length;
+  if (k === 'C') back();
+  else if (k === 'up') st.sel.menu = (st.sel.menu - 1 + MENU.length) % MENU.length;
   else if (k === 'down') st.sel.menu = (st.sel.menu + 1) % MENU.length;
   else if ((k === 'left' || k === 'right') && m.ch) { m.ch(k === 'left' ? -1 : 1); saveS(); }
   else if (k === 'E') { if (m.a) m.a(); else if (m.ch) m.ch(1); saveS(); }
-  else if (/^[1-9]$/.test(k)) { st.sel.menu = clamp(+k - 1, 0, MENU.length - 1); }
+  else if (/^[1-9]$/.test(k)) st.sel.menu = clamp(+k - 1, 0, MENU.length - 1);
 }
-function halteKey(k) {
-  const L = halteListe();
-  if (k === 'up') st.sel.halte = Math.max(0, st.sel.halte - 1);
-  else if (k === 'down') st.sel.halte = Math.min(L.length - 1, st.sel.halte + 1);
-  else if (k === 'left') st.sel.halte = Math.max(0, st.sel.halte - 8);
-  else if (k === 'right') st.sel.halte = Math.min(L.length - 1, st.sel.halte + 8);
-  else if (k === 'E' && L[st.sel.halte]) {
-    const r = L[st.sel.halte];
-    st.screen = 'main';
-    st.scroll = toViewPos(r.i) - toViewPos(st.pos.p);
-    if (st.scroll === 0) st.scroll = 1e-6;
-  }
+function brhKey(k) {
+  const fld = st.sel.brh === 0 ? 'masse' : 'bg';
+  if (/^[0-9]$/.test(k)) { if (st.brh[fld].length < 5) st.brh[fld] = (st.brh[fld] + k).replace(/^0+(?=\d)/, ''); }
+  else if (k === 'C') { if (st.brh[fld]) st.brh[fld] = st.brh[fld].slice(0, -1); else back(); }
+  else if (k === 'up' || k === 'down') st.sel.brh = 1 - st.sel.brh;
+  else if (k === 'E') { const v = brhWert(); if (v == null) flash('Zugmasse und Bremsgewicht eingeben', 'warn'); else if (st.sel.brh === 0) st.sel.brh = 1; else flash('Bremshundertstel ' + v + ' % · ZDE-Eingabe ' + Math.floor(v / 10), 'ok', 7000); }
 }
+function stoerKey(k) {
+  const n = stoerungen().length;
+  if (k === 'C') { st.abhilfe = null; back(); }
+  else if (k === 'up' || k === 'down') { st.sel.stoer = clamp(st.sel.stoer + (k === 'down' ? 1 : -1), 0, Math.max(0, n - 1)); st.abhilfe = null; }
+}
+function infoKey(k) { if (k === 'C' || k === 'E') back(); }
 function grafKey(k) {
+  if (k === 'C') { back(); return; }
   if (k === 'left') st.graf.zoom = Math.max(1, st.graf.zoom / 1.6);
   else if (k === 'right') st.graf.zoom = Math.min(40, st.graf.zoom * 1.6);
   else if (k === 'up') st.graf.off += 0.25;
   else if (k === 'down') st.graf.off -= 0.25;
-  else if (k === 'St' || k === 'E') st.graf.off = 0;
+  else if (k === 'E') st.graf.off = 0;
   if (st.graf.zoom === 1) st.graf.off = 0;
 }
 
@@ -1157,30 +1609,52 @@ document.addEventListener('pointerdown', (e) => {
     return;
   }
   const tb = e.target.closest('.tb');
-  if (tb) { e.preventDefault(); const k = tb.dataset.k; if (/^[0-4]$/.test(k) && st.screen !== 'main') st.screen = 'main'; press(k); return; }
+  if (tb) {
+    e.preventDefault();
+    if (tb.classList.contains('dis')) return;
+    let k = tb.dataset.k;
+    if (k.startsWith('nav')) {
+      k = k.slice(3);
+      if (k === '0' && st.screen === 'grund') { st.screen = 'main'; press('C'); return; }
+      if (st.screen !== 'main') st.screen = 'main';
+    }
+    press(k);
+    return;
+  }
   const key = e.target.closest('.key');
   if (key) { e.preventDefault(); press(key.dataset.k); return; }
   const sk = e.target.closest('.sk');
   if (sk && sk.innerHTML) { e.preventDefault(); press(sk.dataset.k); return; }
-  const mi = e.target.closest('[data-mi]');
-  if (mi) { const i = +mi.dataset.mi; if (st.sel.menu === i) press('E'); else { st.sel.menu = i; render(); } return; }
-  const hi = e.target.closest('[data-hi]');
-  if (hi) { const i = +hi.dataset.hi; if (st.sel.halte === i) press('E'); else { st.sel.halte = i; render(); } return; }
+  const pick = (attr, selKey, fn) => {
+    const el = e.target.closest(`[data-${attr}]`);
+    if (!el) return false;
+    const i = +el.dataset[attr];
+    if (st.sel[selKey] === i) fn(i); else { st.sel[selKey] = i; if (selKey === 'zug') { st.zugIn = libList()[i][0]; st.zugMsg = ''; st.zugErr = false; } render(); }
+    return true;
+  };
+  if (pick('mi', 'menu', () => press('E'))) return;
+  if (pick('hi', 'halte', () => press('E'))) return;
+  if (pick('zi', 'zug', () => press('E'))) return;
+  if (pick('gi', 'grund', () => press('E'))) return;
+  if (pick('ti', 'zeit', () => press('E'))) return;
+  if (pick('si', 'stoer', () => {})) return;
+  if (pick('bi', 'brh', () => {})) return;
   if (st.off && e.target.closest('#screen')) { st.off = false; render(); }
 });
-// Wischen im Fahrplan = blättern
+// Wischen im Fahrplan = Vorschau blättern
 let swipe = null;
 $('tbl').addEventListener('touchstart', (e) => { swipe = { y: e.touches[0].clientY, s: st.scroll }; }, { passive: true });
 $('tbl').addEventListener('touchmove', (e) => {
-  if (!swipe) return;
+  if (!swipe || !st.fpl) return;
   const dy = (e.touches[0].clientY - swipe.y) / scale;
   const rows = dy / S.rowH * (S.dir === 'up' ? 1 : -1);
   st.scroll = Math.round(swipe.s + rows);
+  st.scrollAt = Date.now();
   render();
 }, { passive: true });
-$('tbl').addEventListener('wheel', (e) => { e.preventDefault(); press(e.deltaY < 0 ? 'up' : 'down'); }, { passive: false });
+$('tbl').addEventListener('wheel', (e) => { e.preventDefault(); if (st.fpl) { preview(e.deltaY < 0 ? 1 : -1); render(); } }, { passive: false });
 
-const KBMAP = { Enter: 'E', Escape: 'C', Backspace: 'C', ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', PageUp: 'V>0', PageDown: 'V=0', Home: 'St', s: 'S', i: 'i', t: 'St', h: 'hell', n: 'kontrast', u: 'UD', a: 'aus', f: 'fullscreen', '+': 'V>0', '-': 'V=0' };
+const KBMAP = { Enter: 'E', Escape: 'C', Backspace: 'C', ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', PageUp: 'V>0', PageDown: 'V=0', s: 'S', i: 'i', t: 'St', h: 'hell', n: 'kontrast', u: 'UD', a: 'aus', f: 'fullscreen' };
 document.addEventListener('keydown', (e) => {
   if (e.target && e.target.matches && e.target.matches('input, textarea')) {
     if (e.key === 'Enter') { e.preventDefault(); connAction('connect'); }
@@ -1189,14 +1663,14 @@ document.addEventListener('keydown', (e) => {
   }
   if (st.connOpen) { if (e.key === 'Escape') closeConn(); return; }
   if (e.metaKey || e.ctrlKey || e.altKey) return;
-  let k = /^[0-9]$/.test(e.key) ? e.key : KBMAP[e.key] || KBMAP[e.key.toLowerCase()];
+  const k = /^[0-9]$/.test(e.key) ? e.key : KBMAP[e.key] || KBMAP[e.key.toLowerCase()];
   if (!k) return;
   e.preventDefault();
   if (k === 'fullscreen') return toggleFullscreen();
   press(k);
 });
 
-// Datei laden
+// Fahrplandatei einlesen (wird im Fahrplanspeicher abgelegt und angemeldet)
 $('fileinp').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   e.target.value = '';
@@ -1205,11 +1679,9 @@ $('fileinp').addEventListener('change', async (e) => {
     const buf = await file.arrayBuffer();
     let text = new TextDecoder('utf-8').decode(buf);
     if (text.includes('�')) text = new TextDecoder('windows-1252').decode(buf);
-    const f = parseFahrplan(text, 'Datei ' + file.name);
-    if (st.source === 'demo') setSource('offline', false, true);
-    st.fileLoaded = true;
-    loadFahrplan(f);
-    st.screen = 'main';
+    const { key } = libAdd(text, 'Datei ' + file.name, true);
+    if (st.source === 'demo') setSource('offline', false);
+    anmelden(key);
   } catch (err) { flash('Fehler: ' + err.message, 'warn', 7000); }
 });
 
@@ -1305,17 +1777,17 @@ function setCols(cv, ck, ca, cb, fs) {
   ['--fs-v', '--fs-km', '--fs-name', '--fs-halt', '--fs-time'].forEach((k, i) => d.setProperty(k, fs[i].toFixed(1) + 'px'));
 }
 
-// Touch-Leiste im Handy-Layout
+// Touch-Leiste im Handy-Layout (Softkeys + Bedientasten)
 let tbCache = '';
 function renderToolbar() {
   if (!LAY.phone) return;
-  const main = st.screen === 'main';
-  const key = st.screen + S.filter;
+  const f = !!st.fpl, main = st.screen === 'main';
+  const key = [st.screen, f, st.gw, st.ctl, st.zeit.run, st.loading ? 1 : 0].join('|');
   if (tbCache === key) return;
   tbCache = key;
-  const items = [['1', 'Zug'], ['2', 'Halte'], ['0', 'Grafik'], ['3', 'Datei'], ['4', S.filter === 'alle' ? 'Filter<br>alle' : 'Filter<br>Bst'], ['S', 'Menü'],
-    ['C', main ? 'C' : 'Zurück', 0, !main], ['left', '◄', 1], ['up', '▲', 1], ['down', '▼', 1], ['right', '►', 1], main ? ['St', 'St'] : ['E', 'OK']];
-  $('toolbar').innerHTML = items.map(([k, l, ar, sm]) => `<div class="tb${ar ? ' arrow' : ''}${sm ? ' small' : ''}" data-k="${k}">${l}</div>`).join('');
+  const items = [['nav1', 'Zug'], ['nav2', 'FSD', !f], ['nav6', 'GW /' + st.gw, !f], ['nav7', 'Zeit', !f], ['nav0', 'G'], ['St', 'St'],
+    ['C', main ? 'C' : 'Zurück'], ['left', '◄', 0, 1], ['up', '▲', 0, 1], ['down', '▼', 0, 1], ['right', '►', 0, 1], ['E', main && f && st.ctl === 'zeit' ? (st.zeit.run ? 'E ‖' : 'E ▶') : 'E']];
+  $('toolbar').innerHTML = items.map(([k, l, dis, ar]) => `<div class="tb${ar ? ' arrow' : ''}${dis ? ' dis' : ''}${l.length > 5 ? ' small' : ''}" data-k="${k}">${l}</div>`).join('');
 }
 
 // Bildschirm anlassen (Browser, falls unterstützt)
@@ -1433,13 +1905,20 @@ function startBridge() {
   });
   es.addEventListener('prog', (e) => {
     const p = JSON.parse(e.data), b = st.bridge;
-    const newTrain = p.zugdatei && p.zugdatei !== b.zugdatei && b.zugdatei;
     Object.assign(b, { zugnummer: p.zugnummer, zugdatei: p.zugdatei, ladepause: p.ladepause });
     if (p.xml && p.xmlRev !== b.xmlRev) {
       b.xmlRev = p.xmlRev;
-      try { loadFahrplan(parseFahrplan(p.xml, p.xmlSource === 'Zusi' ? 'Zusi (live)' : p.xmlSource)); st.fileLoaded = false; }
-      catch (err) { flash('Buchfahrplan von Zusi fehlerhaft: ' + err.message, 'warn', 7000); }
-    } else if (newTrain && !st.fileLoaded) { st.fpl = null; buildView(); }
+      try {
+        const { key, f } = libAdd(p.xml, p.xmlSource === 'Zusi' ? 'Zusi (live)' : p.xmlSource, false);
+        b.zusiKey = key;
+        if (st.loggedKey === key) {
+          // gleicher Zug: Fahrplan aktualisieren, Steuerungsart beibehalten
+          const ctl = st.ctl, gw = st.gw;
+          loadFahrplan(f); st.ctl = ctl; st.gw = gw; buildView(); updatePosition();
+        } else if (S.autoLogin) anmelden(key, true);
+        else flash(`Zusi: Zug ${zugTitel(f) || key} bereit – Taste 1 „Zug“, dann E`, 'ok', 8000);
+      } catch (err) { flash('Buchfahrplan von Zusi fehlerhaft: ' + err.message, 'warn', 7000); }
+    } else if (!p.xml) b.zusiKey = null;
     render();
   });
 }
@@ -1477,9 +1956,9 @@ const DEMO_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <FplZeile FplLaufweg="29300"><Fplkm km="16.5"/><FplName FplNameText="Bad Musterstadt"/><FplAnk Ank="2026-10-29 08:25:00"/><FplRichtungswechsel/></FplZeile>
 </Buchfahrplan></Zusi>`;
 
-const demo = { timer: null, weg: 0, v: 0, t: 0, dwellUntil: null, lastTs: 0 };
+const demo = { timer: null, fpl: null, weg: 0, v: 0, t: 0, dwellUntil: null, lastTs: 0 };
 function demoKm(weg) {
-  const R = st.fpl.rows;
+  const R = demo.fpl.rows;
   for (let j = 0; j < R.length - 1; j++) {
     const a = R[j], b = R[j + 1];
     if (weg <= b.laufweg) return a.kmA + (b.km - a.kmA) * (weg - a.laufweg) / ((b.laufweg - a.laufweg) || 1);
@@ -1488,20 +1967,20 @@ function demoKm(weg) {
 }
 function startDemo() {
   stopDemo();
-  loadFahrplan(parseFahrplan(DEMO_XML, 'Demo'), true);
-  const R = st.fpl.rows;
+  demo.fpl = libAdd(DEMO_XML, 'Demo', false).f;
+  const R = demo.fpl.rows;
   Object.assign(demo, { weg: 0, v: 0, t: R[0].abf - 50 / 86400, dwellUntil: R[0].abf, lastTs: performance.now() });
   st.live = { v: 0, km: R[0].km, time: demo.t % 1, date: Math.floor(demo.t), weg: 0, vStrecke: R[0].vmax, afb: null, at: Date.now() };
-  updatePosition();
   demo.timer = setInterval(demoTick, 100);
-  flash('Demo-Fahrt RE 4711 – Zeitraffer ×' + S.demoSpeed + ' (Einstellungen: S)', 'ok', 6000);
+  if (S.autoLogin) anmelden('4711', true);
+  else flash('Demo-Fahrt bereit – Taste 1 „Zug“, 4711, E', 'ok', 8000);
 }
 function stopDemo() { if (demo.timer) clearInterval(demo.timer); demo.timer = null; }
 function demoTick() {
   const now = performance.now();
   let dt = Math.min(0.5, (now - demo.lastTs) / 1000) * S.demoSpeed;
   demo.lastTs = now;
-  const R = st.fpl?.rows; if (!R || st.source !== 'demo') return;
+  const R = demo.fpl?.rows; if (!R || st.source !== 'demo') return;
   const steps = Math.ceil(dt / 0.1);
   dt /= steps;
   for (let s = 0; s < steps; s++) {
@@ -1543,25 +2022,21 @@ function demoTick() {
   render();
 }
 
-function setSource(src, restart, keepFpl) {
+function setSource(src, restart) {
   if (src === 'zusi' && !S.bridgeUrl && !location.protocol.startsWith('http')) { openConn(); return; }
   if (src === st.source && !restart) return;
   stopDemo();
   if (src !== 'zusi') stopBridge();
+  // Demo-Zug abmelden, wenn die Demo verlassen wird
+  if (st.fpl && st.fpl.origin === 'Demo' && (src !== 'demo' || restart)) { st.fpl = null; st.loggedKey = null; buildView(); }
   st.source = src;
   S.source = src; saveS();
   st.live = { v: null, km: null, time: null, date: null, weg: null, vStrecke: null, afb: null, at: 0 };
-  st.manual = false; st.scroll = 0;
+  st.scroll = 0;
   if (src === 'demo') startDemo();
-  else if (src === 'zusi') {
-    if (st.fpl && st.fpl.origin === 'Demo') { st.fpl = null; buildView(); }
-    startBridge();
-    flash('Datenquelle: Zusi 3 über Bridge', '');
-  } else {
-    if (!keepFpl && st.fpl && st.fpl.origin === 'Demo') { st.fpl = null; buildView(); }
-    st.pos.mode = 'manuell';
-    flash('Offline – Fahrplandatei laden (Taste 3), Position mit V>0 / V=0', '');
-  }
+  else if (src === 'zusi') { startBridge(); flash('Datenquelle: Zusi 3 über Bridge', ''); }
+  else flash('Offline – Fahrplandateien über G ▸ 3 einlesen', '');
+  if (st.fpl && st.ctl === 'ortung' && !ortungMoeglich()) st.ctl = st.fpl.hasTimes ? 'zeit' : 'manuell';
   render();
 }
 
@@ -1571,8 +2046,12 @@ setInterval(() => {
     const d = new Date();
     st.live.time = (d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds()) / 86400;
     st.live.date = dayNum(d.getFullYear(), d.getMonth() + 1, d.getDate());
-    if (st.fpl && !st.manual) updatePosition();
+    if (st.fpl) updatePosition();
   }
+  // Zeitsteuerung ohne neue Live-Daten weiterlaufen lassen
+  if (st.source === 'zusi' && st.ctl === 'zeit' && st.zeit.run) updatePosition();
+  // Vorschau springt nach 10 s zum Ortsmarker zurück
+  if (st.scroll !== 0 && st.screen === 'main' && Date.now() - st.scrollAt > 10000) st.scroll = 0;
   // Zusi ohne neue Daten: Uhr nicht einfrieren lassen (Server sendet nur Änderungen)
   render();
 }, 1000);
@@ -1590,8 +2069,10 @@ async function detectBridge() {
 }
 
 (async function init() {
+  libLoad();
   buildKeys();
   layout();
+  if (S.boot) startBoot();
   let src = S.source;
   if (src === 'auto' || src === 'zusi') {
     const ok = await detectBridge();

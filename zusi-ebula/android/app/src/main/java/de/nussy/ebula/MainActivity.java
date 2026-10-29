@@ -25,7 +25,8 @@ import java.net.NetworkInterface;
 import java.util.Collections;
 
 /**
- * Nussy EBuLa – Android-App. Zeigt die Fahrplananzeige (assets/index.html) im Vollbild
+ * Nussy EBuLa / Fahrpult – Android-App. Zeigt die Anzeige (assets/index.html bzw. assets/fahrpult.html,
+ * je nach App-Variante BuildConfig.START_PAGE) im Vollbild
  * und verbindet sich über das WLAN mit der Bridge auf dem Zusi-PC.
  */
 public class MainActivity extends Activity {
@@ -51,7 +52,7 @@ public class MainActivity extends Activity {
         s.setAllowUniversalAccessFromFileURLs(true);
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setTextZoom(100);
-        s.setUserAgentString(s.getUserAgentString() + " NussyEBuLa/1.0");
+        s.setUserAgentString(s.getUserAgentString() + " NussyEBuLa/" + BuildConfig.VERSION_NAME);
 
         web.addJavascriptInterface(new AppInterface((Vibrator) getSystemService(VIBRATOR_SERVICE)), "NussyApp");
         web.setWebViewClient(new WebViewClient() {
@@ -86,7 +87,7 @@ public class MainActivity extends Activity {
         });
 
         if (state != null) web.restoreState(state);
-        else web.loadUrl("file:///android_asset/index.html");
+        else web.loadUrl("file:///android_asset/" + BuildConfig.START_PAGE);
         hideSystemBars();
     }
 
@@ -207,7 +208,13 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public String version() {
-            return "1.0";
+            return BuildConfig.VERSION_NAME;
+        }
+
+        /** Startseite dieser App (EBuLa: index.html, Fahrpult: fahrpult.html). */
+        @JavascriptInterface
+        public String startPage() {
+            return BuildConfig.START_PAGE;
         }
     }
 }

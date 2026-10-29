@@ -114,24 +114,33 @@ erscheint ein Ziffernblock. i und S erreichst du über das Grundmenü (G ▸ 6 u
 
 ## Fahrpult-Anzeige (mittlerer Bildschirm)
 
-`fahrpult.html` ist das mittlere Führerstandsdisplay im Stil moderner E-Loks (TRAXX, Vectron, BR 147). Es läuft über
-dieselbe Bridge wie die EBuLa und nutzt dieselben Töne und dieselbe Bridge-Adresse:
+`fahrpult.html` ist das mittlere Führerstandsdisplay im Aufbau des ETCS-Fahrerdisplays (ERA, Felder A–G auf 640 × 480,
+in DB-Blau), rechts daneben die Druckinstrumente. Es läuft über dieselbe Bridge wie die EBuLa und nutzt dieselben Töne:
 
-- **Tacho** mit Nadel und Digitalwert, AFB-Sollgeschwindigkeit (gelbe Marke), Streckenhöchstgeschwindigkeit (rote Marke
-  und roter Bogen). Die Skala wählt sich automatisch (160/200/250/300) oder fest über Softkey 5.
-- **Zug-/Bremskraft** als Balken (blau = Zugkraft, gelb = elektrische Bremse) mit Soll-Marke, Skala über Softkey 6
-- **Drücke**: Hauptluftleitung, Bremszylinder, Hauptluftbehälter. Außerdem **Oberstrom**, **Fahrdrahtspannung**,
-  **Hauptschalter** und **Fahrstufe**
-- **Leuchtmelder**: PZB 1000 Hz, 500 Hz, Befehl 40, 85/70/55 (blinkend), Sifa und Zwangsbremsung
-- **Diagnose** (Softkey 2): Meldungen, alle Werte von Zusi und die Rohdaten von Sifa und PZB/LZB
-- Tag-/Nachtmodus, Helligkeit, Demo-Fahrt ohne Zusi und Wechsel zur EBuLa (Softkey 0)
+- **Tacho** (Feld B) 0–400 km/h mit ETCS-Skala (0–200 auf 192° des 288°-Bogens), umschaltbar auf 0–250/180, Digitalwert
+  in der Nabe, gedämpfte Nadel. Nadel und Nabe grau, bei Überschreitung orange, bei Zwangsbremsung rot. Haken für die
+  erlaubte Geschwindigkeit (LZB-Soll weiß, sonst Streckenhöchstgeschwindigkeit dunkelgrau), LZB-Zielgeschwindigkeit mit
+  Ring, weißer Punkt für die AFB-Sollgeschwindigkeit
+- **LZB**: Zielweg als Zahl und Balken bis 4000 m (Feld A), Zielgeschwindigkeit, Melder G, B, Ü, Ende, H, E40, EL, V40, S
+- **Zug-/Bremskraft in %** (Feld D) als Segmentring „Bremsen | Fahren“, Dreieck = Soll-Zugkraft. 100 % lernt sich je
+  Fahrzeug selbst ein (größte gesehene Zugkraft) oder wird im Menü fest eingestellt
+- **Rundinstrumente**: Hauptluftbehälter (rot) und Hauptluftleitung (gelb) bis 12 bar, Bremszylinder bis 10 bar
+- **Melder**: Sifa, PZB 1000 Hz, 500 Hz, Befehl 40, 85/70/55 (blinkend) und Zwangsbremsung (Achteck)
+- **Werte**: AFB, Streckenhöchstgeschwindigkeit, Zugkraft, Oberstrom, Fahrdraht, Fahrstufe, Hauptschalter, Zugnummer, Uhr
+- **Meldezeile** mit ▲ ▼ zum Blättern, **Menü** (Helligkeit, Skalen, Töne, Lautstärke, Bridge, Demo), **Diagnose**
+  (Schraubenschlüssel) mit allen Werten und den Rohdaten von Sifa und PZB/LZB
+- **Führerstandstöne**: Sifa-Warnung (läuft, bis die Sifa in Zusi quittiert ist), Sifa-Zwangsbremsung, PZB-Beeinflussung,
+  PZB-Zwangsbremsung, Geschwindigkeitsüberschreitung und Störung. „Ton quitt.“ schaltet laufende Warntöne stumm;
+  unter Menü ▸ Führerstandstöne lassen sie sich ganz abschalten (z. B. wenn Zusi sie schon selbst abspielt).
+  Tondateien dafür: Namen `sifa`, `sifazb`, `zb`, `zbzwang`, `toofast`, `stoer` und `lzb` in `sounds/sounds.json`.
 
-Öffnen: im Browser `http://<PC-IP>:8080/fahrpult.html` oder in der EBuLa über G ▸ 8. Die Taste **Start ▸** links am
-Gerät stellt ein, dass die App künftig gleich mit dem Fahrpult startet.
+Öffnen: als eigene App **Fahrpult** (siehe Android), im Browser `http://<PC-IP>:8080/fahrpult.html` oder in der EBuLa
+über G ▸ 8.
 
-Die Melder werden aus den verschachtelten Zusi-Daten „Status Sifa“ (0x0064) und „Status Zugbeeinflussung“ (0x0065)
-gelesen. Die Zuordnung steht oben in `fahrpult.html` (`SIFA`, `ZB`). Zeigt eine Lok falsche Melder, im Bildschirm
-„Diagn.“ oder unter `/debug` die Rohdaten ansehen und die Zuordnung anpassen.
+Die Melder werden aus den verschachtelten Zusi-Daten „Status Sifa“ (0x0064) und „Status Zugbeeinflussung“ (0x0065,
+Betriebsdaten 0x0003: Melder 0x2F–0x34 und 0x24/0x38–0x3F, LZB 0x21–0x23) gelesen. Zusi meldet die Melder als aus, an,
+blinkend oder gegenläufig blinkend, das Wechselblinken 70/85 kommt also direkt aus Zusi. Die Zuordnung steht oben in `fahrpult.html` (`SIFA`, `ZB`). Zeigt eine Lok falsche Melder, unter „Diagnose“
+oder `/debug` die Rohdaten ansehen und die Zuordnung anpassen.
 
 ## Handy-App
 
@@ -141,8 +150,11 @@ auch fest einstellen („EBuLa-Gerät“ oder „Handy“).
 
 ### Android
 
-1. Die Datei `EBuLa-Zusi3.apk` aufs Handy laden. Sie liegt als Artefakt **EBuLa-Android-APK** bei jedem Lauf der
-   GitHub-Action „EBuLa Android-App“ bereit, oder du baust sie selbst (siehe unten).
+Es gibt zwei eigenständige Apps, die sich nebeneinander installieren lassen: **EBuLa** (`EBuLa-Zusi3.apk`) und
+**Fahrpult** (`Fahrpult-Zusi3.apk`). Jede fragt beim ersten Start nach der Bridge-Adresse.
+
+1. Die APK aufs Tablet oder Handy laden. Sie liegen als Artefakte **EBuLa-Android-APK** und **Fahrpult-Android-APK**
+   bei jedem Lauf der GitHub-Action „EBuLa Android-App“ bereit, oder du baust sie selbst (siehe unten).
 2. Die APK öffnen. Android fragt, ob Installationen aus dieser Quelle erlaubt sind: einmal zulassen.
 3. Die App **EBuLa** starten. Beim ersten Start fragt sie nach der Bridge: die Adresse aus dem `start.bat`-Fenster
    eintragen (z. B. `192.168.0.23:8080`) oder **„Im WLAN suchen“** antippen. Die App sucht die Bridge dann selbst im WLAN.
@@ -154,7 +166,9 @@ sich über „Datei“ auch direkt vom Handy laden. Die Demo funktioniert ohne N
 Selbst bauen (Android SDK und JDK 17 nötig):
 ```
 cd zusi-ebula/android
-./gradlew assembleRelease      # Ergebnis: app/build/outputs/apk/release/app-release.apk
+./gradlew assembleRelease
+# Ergebnis: app/build/outputs/apk/ebula/release/app-ebula-release.apk
+#          app/build/outputs/apk/fahrpult/release/app-fahrpult-release.apk
 ```
 Die APK ist mit einem Debug-Schlüssel signiert. Das reicht zum direkten Installieren, aber nicht für den Play Store.
 Wird sie auf einem anderen Rechner gebaut, hat sie eine andere Signatur. Dann die alte App vorher deinstallieren.

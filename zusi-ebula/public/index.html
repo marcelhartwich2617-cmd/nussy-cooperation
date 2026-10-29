@@ -360,9 +360,6 @@ sup.s { font-size: 11px; margin-left: 1px; vertical-align: 6px; color: var(--scr
  *  Datenquellen: Zusi 3 (über bridge.js), Demo-Fahrt, Fahrplandateien
  * ===================================================================== */
 
-// App-Start mit dem Fahrpult (dort Taste „Start ▸“); index.html?ebula bleibt immer bei der EBuLa
-try { if (localStorage.getItem('ebula-start') === 'fahrpult' && !/[?&]ebula\b/.test(location.search)) location.replace('fahrpult.html'); } catch (e) { /* privat */ }
-
 const $ = (id) => document.getElementById(id);
 const IS_APP = /NussyEBuLa/i.test(navigator.userAgent);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));

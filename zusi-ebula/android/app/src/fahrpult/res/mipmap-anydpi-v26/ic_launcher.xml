@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App-Symbol der Fahrpult-App (Android 8+): Tacho auf DB-Blau -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/fahrpult_icon_bg" />
+    <foreground android:drawable="@drawable/fahrpult_icon_fg" />
+</adaptive-icon>

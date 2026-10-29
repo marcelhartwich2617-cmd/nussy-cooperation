@@ -22,4 +22,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: EBuLa-Android-APK
-          path: zusi-ebula/android/app/build/outputs/apk/release/app-release.apk
+          path: zusi-ebula/android/app/build/outputs/apk/ebula/release/app-ebula-release.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Fahrpult-Android-APK
+          path: zusi-ebula/android/app/build/outputs/apk/fahrpult/release/app-fahrpult-release.apk

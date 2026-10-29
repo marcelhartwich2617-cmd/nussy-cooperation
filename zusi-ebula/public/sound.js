@@ -1,7 +1,8 @@
 // Nussy EBuLa – gemeinsame Gerätetöne für EBuLa (index.html) und Fahrpult (fahrpult.html).
 // Eigene Tondateien aus sounds/sounds.json haben Vorrang; ohne Datei werden die Töne live synthetisiert:
 // Schnappscheibe der Folientaste, Piezo-Summer (≈ 2,7 kHz Resonanz) und dumpfer Gehäuseanteil.
-// opts() liefert die aktuellen Einstellungen: { sound, vol, meldeton, vibra, quiet }
+// opts() liefert die aktuellen Einstellungen: { sound, vol, meldeton, vibra, quiet, cab }
+// Führerstandstöne (Sifa, PZB, Überschreitung …) lassen sich mit cab: false getrennt abschalten.
 'use strict';
 window.EbulaSound = function EbulaSound(opts) {
   let ctx = null, out = null, noise = null, lastWarn = 0, lastInfo = 0;
@@ -55,7 +56,18 @@ window.EbulaSound = function EbulaSound(opts) {
     info: (t) => { piezo(t, 1800, 0.12, 0.13); piezo(t + 0.16, 2400, 0.2, 0.11); },
     on: (t) => { snap(t, 1800, 0.6, 0.02); body(t, 120, 0.5, 0.06); piezo(t + 0.2, 2000, 0.06, 0.13); piezo(t + 0.29, 2730, 0.14, 0.13); },
     off: (t) => { piezo(t, 2730, 0.06, 0.13); piezo(t + 0.09, 1700, 0.12, 0.13); snap(t + 0.24, 1600, 0.45, 0.02); },
+    // Führerstandstöne (Ersatz, falls keine Tondatei zugeordnet ist)
+    sifa: (t) => { piezo(t, 1450, 0.35, 0.2); piezo(t + 0.45, 1450, 0.35, 0.2); },
+    sifazb: (t) => { for (let i = 0; i < 4; i++) piezo(t + i * 0.3, i % 2 ? 900 : 1450, 0.25, 0.22); },
+    zb: (t) => { piezo(t, 1000, 0.6, 0.2); },
+    zbzwang: (t) => { for (let i = 0; i < 5; i++) piezo(t + i * 0.28, i % 2 ? 700 : 1000, 0.24, 0.22); },
+    stoer: (t) => { for (let i = 0; i < 3; i++) piezo(t + i * 0.2, 2000, 0.12, 0.18); },
+    toofast: (t) => { piezo(t, 3000, 0.5, 0.15); },
+    lzb: (t) => { snap(t, 600, 0.5, 0.6); },
   };
+  const CAB = ['sifa', 'sifazb', 'zb', 'zbzwang', 'toofast', 'lzb'];
+  const LOOP_MS = { sifa: 1000, toofast: 1200, lzb: 900 };
+  const loops = {};
   // Eigene Tondateien: sounds/sounds.json ordnet den Tönen Dateien zu, z. B. { "key": "taste.wav" }.
   // XMLHttpRequest statt fetch, damit es auch in der App (file://) funktioniert.
   const custom = {};
@@ -99,12 +111,14 @@ window.EbulaSound = function EbulaSound(opts) {
       else if (navigator.vibrate) navigator.vibrate(ms);
     } catch (e) { /* keine Vibration */ }
   }
+  const allowed = (o, name) => o.sound && (name === 'key' || o.meldeton) && !(CAB.includes(name) && o.cab === false);
   return {
     play(name) {
       const o = opts();
       if (name === 'key') vibrate(12);
-      else if (name === 'err' || name === 'warn') vibrate(name === 'err' ? [40, 60, 40] : [60, 80, 60, 80, 60]);
-      if (!o.sound || (name !== 'key' && !o.meldeton)) return;
+      else if (name === 'err' || name === 'warn' || name === 'stoer') vibrate(name === 'err' ? [40, 60, 40] : [60, 80, 60, 80, 60]);
+      else if (name === 'zbzwang' || name === 'sifazb') vibrate([200, 100, 200]);
+      if (!allowed(o, name)) return;
       if (name === 'warn') { if (Date.now() - lastWarn < 10000) return; lastWarn = Date.now(); }
       if (name === 'info') { if (o.quiet || Date.now() - lastInfo < 2000) return; lastInfo = Date.now(); }
       try {
@@ -113,6 +127,30 @@ window.EbulaSound = function EbulaSound(opts) {
         if (custom[name]) sample(t, custom[name]); else P[name](t);
       } catch (e) { /* kein Ton */ }
     },
+    // Dauerton, solange der Zustand anhält (z. B. Sifa-Warnung bis zur Quittierung)
+    loop(name, on) {
+      if (!on || !allowed(opts(), name)) {
+        if (loops[name]) { loops[name](); delete loops[name]; }
+        return;
+      }
+      if (loops[name]) return;
+      try {
+        init();
+        const c = custom[name], t = ctx.currentTime + 0.005;
+        if (c) {
+          const s = ctx.createBufferSource();
+          s.buffer = c.b; s.loop = true; s.loopStart = c.from; s.loopEnd = c.b.duration;
+          s.connect(out); s.start(t, c.from);
+          loops[name] = () => { try { s.stop(); } catch (e) { /* schon aus */ } };
+        } else {
+          P[name](t);
+          const iv = setInterval(() => P[name](ctx.currentTime + 0.005), LOOP_MS[name] || 1000);
+          loops[name] = () => clearInterval(iv);
+        }
+        if (name === 'sifa') vibrate([80, 120, 80]);
+      } catch (e) { /* kein Ton */ }
+    },
+    stopAll() { for (const n of Object.keys(loops)) { loops[n](); delete loops[n]; } },
     eigene: () => Object.keys(custom),
   };
 };

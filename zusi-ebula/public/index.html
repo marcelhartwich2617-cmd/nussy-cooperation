@@ -704,11 +704,21 @@ function locateKmOn(km, gw) {
   // Globale Suche – mehrere Treffer: am nächsten zur bisherigen bzw. fahrplanmäßigen Position
   const cand = [];
   for (const s of segs) { const r = hit(s); if (r != null) cand.push({ p: r, lang: s.lang }); }
-  if (!cand.length) return null;
+  if (!cand.length) return beyondEnds(km, segs);
   const t = simTime();
   const ref = st.pos.init ? st.pos.p : ((t != null ? timePosAt(t) : null) ?? 0);
   cand.sort((a, b) => (a.lang - b.lang) || (Math.abs(a.p - ref) - Math.abs(b.p - ref)));
   return cand[0].p;
+}
+// Zug steht vor dem ersten bzw. hinter dem letzten Fahrplaneintrag (z. B. am Bahnsteig des Startbahnhofs):
+// bis 2 km davor/dahinter gilt er als am Anfang bzw. Ende geortet
+function beyondEnds(km, segs) {
+  const first = segs.find((s) => !s.lang && s.k2 !== s.k1), last = [...segs].reverse().find((s) => !s.lang && s.k2 !== s.k1);
+  if (!first || !last) return null;
+  const d0 = (km - first.k1) * Math.sign(first.k2 - first.k1), d1 = (km - last.k2) * Math.sign(last.k2 - last.k1);
+  if (d0 < 0 && d0 > -2) return first.i0;
+  if (d1 > 0 && d1 < 2) return last.i1;
+  return null;
 }
 function locateKm(km) {
   const r = locateKmOn(km, st.gw);

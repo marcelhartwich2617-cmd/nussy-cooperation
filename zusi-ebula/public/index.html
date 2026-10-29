@@ -1,0 +1,2130 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="EBuLa">
+<meta name="theme-color" content="#000000">
+<title>EBuLa für Zusi 3</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+:root {
+  --cv: 58px; --ck: 171px; --ca: 712px; --cb: 836px;
+  --fs-v: 19px; --fs-km: 17px; --fs-name: 19px; --fs-halt: 21px; --fs-time: 19px;
+  --frame: #26282c;
+  --frame-edge: #141518;
+  --pink: #e3a6ae;
+  --key-bg: #111214;
+  --key-txt: #f2f2f2;
+  --scr-bg: #0a0a0c;
+  --scr-fg: #f4f6f8;
+  --scr-dim: #8b929a;
+  --scr-line: #cfe2ee;
+  --scr-past: #5d646b;
+  --soft-bg: #9ba8b5;
+  --soft-btn: #b9c4ce;
+  --soft-txt: #29323a;
+  --blue: #0000e6;
+  --accent: #ffd23f;
+  --halt-bg: rgba(255,255,255,.06);
+  --marker: #ff3b30;
+}
+.day {
+  --scr-bg: #f4f4ef;
+  --scr-fg: #0b0b0b;
+  --scr-dim: #5a5f66;
+  --scr-line: #222;
+  --scr-past: #9aa0a6;
+  --halt-bg: rgba(0,0,0,.06);
+  --accent: #b36b00;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0; height: 100%; overflow: hidden; background: #000;
+  font-family: "Helvetica Neue", Arial, "Liberation Sans", sans-serif;
+  -webkit-user-select: none; user-select: none; touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+}
+#device {
+  position: absolute; left: 50%; top: 50%; width: 1180px; height: 820px;
+  transform-origin: 50% 50%;
+  background: var(--frame); border-radius: 34px;
+  box-shadow: inset 0 0 0 6px var(--frame-edge), 0 0 40px rgba(0,0,0,.6);
+}
+#outline { position: absolute; inset: 0; pointer-events: none; }
+.led { position: absolute; width: 11px; height: 11px; border-radius: 50%; background: #3a3d42; box-shadow: inset 0 1px 2px #000; transition: background .08s; }
+.led.on-g { background: #39e15a; box-shadow: 0 0 8px #39e15a; }
+.led.on-y { background: #ffcc33; box-shadow: 0 0 8px #ffcc33; }
+.led.on-r { background: #ff4d3d; box-shadow: 0 0 8px #ff4d3d; }
+.ledlbl { position: absolute; font-size: 12px; font-weight: 700; color: #e9ecef; letter-spacing: .5px; }
+#sensor { position: absolute; left: 34px; top: 236px; width: 12px; height: 26px; background: #6e7680; border-radius: 2px; }
+
+.key {
+  position: absolute; width: 56px; height: 54px; border: 2px solid var(--pink); border-radius: 9px;
+  background: var(--key-bg); color: var(--key-txt); cursor: pointer; padding: 0;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,.5), 0 2px 3px rgba(0,0,0,.4);
+  font: 700 15px/1 "Helvetica Neue", Arial, sans-serif;
+}
+.key span { position: absolute; left: 7px; top: 6px; text-align: left; white-space: nowrap; }
+.key.wide { width: 140px; }
+.key:active, .key.pressed { transform: translateY(2px); box-shadow: inset 0 0 6px rgba(227,166,174,.6); }
+.key svg { display: block; }
+
+#screen {
+  position: absolute; left: 150px; top: 92px; width: 950px; height: 624px; overflow: hidden;
+  background: var(--scr-bg); color: var(--scr-fg); border: 3px solid #050506; border-radius: 3px;
+}
+#screen-inner { position: absolute; inset: 0; }
+#blank { position: absolute; inset: 0; background: #000; display: none; z-index: 50; }
+#dim { position: absolute; inset: 0; background: #000; pointer-events: none; opacity: 0; z-index: 40; }
+
+/* Kopfzeile */
+#hdr { position: absolute; left: 0; top: 0; width: 100%; height: 70px; border-bottom: 2px solid var(--scr-line); }
+.hc { position: absolute; overflow: hidden; white-space: nowrap; display: flex; align-items: center; padding: 0 9px; }
+.hc.a { top: 0; height: 44px; border-bottom: 1px solid var(--scr-line); }
+.hc.b { top: 44px; height: 24px; font-size: 14px; color: var(--scr-dim); }
+.hc + .hc { }
+.vsep { border-left: 2px solid var(--scr-line); }
+#h-zug { font-size: 22px; font-weight: 700; }
+#h-lauf { font-size: 17px; }
+#h-lauf small { color: var(--scr-dim); font-size: 13px; margin-right: 6px; }
+#h-uhr { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; justify-content: center; }
+#h-vsp { font-size: 22px; font-weight: 700; justify-content: center; font-variant-numeric: tabular-nums; }
+#h-vsp.late { color: #ff5a4f; }
+#h-vsp.early { color: #4cd964; }
+.day #h-vsp.late { color: #c21807; }
+.day #h-vsp.early { color: #138a2c; }
+.hc.b b { color: var(--scr-fg); font-weight: 700; margin-left: 4px; font-variant-numeric: tabular-nums; }
+
+/* Fahrplantabelle */
+#tbl { position: absolute; left: 0; top: 70px; width: 100%; height: 458px; overflow: hidden; }
+.col-line { position: absolute; top: 0; bottom: 0; border-left: 2px solid var(--scr-line); }
+.col-line.thin { border-left-width: 1px; opacity: .45; }
+.row { position: absolute; left: 0; width: 100%; font-variant-numeric: tabular-nums; }
+.row > div { position: absolute; top: 0; height: 100%; display: flex; align-items: center; overflow: hidden; white-space: nowrap; }
+.r-v { left: 0; width: var(--cv); justify-content: center; font-weight: 700; font-size: var(--fs-v); }
+.r-km { left: calc(var(--cv) + 2px); width: calc(var(--ck) - var(--cv) - 2px); justify-content: flex-end; padding-right: 9px; font-size: var(--fs-km); }
+.r-name { left: calc(var(--ck) + 2px); width: calc(var(--ca) - var(--ck) - 2px); padding-left: 12px; font-size: var(--fs-name); gap: 10px; }
+.r-an { left: calc(var(--ca) + 2px); width: calc(var(--cb) - var(--ca) - 2px); justify-content: center; font-size: var(--fs-time); }
+.r-ab { left: calc(var(--cb) + 2px); right: 0; justify-content: center; font-size: var(--fs-time); }
+.row.halt .r-name .nm { font-weight: 700; font-size: var(--fs-halt); }
+.row.halt .r-an, .row.halt .r-ab { font-weight: 700; }
+.row.halt { background: var(--halt-bg); }
+.row.pass .r-ab { font-style: italic; }
+.row.past { color: var(--scr-past); }
+.row.nexthalt .nm { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.row.sel { outline: 2px dashed var(--accent); outline-offset: -2px; }
+.sig { font-size: 13px; color: var(--scr-dim); border: 1px solid var(--scr-dim); border-radius: 3px; padding: 1px 4px; }
+.nmr { margin-left: auto; padding-right: 10px; font-size: 15px; color: var(--scr-dim); }
+.wende { font-weight: 700; color: var(--accent); }
+.sprung { font-size: 12px; color: var(--accent); margin-left: 3px; }
+sup.s { font-size: 11px; margin-left: 1px; vertical-align: 6px; color: var(--scr-dim); }
+.vline { position: absolute; left: 50%; width: 3px; margin-left: -1.5px; background: var(--scr-fg); opacity: .8; }
+.row.past .vline { opacity: .35; }
+.vnum { position: relative; z-index: 2; background: var(--scr-bg); padding: 0 2px; }
+.saege { position: absolute; right: 0; top: 0; bottom: 0; width: 10px; background: repeating-linear-gradient(135deg, var(--scr-fg) 0 2px, transparent 2px 6px); opacity: .5; }
+#rows { position: absolute; inset: 0; z-index: 2; }
+#marker { position: absolute; left: 0; width: 100%; height: 0; border-top: 3px solid var(--marker); z-index: 1; box-shadow: 0 0 10px var(--marker); pointer-events: none; }
+#marker::before { content: ""; position: absolute; left: 0; top: -10px; border: 9px solid transparent; border-left: 14px solid var(--marker); }
+#marker::after { content: ""; position: absolute; right: 0; top: -10px; border: 9px solid transparent; border-right: 14px solid var(--marker); }
+#marker.manual { border-top-style: dashed; }
+#scrollhint { position: absolute; right: 8px; top: 6px; z-index: 6; font-size: 13px; padding: 3px 8px; border-radius: 3px; background: var(--accent); color: #000; display: none; }
+#empty { position: absolute; left: 0; right: 0; top: 150px; text-align: center; color: var(--scr-dim); font-size: 20px; line-height: 1.6; display: none; }
+
+/* Meldezeile */
+#msg { position: absolute; left: 0; top: 528px; width: 100%; height: 38px; border-top: 2px solid var(--scr-line); }
+#msgbox { position: absolute; left: 0; top: 0; width: 650px; height: 100%; background: var(--blue); color: #fff; font-size: 17px; display: flex; align-items: center; padding: 0 12px; white-space: nowrap; overflow: hidden; }
+#msgbox.warn { background: #b30000; }
+#msgbox.ok { background: #00691f; }
+#icons { position: absolute; left: 660px; right: 6px; top: 0; height: 100%; display: flex; align-items: center; gap: 14px; font-size: 13px; font-weight: 700; color: var(--scr-fg); }
+.ico { position: relative; padding: 2px 4px; border: 1px solid currentColor; border-radius: 3px; }
+.ico.off { color: var(--scr-dim); }
+.ico.off::after { content: ""; position: absolute; left: -3px; right: -3px; top: 50%; height: 0; border-top: 3px solid #ff2a1a; transform: rotate(-28deg); }
+.ico.off::before { content: ""; position: absolute; left: -3px; right: -3px; top: 50%; height: 0; border-top: 3px solid #ff2a1a; transform: rotate(28deg); }
+#i-v { margin-left: auto; font-size: 17px; font-variant-numeric: tabular-nums; }
+
+/* Softkeyleiste */
+#soft { position: absolute; left: 0; top: 566px; width: 100%; height: 58px; background: var(--soft-bg); }
+.sk { position: absolute; top: 7px; width: 70px; height: 42px; margin-left: -35px; background: var(--soft-btn); border: 1px solid #6c7783; color: var(--soft-txt); font-size: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: inset 1px 1px 0 #e7ecf0, inset -1px -1px 0 #7d8893; text-align: center; line-height: 1.05; }
+.sk:empty { visibility: hidden; }
+.sk:active { box-shadow: inset -1px -1px 0 #e7ecf0, inset 1px 1px 0 #7d8893; }
+
+/* Überlagerte Seiten */
+.page { position: absolute; left: 0; top: 70px; width: 100%; height: 458px; background: var(--scr-bg); z-index: 10; display: none; overflow: hidden; }
+.page.show { display: block; }
+.page h2 { margin: 0; height: 40px; line-height: 40px; padding: 0 14px; font-size: 19px; border-bottom: 2px solid var(--scr-line); }
+.page h2 small { color: var(--scr-dim); font-weight: 400; font-size: 14px; margin-left: 10px; }
+.kv { display: grid; grid-template-columns: 230px 1fr; gap: 0; padding: 6px 14px; font-size: 18px; }
+.kv div { padding: 6px 0; border-bottom: 1px solid rgba(128,128,128,.25); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kv div:nth-child(odd) { color: var(--scr-dim); }
+.list { position: absolute; left: 0; right: 0; top: 40px; bottom: 0; overflow: hidden; }
+.li { display: flex; align-items: center; height: 38px; padding: 0 14px; font-size: 18px; border-bottom: 1px solid rgba(128,128,128,.25); white-space: nowrap; cursor: pointer; font-variant-numeric: tabular-nums; }
+.li.sel { background: var(--accent); color: #000; }
+.li .c1 { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+.li .c2, .li .c3, .li .c4 { width: 92px; text-align: center; }
+.li .c5 { width: 64px; text-align: right; font-weight: 700; }
+.li.head { color: var(--scr-dim); font-size: 14px; height: 28px; cursor: default; }
+.li.done { color: var(--scr-past); }
+.li .val { margin-left: auto; font-weight: 700; }
+.li .arr { color: var(--scr-dim); margin: 0 8px; }
+#graf canvas { position: absolute; left: 0; top: 40px; }
+.help { columns: 2; column-gap: 24px; padding: 8px 14px; font-size: 14.5px; line-height: 1.42; }
+.help b { display: inline-block; min-width: 54px; color: var(--accent); }
+.help p { margin: 0 0 3px; break-inside: avoid; }
+#fileinp { display: none; }
+
+/* Handy-Layout: ohne Gerätegehäuse, Touch-Leiste statt Tasten */
+#device.phone { left: 0; top: 0; border-radius: 0; box-shadow: none; background: var(--scr-bg); }
+#device.phone #outline, #device.phone #keys, #device.phone .led, #device.phone .ledlbl, #device.phone #sensor, #device.phone #soft { display: none; }
+#device.phone #screen { border: 0; border-radius: 0; }
+#toolbar { display: none; position: absolute; z-index: 20; background: var(--soft-bg); gap: 6px; padding: 6px; }
+#device.phone #toolbar { display: grid; }
+.tb { background: var(--soft-btn); border: 1px solid #6c7783; color: var(--soft-txt); font: 700 15px/1.05 "Helvetica Neue", Arial, sans-serif; border-radius: 7px; display: flex; align-items: center; justify-content: center; text-align: center; box-shadow: inset 1px 1px 0 #e7ecf0, inset -1px -1px 0 #7d8893; cursor: pointer; min-width: 0; }
+.tb.arrow { font-size: 19px; }
+.tb:active { filter: brightness(.8); }
+.phone #h-zug { font-size: 18px; } .phone #h-uhr { font-size: 20px; } .phone #h-vsp { font-size: 19px; } .phone #h-lauf { font-size: 15px; }
+.phone .hc { padding: 0 6px; } .phone .hc.b { font-size: 12.5px; }
+.phone .page { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.phone .page h2 { font-size: 16px; height: 34px; line-height: 34px; padding: 0 10px; }
+.phone .page h2 small { display: none; }
+.phone .list { top: 34px; }
+.phone #graf canvas { top: 34px; }
+.phone .kv { grid-template-columns: 44% 56%; font-size: 15px; padding: 4px 10px; }
+.phone .li { font-size: 15px; height: 34px; padding: 0 10px; }
+.phone .li .c2, .phone .li .c3, .phone .li .c4 { width: 50px; }
+.phone .li .c5 { width: 36px; }
+.phone .li .c1 small { display: none; }
+.phone .help { columns: 1; font-size: 13.5px; padding: 6px 10px; }
+.phone #msgbox { font-size: 14px; padding: 0 8px; }
+.phone #icons { gap: 6px; font-size: 11px; right: 4px; }
+.phone #i-v { font-size: 14px; }
+.phone #empty { font-size: 16px; padding: 0 12px; }
+.phone .sig { font-size: 11px; }
+.phone .r-km { padding-right: 5px; } .phone .r-name { padding-left: 8px; gap: 6px; }
+.phone .sprung { display: block; position: absolute; right: 5px; bottom: 0; font-size: 10px; line-height: 1; }
+.phone .li > span:first-child { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.phone .li .val { font-size: 14px; padding-left: 8px; }
+.tb.small { font-size: 13px; }
+
+#conn { position: absolute; inset: 0; z-index: 45; background: rgba(0,0,0,.82); display: none; align-items: center; justify-content: center; }
+#conn.show { display: flex; }
+#conn .box { width: min(560px, 94%); max-height: 96%; overflow-y: auto; background: var(--scr-bg); color: var(--scr-fg); border: 2px solid var(--scr-line); border-radius: 6px; padding: 16px; font-size: 16px; }
+#conn h3 { margin: 0 0 8px; font-size: 20px; }
+#conn p { margin: 0 0 10px; color: var(--scr-dim); font-size: 14px; line-height: 1.4; }
+#conn p b { color: var(--scr-fg); }
+#conn input { width: 100%; font-size: 20px; padding: 10px; border: 2px solid var(--scr-line); background: #000; color: #fff; border-radius: 4px; -webkit-user-select: text; user-select: text; }
+.day #conn input { background: #fff; color: #000; }
+#conn .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+#conn button { flex: 1 1 120px; font-size: 16px; padding: 11px 8px; border-radius: 5px; border: 1px solid #6c7783; background: var(--soft-btn); color: var(--soft-txt); font-weight: 700; cursor: pointer; }
+#conn button.pri { background: #0a5cff; color: #fff; border-color: #0a5cff; }
+.phone #conn { align-items: flex-start; padding-top: 4vh; }
+#c-status { margin-top: 10px; font-size: 14px; min-height: 1.4em; color: var(--accent); }
+#c-found button { display: block; width: 100%; margin-top: 6px; background: #00691f; color: #fff; border-color: #00691f; }
+.field { display: inline-block; min-width: 200px; padding: 6px 12px; border: 2px solid var(--scr-line); font: 700 30px/1.15 ui-monospace, Menlo, Consolas, monospace; letter-spacing: 3px; background: rgba(128,128,128,.08); min-height: 1.6em; }
+.field.cursor::after { content: '_'; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.zin { display: flex; align-items: center; gap: 14px; padding: 14px; font-size: 20px; }
+.zhint { padding: 0 14px 8px; font-size: 15px; color: var(--scr-dim); min-height: 24px; }
+.zhint.err { color: #ff5a4f; font-weight: 700; }
+.list.static { position: static; }
+.li .znr { width: 90px; font-weight: 700; }
+.li .zsrc { margin-left: 10px; font-size: 13px; color: var(--scr-dim); max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+.li.sel .zsrc, .li.sel small { color: #000; }
+.li .code { width: 60px; font-weight: 700; color: var(--accent); }
+.li.sel .code { color: #000; }
+.pad { display: none; grid-template-columns: repeat(6, 1fr); gap: 6px; padding: 8px 10px; }
+.phone .pad { display: grid; }
+.pad .tb { height: 44px; }
+.tabs { margin-left: 8px; }
+.tabs span { padding: 2px 10px; margin-right: 6px; border: 1px solid var(--scr-dim); border-radius: 3px; font-size: 15px; font-weight: 400; }
+.tabs span.on { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+#abhilfe { position: absolute; left: 0; right: 0; bottom: 0; min-height: 130px; border-top: 2px solid var(--scr-line); padding: 10px 14px; font-size: 16px; white-space: pre-line; line-height: 1.45; background: var(--scr-bg); }
+.help .ctx { margin-bottom: 10px; color: var(--scr-fg); column-span: all; line-height: 1.45; }
+#empty small.dim { color: var(--scr-dim); font-size: 15px; }
+#marker.paused { opacity: .55; }
+#boot { position: absolute; inset: 0; z-index: 35; background: #000; color: #d9e2ea; font: 16px/1.7 ui-monospace, Menlo, Consolas, monospace; padding: 40px 60px; display: none; }
+#boot.show { display: block; }
+#boot h3 { font: 700 28px "Helvetica Neue", Arial, sans-serif; margin: 0 0 6px; color: #fff; }
+#boot-log { margin-top: 18px; }
+#boot .bar { margin-top: 22px; height: 16px; border: 1px solid #8a98a6; }
+#boot .bar i { display: block; height: 100%; width: 0; background: var(--blue); transition: width .25s linear; }
+#msgbox.load { background: linear-gradient(90deg, var(--blue) var(--pr, 0%), #121a36 var(--pr, 0%)); }
+.tb.dis { opacity: .4; }
+.brh { padding: 8px 14px; font-size: 18px; }
+.brh .row2 { display: flex; align-items: center; gap: 12px; margin: 6px 0; }
+.brh .row2 .lbl { width: 230px; color: var(--scr-dim); }
+.brh .field { min-width: 150px; font-size: 24px; cursor: pointer; }
+.brh .field:not(.sel)::after { content: none; }
+.brh .field.sel { border-color: var(--accent); }
+.brh .res { margin: 12px 0 4px; font-size: 22px; font-weight: 700; }
+.brh .zhint { padding: 8px 0 0; }
+.phone .brh .row2 .lbl { width: 120px; font-size: 14px; }
+.phone .brh { font-size: 15px; } .phone .brh .res { font-size: 18px; }
+.phone .zin { font-size: 15px; padding: 10px; gap: 10px; } .phone .zin .field { font-size: 24px; min-width: 130px; }
+.phone .li .znr { width: 60px; } .phone .li .zsrc { display: none; }
+.phone #boot { padding: 24px 18px; font-size: 13px; }
+.phone #abhilfe { font-size: 14px; min-height: 160px; }
+#toast { position: absolute; left: 50%; top: 210px; transform: translateX(-50%); z-index: 30; background: var(--accent); color: #000; font-size: 20px; font-weight: 700; padding: 10px 18px; border-radius: 4px; display: none; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div id="device">
+  <svg id="outline" viewBox="0 0 1180 820" width="1180" height="820">
+    <path d="M40 10 H1140 Q1170 10 1170 40 V780 Q1170 810 1140 810 H40 Q10 810 10 780 V600 L58 556 V244 L10 200 V40 Q10 10 40 10 Z" fill="none" stroke="var(--pink)" stroke-width="2.5"/>
+  </svg>
+  <div id="sensor"></div>
+  <div class="led" id="led-kbd" style="left:54px;top:40px"></div>
+  <div class="ledlbl" style="left:44px;top:57px">KBD</div>
+  <div class="led" id="led-temp" style="left:102px;top:40px"></div>
+  <div class="ledlbl" style="left:88px;top:57px">TEMP</div>
+  <div id="keys"></div>
+
+  <div id="screen">
+    <div id="screen-inner">
+      <div id="hdr">
+        <div class="hc a" id="h-zug" style="left:0;width:171px"></div>
+        <div class="hc a vsep" id="h-lauf" style="left:171px;width:541px"></div>
+        <div class="hc a vsep" id="h-uhr" style="left:712px;width:124px"></div>
+        <div class="hc a vsep" id="h-vsp" style="left:836px;width:114px"></div>
+        <div class="hc b" id="h-kmc" style="left:0;width:171px">km<b id="h-km">–</b></div>
+        <div class="hc b vsep" style="left:171px;width:541px" id="h-info"></div>
+        <div class="hc b vsep" style="left:712px;width:124px;justify-content:center" id="h-datum"></div>
+        <div class="hc b vsep" style="left:836px;width:114px;justify-content:center" id="h-mode"></div>
+      </div>
+      <div id="tbl">
+        <div id="rows"></div>
+        <div class="col-line" style="left:var(--cv)"></div>
+        <div class="col-line" style="left:var(--ck)"></div>
+        <div class="col-line" style="left:var(--ca)"></div>
+        <div class="col-line" style="left:var(--cb)"></div>
+        <div id="marker"></div>
+        <div id="scrollhint">Vorschau – C: zurück zum Ortsmarker</div>
+        <div id="empty"></div>
+      </div>
+
+      <div class="page" id="p-zug"><h2>Zug anmelden <small>Zugnummer mit 0–9 · E bestätigen · C löschen · ▲ ▼ gespeicherte Züge</small></h2>
+        <div class="zin"><span>Zugnummer</span><span id="zug-in" class="field cursor"></span></div>
+        <div class="zhint" id="zug-hint"></div>
+        <div class="list static" id="zug-list"></div>
+        <div class="pad" id="zug-pad"></div>
+      </div>
+      <div class="page" id="p-fsd"><h2 id="fsd-h">FSD</h2><div id="fsd-body"></div></div>
+      <div class="page" id="p-zeit"><h2>Steuerungsart <small>1–3 wählen · E bestätigen · C zurück</small></h2><div class="list static" id="zeitlist"></div><div class="zhint" id="zeit-hint"></div></div>
+      <div class="page" id="p-grund"><h2>EBuLa Grundmenü <small>Ziffer wählen · ▲ ▼ E · C zurück</small></h2><div class="list" id="grundlist"></div></div>
+      <div class="page" id="p-menu"><h2>Systemdienste EBuLa <small>▲ ▼ wählen · ◄ ► ändern · E ausführen · C zurück</small></h2><div class="list" id="menulist"></div></div>
+      <div class="page" id="p-brh"><h2>BRH berechnen <small>▲ ▼ Feld · 0–9 Eingabe · C löschen · E weiter</small></h2><div id="brh-body"></div><div class="pad" id="brh-pad"></div></div>
+      <div class="page" id="p-stoer"><h2>Störungsübersicht <small>V&gt;0 Abhilfe Fahrt · V=0 Abhilfe Stillstand · C zurück</small></h2><div class="list" id="stoerlist"></div><div id="abhilfe"></div></div>
+      <div class="page" id="p-info"><h2 id="info-h">Information</h2><div class="help" id="helptext"></div></div>
+      <div class="page" id="p-graf"><h2>Geschwindigkeitsprofil <small>◄ ► zoomen · ▲ ▼ verschieben · E Position · C zurück</small></h2><canvas id="cv" width="944" height="414"></canvas></div>
+      <div id="boot"><h3>EBuLa-Bordgerät</h3><div>Elektronischer Buchfahrplan · Software 2.0 (Zusi 3)</div><div id="boot-log"></div><div class="bar"><i id="boot-bar"></i></div></div>
+
+      <div id="msg">
+        <div id="msgbox"></div>
+        <div id="icons">
+          <span class="ico off" id="i-gps">GPS</span>
+          <span class="ico off" id="i-zusi">ZUSI</span>
+          <span id="i-v"></span>
+        </div>
+      </div>
+      <div id="soft"></div>
+      <div id="toast"></div>
+      <div id="toolbar"></div>
+    </div>
+    <div id="dim"></div>
+    <div id="blank"></div>
+    <div id="conn"><div class="box">
+      <h3>Verbindung zur Bridge</h3>
+      <p>Auf dem Zusi-PC <b>start.bat</b> starten. Im Fenster steht die Adresse für das Tablet/Handy, z.&nbsp;B. <b>192.168.0.23:8080</b>. Handy und PC müssen im selben WLAN sein.</p>
+      <input id="c-addr" type="text" inputmode="url" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="192.168.0.23:8080">
+      <div class="btns"><button class="pri" data-c="connect">Verbinden</button><button data-c="scan" id="c-scanbtn">Im WLAN suchen</button><button data-c="demo">Demo</button><button data-c="close">Abbrechen</button></div>
+      <div id="c-status"></div><div id="c-found"></div>
+    </div></div>
+  </div>
+  <input type="file" id="fileinp" accept=".xml,.trn,text/xml,application/xml">
+</div>
+
+<script src="sound.js"></script>
+<script>
+'use strict';
+/* =====================================================================
+ *  Nussy EBuLa – elektronischer Buchfahrplan für Zusi 3
+ *  Bedienung nach dem Vorbild des EBuLa-Bordgeräts (EBG):
+ *  Anmeldung über Zugnummer (Taste 1 „Zug“), Grundmenü (Taste 0 „G“),
+ *  Steuerungsarten Ortung / Zeitsteuerung / Manuell, FSD, Gleiswechsel,
+ *  Störungsübersicht (St) mit Abhilfetexten (V>0 / V=0).
+ *  Datenquellen: Zusi 3 (über bridge.js), Demo-Fahrt, Fahrplandateien
+ * ===================================================================== */
+
+const $ = (id) => document.getElementById(id);
+const IS_APP = /NussyEBuLa/i.test(navigator.userAgent);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// ------------------------------------------------------------ Einstellungen
+const DEF = { layout: 'auto', source: 'auto', dir: 'up', rot: 0, day: false, bright: 100, secs: true, demoSpeed: 1, filter: 'alle', sound: true, vol: 70, meldeton: true, vibra: true, rowH: 38, bridgeUrl: '', autoLogin: false, boot: true };
+const S = Object.assign({}, DEF);
+try { Object.assign(S, JSON.parse(localStorage.getItem('ebula-settings') || '{}')); } catch (e) { /* privat */ }
+function saveS() { try { localStorage.setItem('ebula-settings', JSON.stringify(S)); } catch (e) { /* egal */ } }
+
+// ------------------------------------------------------------ Zustand
+const st = {
+  source: 'demo',            // zusi | demo | offline
+  fpl: null,                 // angemeldeter Fahrplan { meta, rows, hasKm, hasTimes, origin }
+  loggedKey: null,           // Zugnummer des angemeldeten Zuges
+  view: [],                  // Indizes der angezeigten Zeilen (Filter, Gleiswechsel)
+  live: { v: null, km: null, time: null, date: null, weg: null, vStrecke: null, afb: null, at: 0 },
+  bridge: { ok: false, zusi: false, version: '', error: '', zugnummer: '', zugdatei: '', ladepause: null, xmlRev: -1, zusiKey: null },
+  pos: { p: 0, init: false, gps: false },
+  ctl: 'manuell',            // Steuerungsart: ortung | zeit | manuell
+  zeit: { run: false, off: 0 }, // Zeitsteuerung: läuft? Versatz Uhrzeit → Fahrplanzeit (Tage)
+  gw: 'r',                   // Gleiswechsel: r = Regelgleis, l = Gegengleis
+  scroll: 0, scrollAt: 0,    // Vorschau (Zeilen), springt nach 10 s zum Ortsmarker zurück
+  actual: {}, atHalt: null, delayMin: null,
+  screen: 'main', infoFrom: 'main',
+  sel: { halte: 0, menu: 0, grund: 0, zug: -1, zeit: 0, stoer: 0, brh: 0 },
+  fsdTab: 0,
+  zugIn: '', zugMsg: '', zugErr: false,
+  brh: { masse: '', bg: '' },
+  abhilfe: null,             // fahrt | stand
+  graf: { zoom: 1, off: 0 }, trace: [],
+  off: false, msg: null, loading: null, booting: false,
+};
+
+// ------------------------------------------------------------ Zeit-Helfer (Tage seit 30.12.1899 wie Zusi)
+const EPOCH = Date.UTC(1899, 11, 30);
+function dayNum(y, m, d) { return (Date.UTC(y, m - 1, d) - EPOCH) / 86400000; }
+function parseTime(s) {
+  if (!s) return null;
+  let m = String(s).match(/(\d{4})-(\d\d)-(\d\d)[ T](\d\d):(\d\d)(?::(\d\d))?/);
+  if (m) return dayNum(+m[1], +m[2], +m[3]) + ((+m[4]) * 3600 + (+m[5]) * 60 + (+(m[6] || 0))) / 86400;
+  m = String(s).match(/^(\d\d?):(\d\d)(?::(\d\d))?$/);
+  if (m) return ((+m[1]) * 3600 + (+m[2]) * 60 + (+(m[3] || 0))) / 86400;
+  return null;
+}
+function secsOfDay(t) { return ((Math.round(t * 86400) % 86400) + 86400) % 86400; }
+const p2 = (n) => String(n).padStart(2, '0');
+function fmtHM(t, withSec) {
+  if (t == null) return '';
+  const s = secsOfDay(t);
+  const hm = p2(Math.floor(s / 3600)) + ':' + p2(Math.floor(s / 60) % 60);
+  return withSec ? hm + ':' + p2(s % 60) : hm;
+}
+function fmtTimeCell(t) {
+  if (t == null) return '';
+  const s = secsOfDay(t), sec = s % 60;
+  return fmtHM(t) + (S.secs && sec ? '<sup class="s">' + Math.floor(sec / 6) + '</sup>' : '');
+}
+function fmtDate(t) {
+  if (t == null || t < 1000) return '';
+  const d = new Date(EPOCH + Math.floor(t + 1e-9) * 86400000);
+  return p2(d.getUTCDate()) + '.' + p2(d.getUTCMonth() + 1) + '.' + d.getUTCFullYear();
+}
+function fmtDur(days) {
+  const s = Math.max(0, Math.round(days * 86400));
+  return Math.floor(s / 60) + ':' + p2(s % 60);
+}
+const fmtKm = (k, dec = 1) => k == null || isNaN(k) ? '' : k.toFixed(dec).replace('.', ',');
+
+// ------------------------------------------------------------ Fahrplan einlesen
+const num = (v) => { if (v == null || v === '') return null; const n = parseFloat(String(v).replace(',', '.')); return isNaN(n) ? null : n; };
+const SIGTYP = { 7: 'Esig', 10: 'Sbk' };
+
+function parseFahrplan(text, origin) {
+  const doc = new DOMParser().parseFromString(String(text).replace(/^﻿/, '').trim(), 'application/xml');
+  if (doc.getElementsByTagName('parsererror').length) throw new Error('Datei ist kein gültiges XML');
+  const bf = doc.getElementsByTagName('Buchfahrplan')[0];
+  let f;
+  if (bf) f = parseTimetable(bf);
+  else if (doc.getElementsByTagName('Zug')[0]) f = parseTrn(doc.getElementsByTagName('Zug')[0]);
+  else throw new Error('Kein Buchfahrplan in der Datei gefunden');
+  f.origin = origin;
+  finishFahrplan(f);
+  return f;
+}
+
+function parseTimetable(bf) {
+  const a = (n) => bf.getAttribute(n);
+  const meta = {
+    gattung: a('Gattung') || '', nummer: a('Nummer') || '', zuglauf: a('Zuglauf') || '', br: a('BR') || '',
+    masse: num(a('Masse')), vmax: num(a('spMax')), bremsh: num(a('Bremsh')), mbrh: num(a('MBrh')),
+    laenge: num(a('Laenge')), kmStart: num(a('kmStart')), bremsstellung: a('BremsstellungZug') || a('Bremsstellung') || '',
+  };
+  const rows = [];
+  for (const z of bf.getElementsByTagName('FplZeile')) {
+    const r = { laufweg: num(z.getAttribute('FplLaufweg')), gleis: z.getAttribute('FplRglGgl'), name: '', nameR: '', km: null, kmNeu: null, sprung: false, vmax: null, ank: null, abf: null, sig: null, icon: null, wende: false, saege: 0 };
+    for (const c of z.children) {
+      const g = (n) => c.getAttribute(n);
+      switch (c.tagName) {
+        case 'Fplkm': if (r.km == null) r.km = num(g('km')); if (g('FplSprung') === '1' || g('FplkmNeu') != null) { r.sprung = true; r.kmNeu = num(g('FplkmNeu')); } break;
+        case 'FplvMax': r.vmax = num(g('vMax')); break;
+        case 'FplName': r.name = g('FplNameText') || ''; break;
+        case 'FplNameRechts': r.nameR = g('FplNameText') || ''; break;
+        case 'FplAnk': if (r.ank == null) r.ank = parseTime(g('Ank')); break;
+        case 'FplAbf': if (r.abf == null) r.abf = parseTime(g('Abf')); break;
+        case 'FplSignaltyp': r.sig = num(g('FplSignaltypNr')); break;
+        case 'FplIcon': r.icon = num(g('FplIconNr')); break;
+        case 'FplRichtungswechsel': r.wende = true; break;
+        case 'FplSaegelinien': r.saege = num(g('FplAnzahl')) || 1; break;
+      }
+    }
+    rows.push(r);
+  }
+  return { meta, rows };
+}
+
+function parseTrn(zug) {
+  const a = (n) => zug.getAttribute(n);
+  const meta = { gattung: a('Gattung') || '', nummer: a('Nummer') || '', zuglauf: a('Zuglauf') || '', br: '', masse: null, vmax: null, bremsh: null, mbrh: num(a('MBrh')), laenge: null, kmStart: null, bremsstellung: a('BremsstellungZug') || '' };
+  const rows = [];
+  for (const e of zug.getElementsByTagName('FahrplanEintrag')) {
+    const name = e.getAttribute('Betrst') || '';
+    if (!name) continue;
+    const ank = parseTime(e.getAttribute('Ank')), abf = parseTime(e.getAttribute('Abf'));
+    rows.push({ laufweg: null, name, nameR: '', km: null, kmNeu: null, sprung: false, vmax: null, ank, abf, sig: null, icon: null, wende: /wende|richtung/i.test(e.getAttribute('FzgVerbandAktion') || ''), saege: 0 });
+  }
+  return { meta, rows };
+}
+
+function finishFahrplan(f) {
+  const rows = f.rows;
+  let v = null;
+  rows.forEach((r, i) => {
+    r.i = i;
+    if (r.vmax != null && r.vmax > 0) { const kmh = Math.round(r.vmax * 3.6); r.vChange = kmh !== v; v = kmh; }
+    r.vEff = v;
+    r.halt = r.ank != null || (i === 0 && r.abf != null); // Startbahnhof
+    r.pass = !r.halt && r.abf != null;
+    r.t = r.abf ?? r.ank;
+    r.kmA = r.sprung && r.kmNeu != null ? r.kmNeu : r.km;
+  });
+  // fehlende km-Werte zwischen bekannten Zeilen interpolieren
+  const known = rows.filter((r) => r.km != null);
+  f.hasKm = known.length >= 2;
+  if (f.hasKm) {
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].km != null) continue;
+      let a = i - 1; while (a >= 0 && rows[a].km == null) a--;
+      let b = i + 1; while (b < rows.length && rows[b].km == null) b++;
+      if (a >= 0 && b < rows.length) {
+        const k1 = rows[a].kmA, k2 = rows[b].km;
+        const w = rows[i].laufweg != null && rows[a].laufweg != null && rows[b].laufweg != null && rows[b].laufweg !== rows[a].laufweg
+          ? (rows[i].laufweg - rows[a].laufweg) / (rows[b].laufweg - rows[a].laufweg) : (i - a) / (b - a);
+        rows[i].km = rows[i].kmA = k1 + (k2 - k1) * w; rows[i].kmInterp = true;
+      } else if (a >= 0) { rows[i].km = rows[i].kmA = rows[a].kmA; rows[i].kmInterp = true; }
+      else if (b < rows.length) { rows[i].km = rows[i].kmA = rows[b].km; rows[i].kmInterp = true; }
+    }
+  }
+  f.hasTimes = rows.some((r) => r.t != null);
+  f.hasWeg = rows.length > 1 && rows.every((r) => r.laufweg != null);
+  f.hasGleis = rows.some((r) => /^[23]$/.test(r.gleis || ''));
+  // Tagesbezug, falls Zeiten ohne Datum
+  const t0 = rows.find((r) => r.t != null);
+  f.baseDay = t0 ? Math.floor(t0.t) : null;
+  f.timed = rows.filter((r) => r.t != null).map((r) => r.i);
+}
+
+function zugTitel(f) {
+  const m = f?.meta || {};
+  return ((m.gattung || '') + ' ' + (m.nummer || '')).trim();
+}
+
+// ------------------------------------------------------------ Fahrplanspeicher (wie die Daten im Bordgerät)
+const LIB = new Map(); // Zugnummer -> { xml, origin, persist, at, f }
+const LIB_KEY = 'ebula-lib';
+function libLoad() {
+  try {
+    const o = JSON.parse(localStorage.getItem(LIB_KEY) || '{}');
+    for (const [k, v] of Object.entries(o)) LIB.set(k, { xml: v.xml, origin: v.origin, at: v.at, persist: true });
+  } catch (e) { /* kein Speicher */ }
+}
+function libSave() {
+  const dump = () => { const o = {}; for (const [k, v] of LIB) if (v.persist) o[k] = { xml: v.xml, origin: v.origin, at: v.at }; return JSON.stringify(o); };
+  for (let tries = 0; tries < 20; tries++) {
+    try { localStorage.setItem(LIB_KEY, dump()); return; } catch (e) {
+      // Speicher voll: ältesten gespeicherten Fahrplan verwerfen
+      const old = [...LIB.entries()].filter(([, v]) => v.persist).sort((a, b) => a[1].at - b[1].at)[0];
+      if (!old) return;
+      old[1].persist = false;
+    }
+  }
+}
+function libAdd(xml, origin, persist) {
+  const f = parseFahrplan(xml, origin);
+  const key = String(f.meta.nummer || '').trim() || st.bridge.zugnummer || ('?' + (LIB.size + 1));
+  LIB.set(key, { xml, origin, persist: !!persist, at: Date.now(), f });
+  if (persist) libSave();
+  return { key, f };
+}
+function libEntry(key) {
+  const e = LIB.get(key);
+  if (e && !e.f) { try { e.f = parseFahrplan(e.xml, e.origin); } catch (err) { return null; } }
+  return e;
+}
+function libFind(input) {
+  const n = String(input).trim();
+  if (!n) return null;
+  if (LIB.has(n)) return n;
+  for (const k of LIB.keys()) {
+    if (k.split(/[^0-9A-Za-z]+/).includes(n) || k.replace(/\D/g, '') === n) return k;
+  }
+  return null;
+}
+function libList() {
+  return [...LIB.entries()].sort((a, b) => (b[1].origin.startsWith('Zusi') - a[1].origin.startsWith('Zusi')) || (b[1].at - a[1].at));
+}
+
+// ------------------------------------------------------------ Anmelden / Abmelden
+const CTL_NAME = { ortung: 'Ortung', zeit: 'Zeitsteuerung', manuell: 'Manuell' };
+let loadTimer = null;
+function anmelden(key, quiet) {
+  if (!libEntry(key)) { flash('Fahrplan für Zug ' + key + ' fehlerhaft', 'warn'); return; }
+  st.screen = 'main';
+  st.loading = { key, start: Date.now(), dur: quiet ? 0 : 1600 };
+  clearInterval(loadTimer);
+  if (quiet) return finishLogin();
+  loadTimer = setInterval(() => { if (Date.now() - st.loading.start >= st.loading.dur) finishLogin(); else render(); }, 80);
+  render();
+}
+function finishLogin() {
+  clearInterval(loadTimer);
+  const L = st.loading;
+  st.loading = null;
+  const e = L && libEntry(L.key);
+  if (!e) return render();
+  loadFahrplan(e.f);
+  st.loggedKey = L.key;
+  st.ctl = defaultCtl();
+  st.zeit = { run: false, off: 0 };
+  updatePosition();
+  flash(`Zug ${zugTitel(st.fpl) || L.key} angemeldet · Steuerung: ${CTL_NAME[st.ctl]}${st.ctl === 'zeit' ? ' – E bei Abfahrt' : ''}`, 'ok', 6000);
+  render();
+}
+function defaultCtl() {
+  const live = st.source === 'zusi' || st.source === 'demo';
+  if (live && st.fpl.hasKm) return 'ortung';
+  if (st.fpl.hasTimes) return 'zeit';
+  return 'manuell';
+}
+function abmelden() {
+  st.fpl = null; st.loggedKey = null; st.scroll = 0;
+  buildView();
+  flash('Zug abgemeldet', '');
+}
+function loadFahrplan(f) {
+  st.fpl = f;
+  st.actual = {};
+  st.trace = [];
+  st.delayMin = null;
+  st.atHalt = null;
+  st.pos = { p: 0, init: false, gps: false };
+  st.scroll = 0; st.sel.halte = 0; st.graf = { zoom: 1, off: 0 }; st.gw = 'r';
+  buildView();
+}
+
+// ------------------------------------------------------------ Sichtbare Zeilen (Filter, Gleiswechsel)
+// Zusi-Buchfahrplan „FplRglGgl“: 2 = Zeile gilt nur im Regelgleis, 3 = nur im Gegengleis, sonst für beide Gleise
+function gleisOf(r) { const g = parseInt(r.gleis, 10); return g === 2 ? 'r' : g === 3 ? 'l' : null; }
+function gleisOk(r, gw = st.gw) { const g = gleisOf(r); return g == null || g === gw; }
+function rowVisible(r) {
+  if (!gleisOk(r)) return false;
+  if (S.filter === 'alle') return true;
+  return r.halt || r.pass || r.vChange || r.wende || r.sprung || r.i === 0 || r.i === st.fpl.rows.length - 1 || (r.name && !r.sig);
+}
+function buildView() {
+  st.view = st.fpl ? st.fpl.rows.filter(rowVisible).map((r) => r.i) : [];
+  softCache = ''; tbCache = '';
+}
+// Fahrplan-Position (Zeilenindex) -> Anzeigeposition (Index in st.view)
+function toViewPos(p) {
+  const v = st.view; if (!v.length) return 0;
+  let lo = 0, hi = v.length - 1;
+  if (p <= v[0]) return 0;
+  if (p >= v[hi]) return hi;
+  while (hi - lo > 1) { const m = (lo + hi) >> 1; if (v[m] <= p) lo = m; else hi = m; }
+  const a = v[lo], b = v[hi];
+  return lo + (p - a) / (b - a || 1);
+}
+
+// ------------------------------------------------------------ Uhrzeit und Position
+function simTime() {
+  const L = st.live;
+  if (L.time == null) return null;
+  const base = st.fpl?.baseDay;
+  if (L.date != null && L.date > 1000) {
+    const t = Math.floor(L.date + 1e-6) + L.time;
+    // Datum passt nicht zum Fahrplan (z. B. anderes Fahrplanjahr): nur Uhrzeit verwenden
+    if (base == null || Math.abs(t - base) < 2) return t;
+  }
+  if (base == null) return L.time;
+  // Datum fehlt: Tag wählen, der dem Fahrplan am nächsten liegt
+  const t0 = st.fpl.rows[st.fpl.timed[0]].t;
+  let best = base + L.time;
+  for (const d of [base - 1, base + 1]) if (Math.abs(d + L.time - t0) < Math.abs(best - t0)) best = d + L.time;
+  return best;
+}
+
+// Ortung: Abschnitte zwischen aufeinanderfolgenden Zeilen mit Kilometrierung, die im Gleis gw gelten.
+// Zeilen des anderen Gleises oder ohne km werden übersprungen, damit keine Lücken entstehen.
+function kmSegments(gw) {
+  const f = st.fpl, key = 'seg_' + gw;
+  if (f[key]) return f[key];
+  const idx = f.rows.filter((r) => r.km != null && gleisOk(r, gw)).map((r) => r.i), segs = [];
+  for (let k = 0; k < idx.length - 1; k++) {
+    const a = f.rows[idx[k]], b = f.rows[idx[k + 1]];
+    if (a.kmA == null) continue;
+    segs.push({ i0: a.i, i1: b.i, k1: a.kmA, k2: b.km, lang: Math.abs(b.km - a.kmA) > 5 });
+  }
+  return (f[key] = segs);
+}
+function locateKmOn(km, gw) {
+  const tol = 0.03;
+  const hit = (s) => (km < Math.min(s.k1, s.k2) - tol || km > Math.max(s.k1, s.k2) + tol ? null
+    : s.i0 + (s.i1 - s.i0) * (s.k2 === s.k1 ? 0 : clamp((km - s.k1) / (s.k2 - s.k1), 0, 1)));
+  const segs = kmSegments(gw);
+  // Treffer in sehr langen Abschnitten (> 5 km, z. B. km-Sprung am Fahrplananfang) nur, wenn es keinen anderen gibt
+  const best = (list) => list.filter((r) => !r.lang).concat(list.filter((r) => r.lang)).map((r) => r.p);
+  if (st.pos.init) {
+    const p0 = st.pos.p, near = [];
+    for (const s of segs) {
+      if (s.i1 < p0 - 4 || s.i0 > p0 + 60) continue;
+      const r = hit(s);
+      if (r != null) near.push({ p: r, lang: s.lang, fwd: r >= p0 - 0.6 });
+    }
+    // bevorzugt vorwärts (in Fahrtrichtung), sonst knapp zurück
+    const fwd = best(near.filter((c) => c.fwd).sort((a, b) => a.p - b.p));
+    if (fwd.length) return fwd[0];
+    const back = best(near.filter((c) => !c.fwd).sort((a, b) => b.p - a.p));
+    if (back.length) return back[0];
+  }
+  // Globale Suche – mehrere Treffer: am nächsten zur bisherigen bzw. fahrplanmäßigen Position
+  const cand = [];
+  for (const s of segs) { const r = hit(s); if (r != null) cand.push({ p: r, lang: s.lang }); }
+  if (!cand.length) return beyondEnds(km, segs);
+  const t = simTime();
+  const ref = st.pos.init ? st.pos.p : ((t != null ? timePosAt(t) : null) ?? 0);
+  cand.sort((a, b) => (a.lang - b.lang) || (Math.abs(a.p - ref) - Math.abs(b.p - ref)));
+  return cand[0].p;
+}
+// Zug steht vor dem ersten bzw. hinter dem letzten Fahrplaneintrag (z. B. am Bahnsteig des Startbahnhofs):
+// bis 2 km davor/dahinter gilt er als am Anfang bzw. Ende geortet
+function beyondEnds(km, segs) {
+  const first = segs.find((s) => !s.lang && s.k2 !== s.k1), last = [...segs].reverse().find((s) => !s.lang && s.k2 !== s.k1);
+  if (!first || !last) return null;
+  const d0 = (km - first.k1) * Math.sign(first.k2 - first.k1), d1 = (km - last.k2) * Math.sign(last.k2 - last.k1);
+  if (d0 < 0 && d0 > -2) return first.i0;
+  if (d1 > 0 && d1 < 2) return last.i1;
+  return null;
+}
+function locateKm(km) {
+  const r = locateKmOn(km, st.gw);
+  if (r != null || !st.fpl.hasGleis) return r;
+  // Passt die Kilometrierung nur zum anderen Gleis: Gleiswechsel erkennen und umschalten
+  const other = st.gw === 'r' ? 'l' : 'r', r2 = locateKmOn(km, other);
+  if (r2 != null) { st.gw = other; buildView(); toast(other === 'l' ? 'Gegengleis erkannt  /l' : 'Regelgleis erkannt  /r'); }
+  return r2;
+}
+
+// Fahrplanzeit -> Position (für die Zeitsteuerung)
+function timePosAt(t) {
+  const f = st.fpl;
+  if (!f || !f.hasTimes || t == null) return null;
+  const T = f.timed, R = f.rows;
+  const first = R[T[0]];
+  if (t <= (first.abf ?? first.t)) return T[0];
+  for (let k = 0; k < T.length - 1; k++) {
+    const a = R[T[k]], b = R[T[k + 1]];
+    const ta = a.abf ?? a.t, tb = b.ank ?? b.t;
+    if (t >= ta && t < tb) return a.i + (b.i - a.i) * (t - ta) / ((tb - ta) || 1e-9);
+    if (b.ank != null && b.abf != null && t >= b.ank && t < b.abf) return b.i; // Haltezeit
+  }
+  return T[T.length - 1];
+}
+// Position -> Fahrplanzeit
+function planTimeAt(p) {
+  const f = st.fpl;
+  if (!f || !f.timed.length) return null;
+  const T = f.timed, R = f.rows;
+  if (p <= T[0]) return R[T[0]].abf ?? R[T[0]].t;
+  for (let k = 0; k < T.length - 1; k++) {
+    const a = R[T[k]], b = R[T[k + 1]];
+    if (p >= a.i && p <= b.i) {
+      const ta = a.abf ?? a.t, tb = b.ank ?? b.t;
+      if (p - a.i < 1e-6) return ta;
+      return ta + (tb - ta) * (p - a.i) / (b.i - a.i);
+    }
+  }
+  const l = R[T[T.length - 1]];
+  return l.ank ?? l.t;
+}
+
+function updatePosition() {
+  const f = st.fpl;
+  if (!f || !f.rows.length) return;
+  const L = st.live;
+  const old = st.pos.p;
+  let p = old;
+  st.pos.gps = false;
+  if (st.ctl === 'ortung') {
+    if (L.km != null && f.hasKm && st.source !== 'offline') {
+      const r = locateKm(L.km);
+      if (r != null) { p = r; st.pos.gps = true; }
+    }
+  } else if (st.ctl === 'zeit' && st.zeit.run) {
+    const t = simTime();
+    const q = t != null ? timePosAt(t - st.zeit.off) : null;
+    if (q != null) p = q;
+  }
+  st.pos.p = p;
+  if (st.pos.init) recordActual(old, p);
+  st.pos.init = true;
+  computeDelay();
+  if (L.v != null && st.ctl === 'ortung') {
+    const x = xOf(p);
+    const last = st.trace[st.trace.length - 1];
+    if (!last || Math.abs(last[0] - x) > (f.hasWeg ? 20 : 0.02)) st.trace.push([x, L.v * 3.6]);
+    if (st.trace.length > 20000) st.trace.splice(0, 5000);
+  }
+}
+
+// Ist-Zeiten für die Halteliste erfassen
+function recordActual(old, p) {
+  const t = simTime(), f = st.fpl;
+  if (t == null || (st.ctl === 'zeit' && !st.zeit.run)) return;
+  const act = (i) => st.actual[i] || (st.actual[i] = {});
+  const ch = curHalt();
+  if (ch != null) { if (act(ch).an == null && ch > 0) act(ch).an = t; st.atHalt = ch; }
+  else if (st.atHalt != null) { act(st.atHalt).ab = t; st.atHalt = null; } // Abfahrt
+  if (Math.abs(p - old) > 6) return;
+  for (let i = Math.floor(old) + (old % 1 > 0.01 ? 1 : 0); i <= Math.floor(p - 0.01); i++) {
+    const r = f.rows[i];
+    if (!r || r.t == null || st.atHalt === i) continue;
+    if (act(i).ab == null && i < p - 0.01) act(i).ab = t;
+  }
+}
+
+function computeDelay() {
+  const f = st.fpl, t = simTime();
+  let d = null;
+  if (!f || t == null) { st.delayMin = null; return; }
+  if (st.ctl === 'zeit') d = st.zeit.run ? st.zeit.off : null;
+  else if (st.ctl === 'manuell') d = manualDelay(t);
+  else {
+    // letzte erfasste Ist-Zeit
+    for (let i = Math.min(f.rows.length - 1, Math.floor(st.pos.p) + 1); i >= 0; i--) {
+      const a = st.actual[i], r = f.rows[i];
+      if (!a || !r || r.t == null) continue;
+      if (a.ab != null) { d = a.ab - (r.abf ?? r.t); break; }
+      if (a.an != null && r.ank != null) { d = a.an - r.ank; break; }
+    }
+    const ch = curHalt();
+    // nächste Zeile mit Zeit noch nicht erreicht, Planzeit aber schon vorbei
+    const nx = nextTimed(st.pos.p);
+    if (nx != null && nx !== ch) {
+      const r = f.rows[nx];
+      const plan = r.halt ? r.ank : r.t;
+      if (plan != null && t > plan) d = Math.max(d ?? -1e9, t - plan);
+    }
+    // am Halt: Abfahrtszeit überschritten
+    if (ch != null) {
+      const r = f.rows[ch];
+      if (r.abf != null && t > r.abf) d = Math.max(d ?? -1e9, t - r.abf);
+    }
+  }
+  st.delayMin = d == null ? null : Math.trunc(d * 1440 + (d > 0 ? 1e-9 : -1e-9));
+}
+function manualDelay(t) {
+  const p = st.pos.p, k = Math.round(p), r = st.fpl.rows[k];
+  if (r && Math.abs(p - k) < 0.01 && r.halt) {
+    if (r.ank != null && t < r.ank) return t - r.ank;
+    if (r.abf == null || t <= r.abf) return 0;
+    return t - r.abf;
+  }
+  const pt = planTimeAt(p);
+  return pt == null ? null : t - pt;
+}
+
+function nextTimed(p) {
+  const f = st.fpl; if (!f) return null;
+  for (const i of f.timed) if (i > p + 0.02 && gleisOk(f.rows[i])) return i;
+  return null;
+}
+function nextHalt(p) {
+  const f = st.fpl; if (!f) return null;
+  for (const i of f.timed) if (i > p + 0.02 && f.rows[i].halt && gleisOk(f.rows[i])) return i;
+  return null;
+}
+function curHalt() {
+  const f = st.fpl;
+  if (!f || !st.pos.init) return null;
+  if ((st.live.v ?? 0) >= 0.5 && st.source !== 'offline') return null;
+  const p = st.pos.p;
+  let best = null, bd = 1e9;
+  for (const i of [Math.floor(p), Math.floor(p) + 1]) {
+    const r = f.rows[i];
+    if (!r || !r.halt) continue;
+    let d;
+    if (st.ctl !== 'ortung') d = Math.abs(p - i) < 0.05 ? 0 : 1e9;
+    else if (f.hasWeg) d = Math.abs(wegAt(p) - r.laufweg) / 1000;
+    else if (f.hasKm) d = Math.abs((kmAtP(p) ?? r.km) - r.km);
+    else d = Math.abs(p - i) < 0.05 ? 0 : 1e9;
+    if (d < bd) { bd = d; best = i; }
+  }
+  return bd <= 0.3 ? best : null;
+}
+function wegAt(p) {
+  const R = st.fpl.rows, i = Math.floor(p), f = p - i;
+  const a = R[clamp(i, 0, R.length - 1)], b = R[clamp(i + 1, 0, R.length - 1)];
+  if (a.laufweg == null || b.laufweg == null) return null;
+  return a.laufweg + (b.laufweg - a.laufweg) * f;
+}
+function xOf(p) { return st.fpl.hasWeg ? wegAt(p) : p; }
+function kmAtP(p) {
+  const R = st.fpl.rows, i = clamp(Math.floor(p), 0, R.length - 1), j = clamp(i + 1, 0, R.length - 1);
+  const a = R[i].kmA, b = R[j].km; if (a == null || b == null) return null;
+  return a + (b - a) * (p - i);
+}
+
+// ------------------------------------------------------------ Steuerungsarten
+function setCtl(c) {
+  if (!st.fpl) return;
+  if (c === 'ortung' && !ortungMoeglich()) { flash('Ortung nicht verfügbar – keine Kilometrierung von Zusi', 'warn'); return; }
+  if (c === 'zeit' && !st.fpl.hasTimes) { flash('Fahrplan ohne Zeiten – Zeitsteuerung nicht möglich', 'warn'); return; }
+  st.ctl = c;
+  st.zeit.run = false;
+  st.scroll = 0;
+  if (c === 'ortung') updatePosition();
+  computeDelay();
+  flash('Steuerung: ' + CTL_NAME[c] + (c === 'zeit' ? ' – Start mit E bei Abfahrt' : c === 'manuell' ? ' – Ortsmarker mit ▲ ▼' : ''), 'ok');
+}
+function ortungMoeglich() { return !!st.fpl && st.fpl.hasKm && (st.source === 'zusi' || st.source === 'demo'); }
+function zeitStart() {
+  const t = simTime(), pt = planTimeAt(st.pos.p);
+  if (t == null) { flash('Keine Uhrzeit verfügbar – Zeitsteuerung nicht möglich', 'warn'); return; }
+  if (pt == null) { flash('Fahrplan ohne Zeiten – Zeitsteuerung nicht möglich', 'warn'); return; }
+  st.zeit.off = t - pt;
+  st.zeit.run = true;
+  computeDelay();
+  flash('Zeitsteuerung läuft', 'ok');
+}
+function zeitStop() { st.zeit.run = false; computeDelay(); flash('Zeitsteuerung angehalten – E: weiter', ''); }
+function moveMarker(d) {
+  const v = st.view;
+  if (!v.length) return;
+  const k = clamp(Math.round(toViewPos(st.pos.p)) + d, 0, v.length - 1);
+  const old = st.pos.p;
+  st.pos.p = v[k];
+  st.pos.init = true;
+  st.scroll = 0;
+  recordActual(old, st.pos.p);
+}
+function zeitStep(d) {
+  moveMarker(d);
+  if (st.zeit.run) {
+    const t = simTime(), pt = planTimeAt(st.pos.p);
+    if (t != null && pt != null) st.zeit.off = t - pt;
+  }
+  computeDelay();
+}
+function preview(d) {
+  const n = st.view.length;
+  st.scroll = clamp(st.scroll + d, -n, n);
+  st.scrollAt = Date.now();
+}
+
+// ------------------------------------------------------------ Störungen (St) mit Abhilfetexten (V>0 / V=0)
+function stoerungen() {
+  const L = [];
+  const b = st.bridge;
+  if (st.source === 'zusi') {
+    if (!b.ok) L.push({ code: 'S01', text: 'Keine Verbindung zur Bridge',
+      kurz: 'Bridge (start.bat) auf dem Zusi-PC starten, WLAN prüfen.',
+      lang: '1. Auf dem Zusi-PC start.bat starten.\n2. Gerät und PC müssen im selben WLAN sein.\n3. Adresse prüfen: G ▸ 2 Systemdienste ▸ Bridge-Adresse.\n4. Windows-Firewall: Node.js im privaten Netzwerk zulassen.' });
+    else if (!b.zusi) L.push({ code: 'S02', text: 'Keine Verbindung zu Zusi 3',
+      kurz: 'Zusi 3 starten, TCP-Server aktivieren.',
+      lang: '1. Zusi 3 starten.\n2. TCP-Server in Zusi aktiv (Port 1436)?\n3. Läuft Zusi auf einem anderen PC: Bridge mit --zusi <IP>:1436 starten.\n4. Diagnose im Browser: http://<PC>:8080/debug' });
+    else if (b.zugnummer && !b.zusiKey) L.push({ code: 'S20', text: `Kein Buchfahrplan für Zug ${b.zugnummer}`,
+      kurz: 'Fahrplandatei einlesen: G ▸ 3.',
+      lang: 'Zusi hat keinen Buchfahrplan übertragen und die Bridge hat keine passende *.timetable.xml gefunden.\n1. G ▸ 3 Fahrplandatei einlesen und die *.timetable.xml des Zuges wählen.\n2. Oder in config.json der Bridge das Zusi-Datenverzeichnis eintragen.' });
+  }
+  if (st.fpl && st.ctl === 'ortung' && !st.pos.gps) L.push({ code: 'S10', text: 'Ortung gestört – Position nicht ermittelbar',
+    kurz: 'Softkey 7 „Zeit“: auf Zeitsteuerung oder Manuell umschalten.',
+    lang: 'Die Kilometrierung von Zusi passt nicht zum angemeldeten Fahrplan oder fehlt.\n1. Prüfen, ob die richtige Zugnummer angemeldet ist (Taste 1 „Zug“).\n2. Gleiswechsel prüfen (Softkey 6 „GW“).\n3. Softkey 7 „Zeit“ ▸ 2 Zeitsteuerung oder 3 Manuell wählen.' });
+  if (st.fpl && st.ctl === 'zeit' && simTime() == null) L.push({ code: 'S11', text: 'Keine Uhrzeit für die Zeitsteuerung',
+    kurz: 'Auf manuelle Steuerung umschalten (Softkey 7 ▸ 3).',
+    lang: 'Ohne Uhrzeit kann die Zeitsteuerung den Ortsmarker nicht weiterschalten.\nSoftkey 7 „Zeit“ ▸ 3 Manuell wählen und den Ortsmarker mit ▲ ▼ führen.' });
+  return L;
+}
+
+// ------------------------------------------------------------ Darstellung
+let renderQueued = false;
+function render() { if (!renderQueued) { renderQueued = true; requestAnimationFrame(doRender); } }
+
+function doRender() {
+  renderQueued = false;
+  document.body.classList.toggle('day', !!S.day);
+  $('device').classList.toggle('day', !!S.day);
+  $('dim').style.opacity = String((100 - S.bright) / 100 * 0.85);
+  $('blank').style.display = st.off ? 'block' : 'none';
+  renderHeader();
+  renderTable();
+  renderMsg();
+  renderSoft();
+  renderToolbar();
+  renderPages();
+  renderLeds();
+}
+
+function renderHeader() {
+  const f = st.fpl, t = simTime();
+  $('h-zug').textContent = zugTitel(f) || (f ? st.loggedKey : '');
+  const nh = f ? nextHalt(st.pos.p) : null;
+  const ch = curHalt();
+  let lauf = '';
+  if (!f) lauf = '';
+  else if (ch != null) lauf = `<small>Halt</small><b>${esc(f.rows[ch].name)}</b>`;
+  else if (nh != null) lauf = `<small>nächster Halt</small><b>${esc(f.rows[nh].name)}</b>&nbsp;${fmtHM(f.rows[nh].ank)}`;
+  else lauf = `<small>Zuglauf</small>${esc(f.meta.zuglauf || '–')}`;
+  $('h-lauf').innerHTML = lauf;
+  $('h-uhr').textContent = t != null ? fmtHM(t, true) : '';
+  const vs = $('h-vsp');
+  vs.classList.remove('late', 'early');
+  if (st.delayMin == null || !f) vs.textContent = '';
+  else if (st.delayMin > 0) { vs.textContent = '+' + st.delayMin; vs.classList.add('late'); }
+  else if (st.delayMin < 0) { vs.textContent = String(st.delayMin); vs.classList.add('early'); }
+  else vs.textContent = '±0';
+  $('h-km').textContent = !f ? '' : st.live.km != null && st.source !== 'offline' ? fmtKm(st.live.km, 2) : (f.hasKm && st.pos.init ? fmtKm(kmAtP(st.pos.p), 1) : '–');
+  $('h-kmc').style.visibility = f ? 'visible' : 'hidden';
+  $('h-datum').textContent = t != null && t > 1000 ? fmtDate(t) : '';
+  $('h-mode').textContent = !f ? '' : (st.ctl === 'zeit' ? (st.zeit.run ? 'Zeit ▶' : 'Zeit ‖') : CTL_NAME[st.ctl]) + (f.hasGleis || st.gw === 'l' ? '  /' + st.gw : '');
+  let info = '';
+  if (f) {
+    const m = f.meta, parts = [];
+    if (m.zuglauf) parts.push(esc(m.zuglauf));
+    if (m.br) parts.push('BR ' + esc(m.br));
+    if (m.vmax) parts.push('Vmax ' + Math.round(m.vmax * 3.6));
+    if (st.live.vStrecke != null && st.source !== 'offline') parts.push('Strecke ' + Math.round(st.live.vStrecke * 3.6) + ' km/h');
+    info = parts.join(' · ');
+  }
+  $('h-info').innerHTML = info;
+}
+
+function renderTable() {
+  const box = $('rows'), f = st.fpl;
+  const H = S.rowH, TH = LAY.th;
+  const up = S.dir === 'up';
+  if (!f || !st.view.length) {
+    box.innerHTML = '';
+    $('marker').style.display = 'none';
+    $('scrollhint').style.display = 'none';
+    const e = $('empty');
+    e.style.display = 'block';
+    let sub = '';
+    if (st.source === 'zusi') sub = !st.bridge.ok ? 'Keine Verbindung zur Bridge – Taste St' : !st.bridge.zusi ? 'Keine Verbindung zu Zusi 3 – Taste St' : st.bridge.zusiKey ? `Zusi meldet Zug ${esc(st.bridge.zusiKey)}` : 'Zusi verbunden – Zug in Zusi starten';
+    else if (st.source === 'demo') sub = 'Demo-Fahrt: Zugnummer 4711';
+    else sub = 'Offline – Fahrplandateien über G ▸ 3 einlesen';
+    e.innerHTML = st.loading ? 'Fahrplan wird geladen …' : `Kein Zug angemeldet<br><small>Taste 1 „Zug“: Zugnummer eingeben, mit E bestätigen</small><br><small class="dim">${sub}</small>`;
+    return;
+  }
+  $('empty').style.display = 'none';
+  const vp = toViewPos(st.pos.p);
+  const base = up ? TH * 0.74 : TH * 0.24;
+  const center = vp + st.scroll; // Zeile auf Höhe der Basislinie
+  const yOf = (k) => up ? base - (k - center) * H : base + (k - center) * H;
+  const first = Math.max(0, Math.floor(center - (up ? (TH - base) : base) / H) - 2);
+  const last = Math.min(st.view.length - 1, Math.ceil(center + (up ? base : TH - base) / H) + 2);
+  const nh = nextHalt(st.pos.p);
+  let html = '';
+  for (let k = first; k <= last; k++) {
+    const r = f.rows[st.view[k]];
+    const y = yOf(k) - H / 2;
+    const cls = ['row'];
+    if (r.halt) cls.push('halt');
+    if (r.pass) cls.push('pass');
+    if (r.i < st.pos.p - 0.02 && st.pos.init) cls.push('past');
+    if (r.i === nh) cls.push('nexthalt');
+    if (st.screen === 'main' && st.scroll !== 0 && k === Math.round(center)) cls.push('sel');
+    let vcell = '';
+    if (r.vEff != null) vcell += '<span class="vline" style="top:0;height:100%"></span>';
+    if (r.vChange) vcell += `<span class="vnum">${r.vEff}</span>`;
+    let km = r.km != null && !r.kmInterp ? fmtKm(r.km) : '';
+    if (r.sprung && r.kmNeu != null) km += `<span class="sprung">→${fmtKm(r.kmNeu)}</span>`;
+    let name = '';
+    if (r.wende) name += '<span class="wende">⇅ Richtungswechsel</span>';
+    const sigTxt = r.sig != null && SIGTYP[r.sig] && !(r.name || '').toLowerCase().includes(SIGTYP[r.sig].toLowerCase()) ? SIGTYP[r.sig] : '';
+    if (r.name) name += `<span class="nm">${esc(r.name)}</span>`;
+    if (sigTxt) name += `<span class="sig">${sigTxt}</span>`;
+    if (r.nameR) name += `<span class="nmr">${esc(r.nameR)}</span>`;
+    const an = r.ank != null ? fmtTimeCell(r.ank) : '';
+    const ab = r.abf != null ? fmtTimeCell(r.abf) : '';
+    html += `<div class="${cls.join(' ')}" style="top:${y.toFixed(1)}px;height:${H}px">` +
+      `<div class="r-v">${vcell}</div><div class="r-km">${km}</div>` +
+      `<div class="r-name">${name}${r.saege ? '<span class="saege"></span>' : ''}</div>` +
+      `<div class="r-an">${an}</div><div class="r-ab">${ab}</div></div>`;
+  }
+  box.innerHTML = html;
+  const mk = $('marker');
+  const my = yOf(vp);
+  mk.style.display = my > -5 && my < TH + 5 ? 'block' : 'none';
+  mk.style.top = my.toFixed(1) + 'px';
+  mk.classList.toggle('manual', st.ctl !== 'ortung');
+  mk.classList.toggle('paused', st.ctl === 'zeit' && !st.zeit.run);
+  $('scrollhint').style.display = st.scroll !== 0 ? 'block' : 'none';
+}
+
+function defaultMsg() {
+  const f = st.fpl, t = simTime();
+  const stoer = stoerungen();
+  if (stoer.length) return [`${stoer[0].code}  ${stoer[0].text} – Taste St`, 'warn'];
+  if (st.source === 'zusi' && st.bridge.ladepause === 1) return ['Zusi lädt die Strecke …', ''];
+  if (!f) {
+    if (st.source === 'zusi' && st.bridge.zusiKey) return [`Zusi: Zug ${st.bridge.zusiKey} bereit – Taste 1 „Zug“, E`, 'ok'];
+    return ['Bitte Zug anmelden – Taste 1 „Zug“', ''];
+  }
+  if (st.ctl === 'zeit' && !st.zeit.run) return ['Zeitsteuerung angehalten – Start mit E bei Abfahrt', ''];
+  const ch = curHalt();
+  if (ch != null) {
+    const r = f.rows[ch];
+    if (r.abf == null) return [`Ziel erreicht: ${r.name}`, 'ok'];
+    if (t != null) {
+      const rest = r.abf - t;
+      return rest > 0 ? [`Halt ${r.name} – Abfahrt ${fmtHM(r.abf, true)} · noch ${fmtDur(rest)}`, ''] : [`Abfahrt ${r.name} ${fmtHM(r.abf)} – Abfahrzeit erreicht`, 'ok'];
+    }
+    return [`Halt ${r.name} – Abfahrt ${fmtHM(r.abf)}`, ''];
+  }
+  const nh = nextHalt(st.pos.p);
+  if (nh != null) {
+    const r = f.rows[nh];
+    let dist = '';
+    if (f.hasWeg && st.pos.init) { const d = (r.laufweg - wegAt(st.pos.p)) / 1000; if (d >= 0) dist = ` · ${fmtKm(d, d < 10 ? 2 : 1)} km`; }
+    else if (f.hasKm && st.pos.init) { const d = Math.abs(r.km - (kmAtP(st.pos.p) ?? r.km)); dist = ` · ${fmtKm(d, 1)} km`; }
+    let rest = '';
+    if (t != null && r.ank != null) { const dt = r.ank - t; rest = dt >= 0 ? ` · in ${fmtDur(dt)}` : ''; }
+    return [`Nächster Halt ${r.name} an ${fmtHM(r.ank)}${dist}${rest}`, ''];
+  }
+  return [f.meta.zuglauf ? f.meta.zuglauf : 'Fahrplanende', ''];
+}
+
+function renderMsg() {
+  const box = $('msgbox');
+  let text, cls;
+  if (st.loading) {
+    const pr = st.loading.dur ? clamp((Date.now() - st.loading.start) / st.loading.dur, 0, 1) : 1;
+    box.style.setProperty('--pr', Math.round(pr * 100) + '%');
+    text = `Fahrplan Zug ${st.loading.key} wird geladen … ${Math.round(pr * 100)} %`;
+    cls = 'load';
+  } else if (st.msg && st.msg.until > Date.now()) { text = st.msg.text; cls = st.msg.cls; }
+  else [text, cls] = defaultMsg();
+  box.textContent = text;
+  box.className = cls || '';
+  $('i-gps').classList.toggle('off', !(st.fpl && st.pos.gps && st.ctl === 'ortung'));
+  const live = st.source === 'demo' || (st.source === 'zusi' && st.bridge.zusi);
+  $('i-zusi').textContent = st.source === 'demo' ? 'DEMO' : st.source === 'zusi' ? 'ZUSI' : 'OFFLINE';
+  $('i-zusi').classList.toggle('off', !live);
+  $('i-v').textContent = st.live.v != null && st.source !== 'offline' ? Math.round(Math.abs(st.live.v) * 3.6) + ' km/h' : '';
+}
+
+// Softkeys über den Zifferntasten – Belegung wie am Bordgerät
+function softDef() {
+  if (st.loading || st.booting) return {};
+  if (st.screen === 'main') return st.fpl ? { 1: 'Zug', 2: 'FSD', 6: 'GW<br>/' + st.gw, 7: 'Zeit', 0: 'G' } : { 1: 'Zug', 0: 'G' };
+  if (st.screen === 'fsd') return { 2: 'FSD' };
+  if (st.screen === 'zeit') return { 1: 'Ortung', 2: 'Zeitst.', 3: 'Manuell', 7: 'Zeit' };
+  return {};
+}
+let softCache = '';
+function renderSoft() {
+  const def = softDef();
+  const key = JSON.stringify(def);
+  if (softCache === key) return;
+  softCache = key;
+  let html = '';
+  for (let i = 0; i < 10; i++) {
+    const n = (i + 1) % 10;
+    html += `<div class="sk" data-k="${n}" style="left:${36 + i * 97}px">${def[n] || ''}</div>`;
+  }
+  $('soft').innerHTML = html;
+}
+
+const PAGES = ['zug', 'fsd', 'zeit', 'grund', 'menu', 'brh', 'stoer', 'info', 'graf'];
+function renderPages() {
+  for (const p of PAGES) $('p-' + p).classList.toggle('show', st.screen === p);
+  const fn = { zug: renderZugPage, fsd: renderFsd, zeit: renderZeit, grund: renderGrund, menu: renderMenu, brh: renderBrh, stoer: renderStoer, info: renderInfo, graf: renderGraf }[st.screen];
+  if (fn) fn();
+}
+
+// Bildschirmtastatur für Ziffern im Handy-Layout
+function padHtml() {
+  return ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].map((d) => `<div class="tb" data-k="${d}">${d}</div>`).join('') +
+    '<div class="tb small" data-k="C">⌫ C</div><div class="tb small" data-k="E">E ✓</div>';
+}
+
+function renderZugPage() {
+  $('zug-in').textContent = st.zugIn;
+  const h = $('zug-hint');
+  h.textContent = st.zugMsg;
+  h.classList.toggle('err', st.zugErr);
+  const L = libList();
+  st.sel.zug = clamp(st.sel.zug, -1, L.length - 1);
+  const vis = LAY.phone ? 3 : 6;
+  const start = clamp(st.sel.zug - Math.floor(vis / 2), 0, Math.max(0, L.length - vis));
+  let html = '<div class="li head"><span class="c1">Gespeicherte Fahrpläne (▲ ▼ wählen)</span></div>';
+  html += L.slice(start, start + vis).map(([k, e], j) => {
+    const i = start + j, m = libEntry(k)?.f?.meta || {};
+    return `<div class="li${i === st.sel.zug ? ' sel' : ''}" data-zi="${i}"><span class="znr">${esc(k)}</span><span class="c1">${esc(((m.gattung || '') + ' ' + (m.zuglauf || '')).trim())}</span><span class="zsrc">${esc(e.origin.replace(/^Datei /, ''))}</span></div>`;
+  }).join('');
+  if (!L.length) html += '<div class="li">Noch keine Fahrpläne – Zusi verbinden oder G ▸ 3 Datei einlesen</div>';
+  $('zug-list').innerHTML = html;
+  if (!$('zug-pad').innerHTML) $('zug-pad').innerHTML = padHtml();
+}
+
+function renderFsd() {
+  const tabs = ['Zugdaten', 'Halteliste'];
+  $('fsd-h').innerHTML = 'FSD <span class="tabs">' + tabs.map((t, i) => `<span class="${i === st.fsdTab ? 'on' : ''}">${t}</span>`).join('') + '</span><small>◄ ► umschalten</small>';
+  if (st.fsdTab === 0) renderZugdaten(); else renderHalte();
+}
+function renderZugdaten() {
+  const f = st.fpl, m = f?.meta || {};
+  const kv = [
+    ['Zug', zugTitel(f) || st.loggedKey || '–'],
+    ['Zuglauf', m.zuglauf || '–'],
+    ['Baureihe', m.br || '–'],
+    ['Höchstgeschwindigkeit', m.vmax ? Math.round(m.vmax * 3.6) + ' km/h' : '–'],
+    ['Zuglänge', m.laenge ? Math.round(m.laenge) + ' m' : '–'],
+    ['Zugmasse', m.masse ? Math.round(m.masse / 1000) + ' t' : '–'],
+    ['Bremshundertstel', m.bremsh ? Math.round(m.bremsh * 100) + ' %' : (m.mbrh ? Math.round(m.mbrh * 100) + ' % (Mindest)' : '–')],
+    ['Bremsstellung', m.bremsstellung ? ({ 0: 'G', 1: 'P', 2: 'P+Mg', 3: 'R', 4: 'R+Mg', 5: 'R+Mg (K)' }[m.bremsstellung] || m.bremsstellung) : '–'],
+    ['Steuerungsart', CTL_NAME[st.ctl] + ' · Gleis /' + st.gw],
+    ['Datenquelle', f ? f.origin : '–'],
+  ];
+  $('fsd-body').innerHTML = '<div class="kv">' + kv.map(([k, v]) => `<div>${esc(k)}</div><div>${esc(v)}</div>`).join('') + '</div>';
+}
+function halteListe() { return st.fpl ? st.fpl.rows.filter((r) => (r.halt || r.pass || r.i === 0) && gleisOk(r)) : []; }
+function renderHalte() {
+  const L = halteListe();
+  st.sel.halte = clamp(st.sel.halte, 0, Math.max(0, L.length - 1));
+  const visible = Math.max(3, Math.floor((LAY.th - LAY.h2 - 28) / LAY.li)), start = clamp(st.sel.halte - Math.floor(visible / 2), 0, Math.max(0, L.length - visible));
+  let html = '<div class="li head"><span class="c1">Betriebsstelle</span><span class="c2">An</span><span class="c3">Ab</span><span class="c4">Ist</span><span class="c5">+/−</span></div>';
+  L.slice(start, start + visible).forEach((r, k) => {
+    const i = start + k, a = st.actual[r.i] || {};
+    const ist = a.ab ?? a.an;
+    let d = '';
+    if (ist != null && r.t != null) { const m = Math.trunc(((a.ab != null ? a.ab - r.t : a.an - (r.ank ?? r.t))) * 1440); d = m > 0 ? '+' + m : String(m); }
+    const done = r.i < st.pos.p - 0.02;
+    html += `<div class="li${i === st.sel.halte ? ' sel' : ''}${done ? ' done' : ''}" data-hi="${i}"><span class="c1">${r.halt ? '<b>' + esc(r.name) + '</b>' : esc(r.name)}${r.pass ? ' <small>(Durchfahrt)</small>' : ''}</span>` +
+      `<span class="c2">${fmtHM(r.ank)}</span><span class="c3">${fmtHM(r.abf)}</span><span class="c4">${ist != null ? fmtHM(ist) : ''}</span><span class="c5">${d}</span></div>`;
+  });
+  if (!L.length) html += '<div class="li">Keine Halte vorhanden</div>';
+  $('fsd-body').innerHTML = '<div class="list">' + html + '</div>';
+}
+
+const ZEIT_OPT = [
+  { c: 'ortung', l: 'Ortung', d: () => ortungMoeglich() ? 'Position aus der Kilometrierung von Zusi' : 'nicht verfügbar (keine Kilometrierung)' },
+  { c: 'zeit', l: 'Zeitsteuerung', d: () => st.fpl?.hasTimes ? 'Ortsmarker läuft nach Fahrplanzeit, Start mit E bei Abfahrt' : 'nicht verfügbar (Fahrplan ohne Zeiten)' },
+  { c: 'manuell', l: 'Manuell', d: () => 'Ortsmarker mit ▲ ▼ weiterschalten' },
+];
+function renderZeit() {
+  st.sel.zeit = clamp(st.sel.zeit, 0, ZEIT_OPT.length - 1);
+  $('zeitlist').innerHTML = ZEIT_OPT.map((o, i) => `<div class="li${i === st.sel.zeit ? ' sel' : ''}" data-ti="${i}"><span class="znr">${i + 1}</span><span class="c1"><b>${o.l}</b> <small>${esc(o.d())}</small></span><span class="val">${st.ctl === o.c ? '●' : ''}</span></div>`).join('');
+  const t = simTime();
+  const src = st.source === 'zusi' ? 'Zusi' : st.source === 'demo' ? 'Demo' : 'Geräteuhr';
+  let h = `Uhrzeit: ${t != null ? fmtHM(t, true) : '–'} (${src})`;
+  if (st.ctl === 'zeit') h += ` · Zeitsteuerung ${st.zeit.run ? 'läuft' : 'angehalten'}${st.zeit.run ? ' · Versatz ' + (st.delayMin > 0 ? '+' : '') + st.delayMin + ' min' : ''}`;
+  $('zeit-hint').textContent = h;
+}
+
+const GRUND = [
+  { n: 0, l: 'EBuLa Fahrplan', a: () => go('main') },
+  { n: 1, l: 'Zug anmelden (Zugnummer)', a: () => openZug() },
+  { n: 2, l: 'Systemdienste EBuLa', a: () => { st.sel.menu = 0; go('menu'); } },
+  { n: 3, l: 'Fahrplandatei einlesen', a: () => $('fileinp').click() },
+  { n: 4, l: 'Geschwindigkeitsprofil', a: () => { if (!st.fpl) return flash('Kein Zug angemeldet', 'warn'); st.graf.off = 0; go('graf'); } },
+  { n: 5, l: 'Zug abmelden', a: () => { if (!st.fpl) return flash('Kein Zug angemeldet', 'warn'); abmelden(); go('main'); } },
+  { n: 6, l: 'Information / Tastenbelegung', a: () => openInfo('grund') },
+  { n: 7, l: 'Störungsübersicht', a: () => { st.abhilfe = null; go('stoer'); } },
+  { n: 8, l: 'Fahrpult-Anzeige (Tacho, Drücke, PZB)', a: () => { location.href = 'fahrpult.html'; } },
+  { n: 9, l: 'Sonstige Systemdienste: BRH berechnen', a: () => openBrh() },
+];
+function renderGrund() {
+  st.sel.grund = clamp(st.sel.grund, 0, GRUND.length - 1);
+  $('grundlist').innerHTML = GRUND.map((g, i) => `<div class="li${i === st.sel.grund ? ' sel' : ''}" data-gi="${i}"><span class="znr">${g.n}</span><span class="c1">${esc(g.l)}</span></div>`).join('');
+}
+
+const MENU = [
+  { l: 'Datenquelle', v: () => ({ zusi: 'Zusi 3 (Bridge)', demo: 'Demo-Fahrt', offline: 'Nur Dateien (offline)' }[st.source]), ch: (d) => { const o = ['zusi', 'demo', 'offline']; setSource(o[(o.indexOf(st.source) + d + 3) % 3]); } },
+  { l: 'Bridge-Adresse', v: () => S.bridgeUrl ? S.bridgeUrl.replace(/^https?:\/\//, '') : 'automatisch (diese Seite)', a: () => openConn() },
+  { l: 'Zusi neu verbinden', a: () => { fetch(bridgeBase() + '/api/reconnect', { method: 'POST' }).then(() => flash('Neuverbindung angefordert', 'ok')).catch(() => flash('Bridge nicht erreichbar', 'warn')); } },
+  { l: 'Zug von Zusi automatisch anmelden', v: () => S.autoLogin ? 'an' : 'aus (Zugnummer eingeben)', ch: () => { S.autoLogin = !S.autoLogin; } },
+  { l: 'Laufrichtung der Anzeige', v: () => S.dir === 'up' ? 'aufwärts (EBuLa)' : 'abwärts', ch: () => { S.dir = S.dir === 'up' ? 'down' : 'up'; } },
+  { l: 'Bildschirm drehen', v: () => S.rot + '°', ch: (d) => { S.rot = (S.rot + d * 90 + 360) % 360; layout(); } },
+  { l: 'Tag-/Nachtmodus', v: () => S.day ? 'Tag (hell)' : 'Nacht (dunkel)', ch: () => { S.day = !S.day; } },
+  { l: 'Helligkeit', v: () => S.bright + ' %', ch: (d) => { S.bright = clamp(S.bright + d * 10, 20, 100); } },
+  { l: 'Zeilenhöhe', v: () => ({ 30: 'klein', 38: 'mittel', 46: 'groß', 56: 'sehr groß' }[S.rowH] || S.rowH), ch: (d) => { const o = [30, 38, 46, 56]; S.rowH = o[clamp(o.indexOf(S.rowH) + d, 0, 3)] || 38; } },
+  { l: 'Zehntelminuten anzeigen', v: () => S.secs ? 'an' : 'aus', ch: () => { S.secs = !S.secs; } },
+  { l: 'Zeilen', v: () => S.filter === 'alle' ? 'alle (inkl. Signale)' : 'nur Betriebsstellen', ch: () => { S.filter = S.filter === 'alle' ? 'bst' : 'alle'; buildView(); } },
+  { l: 'Demo-Zeitraffer', v: () => '×' + S.demoSpeed, ch: (d) => { const o = [1, 2, 5, 10, 20]; S.demoSpeed = o[clamp(o.indexOf(S.demoSpeed) + d, 0, 4)] || 1; } },
+  { l: 'Demo-Fahrt neu starten', a: () => setSource('demo', true) },
+  { l: 'Tastenton', v: () => S.sound ? 'an' : 'aus', ch: () => { S.sound = !S.sound; } },
+  { l: 'Lautstärke', v: () => S.vol + ' %', ch: (d) => { S.vol = clamp(S.vol + d * 10, 10, 100); } },
+  { l: 'Meldetöne (Bestätigung, Fehler, Störung)', v: () => S.meldeton ? 'an' : 'aus', ch: () => { S.meldeton = !S.meldeton; } },
+  { l: 'Vibration bei Tastendruck', v: () => S.vibra ? 'an' : 'aus', ch: () => { S.vibra = !S.vibra; } },
+  { l: 'Layout', v: () => ({ auto: 'automatisch', geraet: 'EBuLa-Gerät', handy: 'Handy' }[S.layout] || 'automatisch'), ch: (d) => { const o = ['auto', 'geraet', 'handy']; S.layout = o[(o.indexOf(S.layout) + d + 3) % 3]; saveS(); layout(); } },
+  { l: 'Selbsttest beim Start', v: () => S.boot ? 'an' : 'aus', ch: () => { S.boot = !S.boot; } },
+  { l: 'Vollbild', a: () => toggleFullscreen() },
+  { l: 'Ist-Zeiten zurücksetzen', a: () => { st.actual = {}; st.trace = []; flash('Ist-Zeiten gelöscht', 'ok'); } },
+  { l: 'Fahrplanspeicher leeren', a: () => { for (const [k, v] of [...LIB]) if (v.persist) LIB.delete(k); libSave(); flash('Gespeicherte Fahrpläne gelöscht', 'ok'); } },
+  { l: 'Alle Einstellungen zurücksetzen', a: () => { Object.assign(S, DEF); saveS(); layout(); buildView(); flash('Standardwerte geladen', 'ok'); } },
+];
+if (IS_APP) MENU.splice(MENU.findIndex((m) => m.l === 'Vollbild'), 1);
+function renderMenu() {
+  st.sel.menu = clamp(st.sel.menu, 0, MENU.length - 1);
+  const vis = Math.min(MENU.length, Math.max(3, Math.floor((LAY.th - LAY.h2) / LAY.li))), start = clamp(st.sel.menu - Math.floor(vis / 2), 0, MENU.length - vis);
+  $('menulist').innerHTML = MENU.slice(start, start + vis).map((m, k) => {
+    const i = start + k;
+    return `<div class="li${i === st.sel.menu ? ' sel' : ''}" data-mi="${i}"><span>${p2(i + 1)}&nbsp;&nbsp;${esc(m.l)}</span>${m.v ? `<span class="val">◄ ${esc(m.v())} ►</span>` : '<span class="val">E ▸</span>'}</div>`;
+  }).join('');
+}
+
+// Bremshundertstel-Rechner (Sonstige Systemdienste)
+function openBrh() {
+  const m = st.fpl?.meta;
+  if (!st.brh.masse && m?.masse) st.brh.masse = String(Math.round(m.masse / 1000));
+  if (!st.brh.bg && m?.masse && m?.bremsh) st.brh.bg = String(Math.round(m.masse / 1000 * m.bremsh));
+  st.sel.brh = 0;
+  go('brh');
+}
+function brhWert() {
+  const ms = +st.brh.masse, bg = +st.brh.bg;
+  return ms > 0 && bg > 0 ? Math.floor(bg / ms * 100) : null;
+}
+function renderBrh() {
+  const v = brhWert();
+  const zugart = v == null ? '–' : v >= 111 ? 'O (obere Zugart)' : v >= 66 ? 'M (mittlere Zugart)' : 'U (untere Zugart)';
+  const fld = (i, lbl, val, unit) => `<div class="row2"><span class="lbl">${lbl}</span><span class="field${st.sel.brh === i ? ' sel cursor' : ''}" data-bi="${i}">${esc(val)}</span><span>${unit}</span></div>`;
+  $('brh-body').innerHTML = '<div class="brh">' +
+    fld(0, 'Zugmasse', st.brh.masse, 't') + fld(1, 'Bremsgewicht', st.brh.bg, 't') +
+    `<div class="res">Bremshundertstel: ${v == null ? '–' : v + ' %'}</div>` +
+    `<div class="row2"><span class="lbl">Eingabe ZDE (BRH)</span><b>${v == null ? '–' : Math.floor(v / 10)}</b></div>` +
+    `<div class="row2"><span class="lbl">PZB-Zugart</span><b>${zugart}</b></div>` +
+    '<div class="zhint">Bremshundertstel = Bremsgewicht ÷ Zugmasse × 100. Werte aus den Zugdaten sind vorbelegt.</div></div>';
+  if (!$('brh-pad').innerHTML) $('brh-pad').innerHTML = padHtml();
+}
+
+function renderStoer() {
+  const L = stoerungen();
+  st.sel.stoer = clamp(st.sel.stoer, 0, Math.max(0, L.length - 1));
+  $('stoerlist').innerHTML = L.length
+    ? L.map((s, i) => `<div class="li${i === st.sel.stoer ? ' sel' : ''}" data-si="${i}"><span class="code">${s.code}</span><span class="c1">${esc(s.text)}</span></div>`).join('')
+    : '<div class="li">Keine Störung vorhanden</div>';
+  const s = L[st.sel.stoer];
+  let ab = 'V>0: Abhilfe während der Fahrt · V=0: ausführliche Abhilfe im Stillstand';
+  if (s && st.abhilfe === 'fahrt') ab = 'Abhilfe (Fahrt): ' + s.kurz;
+  else if (s && st.abhilfe === 'stand') ab = (st.live.v ?? 0) < 0.5 || st.source === 'offline' ? 'Abhilfe (Stillstand):\n' + s.lang : 'Ausführliche Abhilfe nur bei stehendem Zug (V=0) – Abhilfe während der Fahrt: ' + s.kurz;
+  $('abhilfe').textContent = L.length ? ab : '';
+}
+
+const HELP = {
+  main: 'Fahrplan von unten nach oben lesen. Der rote Ortsmarker zeigt die aktuelle Position. ▲ ▼ blättern bei Ortung in der Vorschau, bei Zeitsteuerung und Manuell verschieben sie den Ortsmarker. ◄ ► blättern seitenweise. Nach 10 s springt die Anzeige zum Ortsmarker zurück. E startet/hält die Zeitsteuerung.',
+  zug: 'Zugnummer mit den Zifferntasten eingeben und mit E bestätigen. C löscht die letzte Ziffer. Mit ▲ ▼ lässt sich ein gespeicherter Fahrplan auswählen.',
+  fsd: 'Fahrplan-Stammdaten: Zugdaten und Halteliste mit Soll- und Ist-Zeiten. ◄ ► schaltet um, E zeigt die gewählte Betriebsstelle im Fahrplan.',
+  zeit: '1 Ortung: Position aus der Kilometrierung von Zusi. 2 Zeitsteuerung: der Ortsmarker läuft nach Fahrplan, Start mit E bei Abfahrt. 3 Manuell: Ortsmarker mit ▲ ▼ führen.',
+  grund: 'Grundmenü: Menüpunkt über die Ziffer direkt wählen.',
+  menu: 'Systemdienste: ▲ ▼ wählen, ◄ ► Wert ändern, E ausführen.',
+  brh: 'Zugmasse und Bremsgewicht eingeben (▲ ▼ wechselt das Feld). Das Ergebnis zeigt die Bremshundertstel und die PZB-Zugart.',
+  stoer: 'V>0 zeigt die Abhilfe während der Fahrt, V=0 die ausführliche Abhilfe im Stillstand.',
+  graf: '◄ ► zoomen, ▲ ▼ verschieben, E zurück zur Position.',
+};
+function openInfo(from) { st.infoFrom = from || st.screen; st.screen = 'info'; }
+function renderInfo() {
+  $('info-h').innerHTML = 'Information <small>' + (st.source === 'zusi' ? (st.bridge.zusi ? 'Zusi ' + esc(st.bridge.version) : 'Zusi nicht verbunden') : '') + '</small>';
+  const keys = [
+    ['1 Zug', 'Zug anmelden (Zugnummer)'], ['2 FSD', 'Zugdaten und Halteliste'], ['6 GW', 'Gleiswechsel Regel-/Gegengleis'], ['7 Zeit', 'Steuerungsart: Ortung / Zeit / Manuell'], ['0 G', 'Grundmenü'],
+    ['St', 'Störungsübersicht'], ['V>0 V=0', 'Abhilfetexte Fahrt / Stillstand'], ['i', 'Information (diese Seite)'], ['S', 'Systemdienste'],
+    ['☀aus', 'Bildschirm aus'], ['☀', 'Helligkeit'], ['◑', 'Kontrast Tag/Nacht'], ['UD', 'Display umschalten (drehen)'],
+    ['▲ ▼', 'Vorschau / Ortsmarker'], ['◄ ►', 'seitenweise blättern'], ['E', 'Bestätigen / Zeitsteuerung'], ['C', 'Zurück / Löschen'],
+    ['KBD', 'Tastendruck'], ['TEMP', 'Warnung: Störung vorhanden'], ['GPS', 'durchgestrichen = keine Ortung'],
+  ];
+  $('helptext').innerHTML = `<p class="ctx">${esc(HELP[st.infoFrom] || HELP.main)}</p>` + keys.map(([k, v]) => `<p><b>${esc(k)}</b> ${esc(v)}</p>`).join('');
+}
+
+function renderGraf() {
+  const cv = $('cv'), g = cv.getContext('2d'), f = st.fpl;
+  const W = cv.width, H = cv.height, cs = getComputedStyle($('device'));
+  const fg = cs.getPropertyValue('--scr-fg').trim(), dim = cs.getPropertyValue('--scr-dim').trim(), line = cs.getPropertyValue('--scr-line').trim();
+  g.clearRect(0, 0, W, H);
+  if (!f) { g.fillStyle = dim; g.font = '18px sans-serif'; g.fillText('Kein Zug angemeldet', 20, 40); return; }
+  const R = f.rows, X = (r) => f.hasWeg ? r.laufweg : r.i;
+  const x0 = X(R[0]), x1 = X(R[R.length - 1]);
+  const span = (x1 - x0) / st.graf.zoom || 1;
+  const curX = st.pos.init ? xOf(st.pos.p) : x0;
+  const from = clamp(curX - span * 0.25 + st.graf.off * span, x0, Math.max(x0, x1 - span));
+  const to = from + span;
+  const vmax = Math.max(80, ...R.map((r) => r.vEff || 0), ...st.trace.map((p) => p[1])) * 1.1;
+  const L = 48, T = 14, B = 64, PW = W - L - 12, PH = H - T - B;
+  const sx = (x) => L + (x - from) / (to - from) * PW, sy = (v) => T + PH - v / vmax * PH;
+  g.font = '12px sans-serif'; g.lineWidth = 1;
+  for (let v = 0; v <= vmax; v += 20) {
+    g.strokeStyle = 'rgba(128,128,128,.25)'; g.beginPath(); g.moveTo(L, sy(v)); g.lineTo(L + PW, sy(v)); g.stroke();
+    g.fillStyle = dim; g.fillText(String(v), 8, sy(v) + 4);
+  }
+  g.strokeStyle = fg; g.lineWidth = 2.5; g.beginPath();
+  let started = false;
+  for (let k = 0; k < R.length - 1; k++) {
+    const r = R[k], n = R[k + 1];
+    if (r.vEff == null) continue;
+    const a = X(r), b = X(n);
+    if (b < from || a > to) continue;
+    if (!started) { g.moveTo(sx(Math.max(a, from)), sy(r.vEff)); started = true; } else g.lineTo(sx(a), sy(r.vEff));
+    g.lineTo(sx(Math.min(b, to)), sy(r.vEff));
+  }
+  g.stroke();
+  g.strokeStyle = '#2f8cff'; g.lineWidth = 2; g.beginPath(); started = false;
+  for (const [x, v] of st.trace) { if (x < from || x > to) { started = false; continue; } if (!started) { g.moveTo(sx(x), sy(v)); started = true; } else g.lineTo(sx(x), sy(v)); }
+  g.stroke();
+  g.textAlign = 'left';
+  let lastLbl = -1e9;
+  for (const r of R) {
+    if (!(r.halt || r.pass)) continue;
+    const x = X(r); if (x < from || x > to) continue;
+    const px = sx(x);
+    g.strokeStyle = r.halt ? line : 'rgba(128,128,128,.5)'; g.lineWidth = r.halt ? 1.5 : 1; g.setLineDash(r.halt ? [] : [3, 3]);
+    g.beginPath(); g.moveTo(px, T); g.lineTo(px, T + PH); g.stroke(); g.setLineDash([]);
+    if (px - lastLbl > 70) {
+      g.save(); g.translate(px + 3, T + PH + 8); g.rotate(Math.PI / 7); g.fillStyle = r.halt ? fg : dim; g.font = (r.halt ? 'bold ' : '') + '12px sans-serif';
+      g.fillText(r.name.slice(0, 22), 0, 0); g.restore(); lastLbl = px;
+    }
+  }
+  if (st.pos.init && curX >= from && curX <= to) {
+    g.strokeStyle = '#ff3b30'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(sx(curX), T); g.lineTo(sx(curX), T + PH); g.stroke();
+  }
+  g.fillStyle = dim; g.font = '12px sans-serif'; g.fillText('km/h', 8, T + 2);
+  g.fillText(f.hasWeg ? `Ausschnitt ${fmtKm((to - from) / 1000)} km` : 'Ausschnitt nach Zeilen', L + PW - 150, T + 12);
+  g.fillStyle = '#2f8cff'; g.fillText('— Ist', L + 8, T + 12); g.fillStyle = fg; g.fillText('— zulässig', L + 50, T + 12);
+}
+
+let stoerCodes = null;
+function renderLeds() {
+  const L = stoerungen();
+  $('led-temp').className = 'led' + (L.length ? ' on-y' : '');
+  // Neue Störung: Meldeton (erst nach dem Selbsttest, nicht für schon bekannte Codes)
+  const codes = L.map((s) => s.code);
+  if (stoerCodes && !st.booting && codes.some((c) => !stoerCodes.includes(c))) SND.play('warn');
+  if (!st.booting) stoerCodes = codes;
+}
+
+// ton: Meldeton zur Meldung; ohne Angabe Bestätigung (ok), Fehler (warn) oder Info (neutral)
+function flash(text, cls = '', ms = 4500, ton) {
+  SND.play(ton || (cls === 'ok' ? 'ok' : cls === 'warn' ? 'err' : 'info'));
+  st.msg = { text, cls, until: Date.now() + ms }; render(); setTimeout(render, ms + 50); }
+let toastT = null;
+function toast(text) { const t = $('toast'); t.textContent = text; t.style.display = 'block'; clearTimeout(toastT); toastT = setTimeout(() => { t.style.display = 'none'; }, 1300); }
+
+// ------------------------------------------------------------ Gerätestart mit Selbsttest
+let bootTimers = [];
+function startBoot() {
+  st.booting = true;
+  SND.play('on');
+  const b = $('boot');
+  b.classList.add('show');
+  const lines = ['Selbsttest Speicher ……………… OK', 'Selbsttest Anzeige ……………… OK', 'Selbsttest Tastatur ……………… OK', 'Fahrplanspeicher ……………… ' + LIB.size + ' Fahrpläne', 'Datenverbindung ……………… wird aufgebaut'];
+  $('boot-log').innerHTML = '';
+  lines.forEach((l, i) => bootTimers.push(setTimeout(() => {
+    $('boot-log').insertAdjacentHTML('beforeend', `<div>${esc(l)}</div>`);
+    $('boot-bar').style.width = ((i + 1) / lines.length * 100) + '%';
+  }, 280 + i * 330)));
+  bootTimers.push(setTimeout(endBoot, 280 + lines.length * 330 + 400));
+}
+function endBoot() {
+  bootTimers.forEach(clearTimeout); bootTimers = [];
+  st.booting = false;
+  $('boot').classList.remove('show');
+  render();
+}
+
+// ------------------------------------------------------------ Tasten
+const KEYS = [
+  // obere Reihe
+  { id: 'aus', label: '☀<br>aus', x: 172, y: 18 }, { id: 'S', label: 'S', x: 274, y: 18 }, { id: 'i', label: 'i', x: 373, y: 18 },
+  { id: 'St', label: 'St', x: 473, y: 18, wide: true }, { id: 'V>0', label: 'V&gt;0', x: 651, y: 18 }, { id: 'V=0', label: 'V=0', x: 747, y: 18 },
+  { id: 'hell', label: '☀', x: 831, y: 18 }, { id: 'kontrast', label: '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.5a6.5 6.5 0 0 0 0 13z" fill="currentColor"/></svg>', x: 924, y: 18 }, { id: 'UD', label: 'UD', x: 1010, y: 18 },
+  // rechte Spalte
+  { id: 'C', label: 'C', x: 1112, y: 110 }, { id: 'left', label: '◄', x: 1112, y: 212 }, { id: 'right', label: '►', x: 1112, y: 312 },
+  { id: 'up', label: '▲', x: 1112, y: 414 }, { id: 'down', label: '▼', x: 1112, y: 516 }, { id: 'E', label: 'E', x: 1112, y: 636 },
+];
+for (let i = 0; i < 10; i++) KEYS.push({ id: String((i + 1) % 10), label: String((i + 1) % 10), x: 161 + i * 97, y: 736 });
+
+function buildKeys() {
+  $('keys').innerHTML = KEYS.map((k) => `<button class="key${k.wide ? ' wide' : ''}" data-k="${esc(k.id)}" style="left:${k.x}px;top:${k.y}px"><span>${k.label}</span></button>`).join('');
+}
+
+// Gerätetöne (sound.js): eigene Tondateien aus sounds/ oder live synthetisiert
+const SND = EbulaSound(() => ({ sound: S.sound, vol: S.vol, meldeton: S.meldeton, vibra: S.vibra, quiet: st.booting }));
+let kbdT = null;
+function press(k) {
+  SND.play('key');
+  const led = $('led-kbd'); led.className = 'led on-y'; clearTimeout(kbdT); kbdT = setTimeout(() => { led.className = 'led'; }, 140);
+  const btn = document.querySelector(`.key[data-k="${CSS.escape(k)}"]`);
+  if (btn) { btn.classList.add('pressed'); setTimeout(() => btn.classList.remove('pressed'), 120); }
+  if (st.off && k !== 'aus') { st.off = false; SND.play('on'); render(); return; }
+  const wasErr = st.zugErr;
+  handleKey(k);
+  if (k === 'aus') SND.play(st.off ? 'off' : 'on');
+  if (st.zugErr && !wasErr) SND.play('err');
+  render();
+}
+
+function go(screen) { st.screen = screen; }
+function back() {
+  const parent = { menu: 'grund', brh: 'grund', graf: 'grund', info: st.infoFrom === 'info' ? 'main' : st.infoFrom }[st.screen] || 'main';
+  st.screen = parent;
+}
+
+function handleKey(k) {
+  if (st.booting) { endBoot(); return; }
+  if (st.loading) return;
+  // Tasten mit fester Funktion
+  switch (k) {
+    case 'aus': st.off = !st.off; return;
+    case 'hell': S.bright = S.bright <= 30 ? 100 : S.bright - 20; saveS(); toast('Helligkeit ' + S.bright + ' %'); return;
+    case 'kontrast': S.day = !S.day; saveS(); toast(S.day ? 'Tagdarstellung' : 'Nachtdarstellung'); return;
+    case 'UD': S.rot = (S.rot + 90) % 360; saveS(); layout(); toast('Display ' + S.rot + '°'); return;
+    case 'S': if (st.screen === 'menu') back(); else { st.sel.menu = 0; go('menu'); } return;
+    case 'i': if (st.screen === 'info') back(); else openInfo(); return;
+    case 'St': if (st.screen === 'stoer') back(); else { st.abhilfe = null; st.sel.stoer = 0; go('stoer'); } return;
+    case 'V>0': case 'V=0':
+      if (!stoerungen().length) { flash('Keine Störung – kein Abhilfetext vorhanden', ''); return; }
+      if (st.screen !== 'stoer') { st.sel.stoer = 0; go('stoer'); }
+      st.abhilfe = k === 'V>0' ? 'fahrt' : 'stand';
+      return;
+  }
+  const h = { main: mainKey, zug: zugKey, fsd: fsdKey, zeit: zeitKey, grund: grundKey, menu: menuKey, brh: brhKey, stoer: stoerKey, info: infoKey, graf: grafKey }[st.screen];
+  if (h) h(k);
+}
+
+function mainKey(k) {
+  const f = st.fpl;
+  const fwd = (key) => ((key === 'up') === (S.dir === 'up')) ? 1 : -1;
+  switch (k) {
+    case 'up': case 'down':
+      if (!f) return;
+      if (st.ctl === 'manuell') moveMarker(fwd(k));
+      else if (st.ctl === 'zeit') zeitStep(fwd(k));
+      else preview(fwd(k));
+      break;
+    case 'left': case 'right': {
+      if (!f) return;
+      const page = Math.max(1, Math.floor(LAY.th / S.rowH) - 2);
+      preview(k === 'right' ? page : -page);
+      break;
+    }
+    case 'E':
+      if (st.scroll) { st.scroll = 0; break; }
+      if (f && st.ctl === 'zeit') { if (st.zeit.run) zeitStop(); else zeitStart(); }
+      break;
+    case 'C': st.scroll = 0; st.msg = null; break;
+    case '1': openZug(); break;
+    case '2': if (f) { st.fsdTab = 0; go('fsd'); } break;
+    case '6':
+      if (f) {
+        st.gw = st.gw === 'r' ? 'l' : 'r';
+        buildView();
+        if (st.ctl === 'ortung') { st.pos.init = false; updatePosition(); }
+        toast(st.gw === 'r' ? 'Regelgleis  /r' : 'Gegengleis  /l');
+      }
+      break;
+    case '7': if (f) { st.sel.zeit = ZEIT_OPT.findIndex((o) => o.c === st.ctl); go('zeit'); } break;
+    case '0': st.sel.grund = 0; go('grund'); break;
+  }
+}
+
+function openZug() {
+  const b = st.bridge;
+  st.zugIn = '';
+  if (st.source === 'zusi' && b.zusiKey && b.zusiKey !== st.loggedKey) st.zugIn = b.zusiKey;
+  else if (st.source === 'demo' && st.loggedKey !== '4711') st.zugIn = '4711';
+  st.zugMsg = st.zugIn ? 'Vorschlag ' + (st.source === 'zusi' ? 'von Zusi' : 'Demo') + ' – mit E übernehmen' : 'Zugnummer eingeben';
+  st.zugErr = false;
+  st.sel.zug = -1;
+  go('zug');
+}
+function zugKey(k) {
+  const L = libList();
+  if (/^[0-9]$/.test(k)) {
+    if (st.zugIn.length < 8) st.zugIn += k;
+    st.zugMsg = ''; st.zugErr = false; st.sel.zug = -1;
+  } else if (k === 'C') {
+    if (st.zugIn) { st.zugIn = st.zugIn.slice(0, -1); st.zugMsg = ''; st.zugErr = false; } else back();
+  } else if (k === 'up' || k === 'down') {
+    if (!L.length) return;
+    st.sel.zug = clamp(st.sel.zug + (k === 'down' ? 1 : -1), 0, L.length - 1);
+    st.zugIn = L[st.sel.zug][0];
+    st.zugMsg = ''; st.zugErr = false;
+  } else if (k === 'E') {
+    if (!st.zugIn) { st.zugMsg = 'Bitte Zugnummer eingeben'; st.zugErr = true; return; }
+    const key = libFind(st.zugIn);
+    if (!key) {
+      st.zugErr = true;
+      st.zugMsg = `Zug ${st.zugIn} nicht gefunden` + (st.source === 'zusi' ? (st.bridge.zusiKey ? ` – Zusi meldet ${st.bridge.zusiKey}` : ' – Zusi hat noch keinen Fahrplan geschickt') : ' – Fahrplandatei über G ▸ 3 einlesen');
+      return;
+    }
+    anmelden(key);
+  }
+}
+function fsdKey(k) {
+  const L = halteListe();
+  if (k === 'C' || k === '2') st.screen = 'main';
+  else if (k === '0') { st.sel.grund = 0; go('grund'); }
+  else if (k === 'left' || k === 'right') { st.fsdTab = 1 - st.fsdTab; if (st.fsdTab === 1) { const nh = nextHalt(st.pos.p - 0.5); st.sel.halte = Math.max(0, L.findIndex((r) => r.i >= (nh ?? 0))); } }
+  else if (st.fsdTab === 1 && (k === 'up' || k === 'down')) st.sel.halte = clamp(st.sel.halte + (k === 'down' ? 1 : -1), 0, Math.max(0, L.length - 1));
+  else if (k === 'E') {
+    if (st.fsdTab === 1 && L[st.sel.halte]) {
+      const r = L[st.sel.halte];
+      st.screen = 'main';
+      st.scroll = toViewPos(r.i) - toViewPos(st.pos.p) || 1e-6;
+      st.scrollAt = Date.now();
+    } else st.screen = 'main';
+  }
+}
+function zeitKey(k) {
+  if (k === 'C' || k === '7') { st.screen = 'main'; return; }
+  if (/^[1-3]$/.test(k)) { st.sel.zeit = +k - 1; setCtl(ZEIT_OPT[st.sel.zeit].c); st.screen = 'main'; return; }
+  if (k === 'up' || k === 'down') st.sel.zeit = clamp(st.sel.zeit + (k === 'down' ? 1 : -1), 0, ZEIT_OPT.length - 1);
+  if (k === 'E') { setCtl(ZEIT_OPT[st.sel.zeit].c); st.screen = 'main'; }
+}
+function grundKey(k) {
+  if (k === 'C') { st.screen = 'main'; return; }
+  if (/^[0-9]$/.test(k)) { const g = GRUND.find((x) => String(x.n) === k); if (g) g.a(); return; }
+  if (k === 'up' || k === 'down') st.sel.grund = (st.sel.grund + (k === 'down' ? 1 : -1) + GRUND.length) % GRUND.length;
+  if (k === 'E') GRUND[st.sel.grund].a();
+}
+function menuKey(k) {
+  const m = MENU[st.sel.menu];
+  if (k === 'C') back();
+  else if (k === 'up') st.sel.menu = (st.sel.menu - 1 + MENU.length) % MENU.length;
+  else if (k === 'down') st.sel.menu = (st.sel.menu + 1) % MENU.length;
+  else if ((k === 'left' || k === 'right') && m.ch) { m.ch(k === 'left' ? -1 : 1); saveS(); }
+  else if (k === 'E') { if (m.a) m.a(); else if (m.ch) m.ch(1); saveS(); }
+  else if (/^[1-9]$/.test(k)) st.sel.menu = clamp(+k - 1, 0, MENU.length - 1);
+}
+function brhKey(k) {
+  const fld = st.sel.brh === 0 ? 'masse' : 'bg';
+  if (/^[0-9]$/.test(k)) { if (st.brh[fld].length < 5) st.brh[fld] = (st.brh[fld] + k).replace(/^0+(?=\d)/, ''); }
+  else if (k === 'C') { if (st.brh[fld]) st.brh[fld] = st.brh[fld].slice(0, -1); else back(); }
+  else if (k === 'up' || k === 'down') st.sel.brh = 1 - st.sel.brh;
+  else if (k === 'E') { const v = brhWert(); if (v == null) flash('Zugmasse und Bremsgewicht eingeben', 'warn'); else if (st.sel.brh === 0) st.sel.brh = 1; else flash('Bremshundertstel ' + v + ' % · ZDE-Eingabe ' + Math.floor(v / 10), 'ok', 7000); }
+}
+function stoerKey(k) {
+  const n = stoerungen().length;
+  if (k === 'C') { st.abhilfe = null; back(); }
+  else if (k === 'up' || k === 'down') { st.sel.stoer = clamp(st.sel.stoer + (k === 'down' ? 1 : -1), 0, Math.max(0, n - 1)); st.abhilfe = null; }
+}
+function infoKey(k) { if (k === 'C' || k === 'E') back(); }
+function grafKey(k) {
+  if (k === 'C') { back(); return; }
+  if (k === 'left') st.graf.zoom = Math.max(1, st.graf.zoom / 1.6);
+  else if (k === 'right') st.graf.zoom = Math.min(40, st.graf.zoom * 1.6);
+  else if (k === 'up') st.graf.off += 0.25;
+  else if (k === 'down') st.graf.off -= 0.25;
+  else if (k === 'E') st.graf.off = 0;
+  if (st.graf.zoom === 1) st.graf.off = 0;
+}
+
+function toggleFullscreen() {
+  const d = document, el = d.documentElement;
+  try {
+    if (d.fullscreenElement || d.webkitFullscreenElement) (d.exitFullscreen || d.webkitExitFullscreen).call(d);
+    else if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else flash('iPad: Teilen ▸ „Zum Home-Bildschirm“ für Vollbild', '');
+  } catch (e) { flash('Vollbild nicht verfügbar', 'warn'); }
+}
+
+// Eingaben: Touch / Maus / Tastatur
+document.addEventListener('pointerdown', (e) => {
+  requestWakeLock();
+  if (e.target.closest('#conn')) {
+    const b = e.target.closest('[data-c]');
+    if (b) { e.preventDefault(); connAction(b.dataset.c, b.dataset.addr); }
+    return;
+  }
+  const tb = e.target.closest('.tb');
+  if (tb) {
+    e.preventDefault();
+    if (tb.classList.contains('dis')) { SND.play('err'); return; }
+    let k = tb.dataset.k;
+    if (k.startsWith('nav')) {
+      k = k.slice(3);
+      if (k === '0' && st.screen === 'grund') { st.screen = 'main'; press('C'); return; }
+      if (st.screen !== 'main') st.screen = 'main';
+    }
+    press(k);
+    return;
+  }
+  const key = e.target.closest('.key');
+  if (key) { e.preventDefault(); press(key.dataset.k); return; }
+  const sk = e.target.closest('.sk');
+  if (sk && sk.innerHTML) { e.preventDefault(); press(sk.dataset.k); return; }
+  const pick = (attr, selKey, fn) => {
+    const el = e.target.closest(`[data-${attr}]`);
+    if (!el) return false;
+    const i = +el.dataset[attr];
+    if (st.sel[selKey] === i) fn(i); else { st.sel[selKey] = i; if (selKey === 'zug') { st.zugIn = libList()[i][0]; st.zugMsg = ''; st.zugErr = false; } render(); }
+    return true;
+  };
+  if (pick('mi', 'menu', () => press('E'))) return;
+  if (pick('hi', 'halte', () => press('E'))) return;
+  if (pick('zi', 'zug', () => press('E'))) return;
+  if (pick('gi', 'grund', () => press('E'))) return;
+  if (pick('ti', 'zeit', () => press('E'))) return;
+  if (pick('si', 'stoer', () => {})) return;
+  if (pick('bi', 'brh', () => {})) return;
+  if (st.off && e.target.closest('#screen')) { st.off = false; render(); }
+});
+// Wischen im Fahrplan = Vorschau blättern
+let swipe = null;
+$('tbl').addEventListener('touchstart', (e) => { swipe = { y: e.touches[0].clientY, s: st.scroll }; }, { passive: true });
+$('tbl').addEventListener('touchmove', (e) => {
+  if (!swipe || !st.fpl) return;
+  const dy = (e.touches[0].clientY - swipe.y) / scale;
+  const rows = dy / S.rowH * (S.dir === 'up' ? 1 : -1);
+  st.scroll = Math.round(swipe.s + rows);
+  st.scrollAt = Date.now();
+  render();
+}, { passive: true });
+$('tbl').addEventListener('wheel', (e) => { e.preventDefault(); if (st.fpl) { preview(e.deltaY < 0 ? 1 : -1); render(); } }, { passive: false });
+
+const KBMAP = { Enter: 'E', Escape: 'C', Backspace: 'C', ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', PageUp: 'V>0', PageDown: 'V=0', s: 'S', i: 'i', t: 'St', h: 'hell', n: 'kontrast', u: 'UD', a: 'aus', f: 'fullscreen' };
+document.addEventListener('keydown', (e) => {
+  if (e.target && e.target.matches && e.target.matches('input, textarea')) {
+    if (e.key === 'Enter') { e.preventDefault(); connAction('connect'); }
+    if (e.key === 'Escape') closeConn();
+    return;
+  }
+  if (st.connOpen) { if (e.key === 'Escape') closeConn(); return; }
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  const k = /^[0-9]$/.test(e.key) ? e.key : KBMAP[e.key] || KBMAP[e.key.toLowerCase()];
+  if (!k) return;
+  e.preventDefault();
+  if (k === 'fullscreen') return toggleFullscreen();
+  press(k);
+});
+
+// Fahrplandatei einlesen (wird im Fahrplanspeicher abgelegt und angemeldet)
+$('fileinp').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  try {
+    const buf = await file.arrayBuffer();
+    let text = new TextDecoder('utf-8').decode(buf);
+    if (text.includes('�')) text = new TextDecoder('windows-1252').decode(buf);
+    const { key } = libAdd(text, 'Datei ' + file.name, true);
+    if (st.source === 'demo') setSource('offline', false);
+    anmelden(key);
+  } catch (err) { flash('Fehler: ' + err.message, 'warn', 7000); }
+});
+
+// ------------------------------------------------------------ Skalierung / Drehung
+let scale = 1;
+const LAY = { phone: false, W: 950, th: 458, h2: 40, li: 38 };
+function isPhone() {
+  if (S.layout === 'handy') return true;
+  if (S.layout === 'geraet') return false;
+  return Math.min(window.innerWidth, window.innerHeight) < 600;
+}
+function box(id, l, t, w, h) {
+  const s = (typeof id === 'string' ? $(id) : id).style;
+  s.left = l + 'px'; s.top = t + 'px';
+  if (w != null) s.width = w + 'px';
+  if (h != null) s.height = h + 'px';
+  s.display = '';
+}
+function safeInsets() {
+  const d = document.createElement('div');
+  d.style.cssText = 'position:fixed;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
+  document.body.appendChild(d);
+  const c = getComputedStyle(d), r = [c.paddingTop, c.paddingRight, c.paddingBottom, c.paddingLeft].map((v) => parseFloat(v) || 0);
+  d.remove();
+  return r;
+}
+function layout() {
+  const vw = window.innerWidth, vh = window.innerHeight, dev = $('device');
+  const phone = isPhone();
+  LAY.phone = phone;
+  dev.classList.toggle('phone', phone);
+  let W, H, hdrH, msgH, th, aw;
+  const hdrCells = {};
+  if (!phone) {
+    const rot = S.rot % 180 !== 0;
+    scale = Math.min(vw / (rot ? 820 : 1180), vh / (rot ? 1180 : 820));
+    Object.assign(dev.style, { left: '50%', top: '50%', width: '1180px', height: '820px', transform: `translate(-50%,-50%) rotate(${S.rot}deg) scale(${scale})` });
+    box('screen', 150, 92, 950, 624);
+    aw = 950; hdrH = 70; msgH = 38; th = 458;
+    Object.assign(hdrCells, { 'h-zug': [0, 0, 171, 44], 'h-lauf': [171, 0, 541, 44], 'h-uhr': [712, 0, 124, 44], 'h-vsp': [836, 0, 114, 44],
+      'h-kmc': [0, 44, 171, 24], 'h-info': [171, 44, 541, 24], 'h-datum': [712, 44, 124, 24], 'h-mode': [836, 44, 114, 24] });
+    box('tbl', 0, 70, 944, 458); box('msg', 0, 528, 950, 38); box('soft', 0, 566, 950, 58);
+    $('msgbox').style.width = '650px'; $('icons').style.left = '660px';
+    setCols(58, 171, 712, 836, [19, 17, 19, 21, 19]);
+    LAY.h2 = 40; LAY.li = 38;
+  } else {
+    scale = 1;
+    const [iT, iR, iB, iL] = safeInsets();
+    Object.assign(dev.style, { left: '0', top: '0', width: vw + 'px', height: vh + 'px', transform: 'none' });
+    W = vw - iL - iR; H = vh - iT - iB;
+    box('screen', iL, iT, W, H);
+    const tbEl = $('toolbar');
+    LAY.h2 = 34; LAY.li = 34;
+    if (H > W) { // Hochformat
+      hdrH = 96; msgH = 32;
+      const tbH = 2 * 50 + 3 * 6;
+      aw = W; th = H - hdrH - msgH - tbH;
+      const a = Math.round(W * 0.36), b = Math.round(W * 0.74);
+      Object.assign(hdrCells, { 'h-zug': [0, 0, a, 44], 'h-uhr': [a, 0, b - a, 44], 'h-vsp': [b, 0, W - b, 44], 'h-lauf': [0, 44, W, 28],
+        'h-kmc': [0, 72, a, 22], 'h-mode': [a, 72, b - a, 22], 'h-datum': [b, 72, W - b, 22], 'h-info': null });
+      box(tbEl, 0, H - tbH, W, tbH);
+      tbEl.style.gridTemplateColumns = 'repeat(6, 1fr)'; tbEl.style.gridTemplateRows = 'repeat(2, 1fr)';
+      setCols(34, 94, W - 118, W - 59, [14, 13, 15.5, 17, 14]);
+    } else { // Querformat
+      hdrH = 64; msgH = 30;
+      const tbW = 2 * 60 + 3 * 6;
+      aw = W - tbW; th = H - hdrH - msgH;
+      const f = aw / 950, x = (v) => Math.round(v * f);
+      Object.assign(hdrCells, { 'h-zug': [0, 0, x(171), 40], 'h-lauf': [x(171), 0, x(541), 40], 'h-uhr': [x(712), 0, x(124), 40], 'h-vsp': [x(836), 0, aw - x(836), 40],
+        'h-kmc': [0, 40, x(171), 22], 'h-info': [x(171), 40, x(541), 22], 'h-datum': [x(712), 40, x(124), 22], 'h-mode': [x(836), 40, aw - x(836), 22] });
+      box(tbEl, aw, 0, tbW, H);
+      tbEl.style.gridTemplateColumns = 'repeat(2, 1fr)'; tbEl.style.gridTemplateRows = 'repeat(6, 1fr)';
+      const cb = aw - Math.max(64, x(114)), ca = cb - Math.max(64, x(124));
+      const fs = clamp(f * 1.15, 0.78, 1);
+      setCols(Math.max(40, x(58)), Math.max(100, x(171)), ca, cb, [19 * fs, 17 * fs, 19 * fs, 21 * fs, 19 * fs]);
+    }
+    box('tbl', 0, hdrH, aw, th); box('msg', 0, hdrH + th, aw, msgH);
+    $('msgbox').style.width = (aw - 150) + 'px'; $('icons').style.left = (aw - 146) + 'px';
+  }
+  box('hdr', 0, 0, aw, hdrH);
+  for (const [id, c] of Object.entries(hdrCells)) { if (c) box(id, ...c); else $(id).style.display = 'none'; }
+  for (const pg of document.querySelectorAll('.page')) box(pg, 0, hdrH, aw, th);
+  LAY.W = aw; LAY.th = th;
+  const cv = $('cv'); cv.width = aw; cv.height = Math.max(100, th - LAY.h2);
+  $('toast').style.top = Math.round(hdrH + th * 0.35) + 'px';
+  $('empty').style.top = Math.round(th * 0.3) + 'px';
+  softCache = ''; tbCache = '';
+  render();
+}
+function setCols(cv, ck, ca, cb, fs) {
+  const d = $('device').style;
+  [['--cv', cv], ['--ck', ck], ['--ca', ca], ['--cb', cb]].forEach(([k, v]) => d.setProperty(k, v + 'px'));
+  ['--fs-v', '--fs-km', '--fs-name', '--fs-halt', '--fs-time'].forEach((k, i) => d.setProperty(k, fs[i].toFixed(1) + 'px'));
+}
+
+// Touch-Leiste im Handy-Layout (Softkeys + Bedientasten)
+let tbCache = '';
+function renderToolbar() {
+  if (!LAY.phone) return;
+  const f = !!st.fpl, main = st.screen === 'main';
+  const key = [st.screen, f, st.gw, st.ctl, st.zeit.run, st.loading ? 1 : 0].join('|');
+  if (tbCache === key) return;
+  tbCache = key;
+  const items = [['nav1', 'Zug'], ['nav2', 'FSD', !f], ['nav6', 'GW /' + st.gw, !f], ['nav7', 'Zeit', !f], ['nav0', 'G'], ['St', 'St'],
+    ['C', main ? 'C' : 'Zurück'], ['left', '◄', 0, 1], ['up', '▲', 0, 1], ['down', '▼', 0, 1], ['right', '►', 0, 1], ['E', main && f && st.ctl === 'zeit' ? (st.zeit.run ? 'E ‖' : 'E ▶') : 'E']];
+  $('toolbar').innerHTML = items.map(([k, l, dis, ar]) => `<div class="tb${ar ? ' arrow' : ''}${dis ? ' dis' : ''}${l.length > 5 ? ' small' : ''}" data-k="${k}">${l}</div>`).join('');
+}
+
+// Bildschirm anlassen (Browser, falls unterstützt)
+let wakeLock = null;
+async function requestWakeLock() {
+  if (wakeLock || !('wakeLock' in navigator) || document.visibilityState !== 'visible') return;
+  try { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } catch (e) { /* nicht erlaubt */ }
+}
+document.addEventListener('visibilitychange', requestWakeLock);
+
+// Verbindungsdialog
+function openConn() {
+  st.connOpen = true;
+  $('conn').classList.add('show');
+  $('c-addr').value = (S.bridgeUrl || '').replace(/^https?:\/\//, '');
+  $('c-status').textContent = location.protocol === 'https:' ? 'Hinweis: Von einer https-Seite aus ist keine Verbindung zur Bridge möglich – die Adresse der Bridge direkt im Browser öffnen.' : '';
+  $('c-found').innerHTML = '';
+  $('c-scanbtn').style.display = location.protocol === 'https:' ? 'none' : '';
+}
+function closeConn() { st.connOpen = false; scanAbort = true; $('conn').classList.remove('show'); try { document.activeElement.blur(); } catch (e) { /* egal */ } }
+function normAddr(a) {
+  a = String(a || '').trim();
+  if (!a) return '';
+  if (!/^https?:\/\//i.test(a)) a = 'http://' + a;
+  try { const u = new URL(a); if (!u.port && u.protocol === 'http:') u.port = '8080'; return u.origin; } catch (e) { return null; }
+}
+async function probe(base, ms) {
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), ms);
+  try { const r = await fetch(base + '/api/state', { signal: ctl.signal, cache: 'no-store' }); const j = await r.json(); return j.bridge === 'nussy-ebula' ? j : null; }
+  catch (e) { return null; } finally { clearTimeout(to); }
+}
+let scanAbort = false;
+async function connAction(c, addr) {
+  const status = $('c-status');
+  if (c === 'close') return closeConn();
+  if (c === 'demo') { closeConn(); setSource('demo', true); return; }
+  if (c === 'connect') {
+    const a = addr || normAddr($('c-addr').value);
+    if (a === null) { status.textContent = 'Ungültige Adresse'; return; }
+    if (a === '' && !location.protocol.startsWith('http')) { status.textContent = 'Bitte die Adresse der Bridge eingeben'; return; }
+    status.textContent = 'Verbinde mit ' + (a || location.host) + ' …';
+    const j = await probe(a, 3000);
+    if (!j) { status.textContent = 'Keine Bridge erreichbar. Läuft start.bat? Selbes WLAN? Windows-Firewall erlaubt?'; return; }
+    S.bridgeUrl = a; saveS(); closeConn();
+    setSource('zusi', true);
+    return;
+  }
+  if (c === 'scan') {
+    scanAbort = false;
+    let ip = null;
+    try { ip = window.NussyApp && window.NussyApp.getLocalIp ? window.NussyApp.getLocalIp() : null; } catch (e) { /* kein App-Interface */ }
+    const prefixes = ip && /^\d+\.\d+\.\d+\.\d+$/.test(ip) ? [ip.split('.').slice(0, 3).join('.')] : ['192.168.178', '192.168.0', '192.168.1', '192.168.2', '10.0.0', '172.20.10'];
+    const port = (normAddr($('c-addr').value) || ':8080').split(':').pop() || '8080';
+    const found = [];
+    for (const pre of prefixes) {
+      const hosts = Array.from({ length: 254 }, (_, i) => `${pre}.${i + 1}`);
+      let done = 0;
+      const worker = async () => {
+        while (hosts.length && !scanAbort) {
+          const h = hosts.shift();
+          const base = `http://${h}:${port}`;
+          if (await probe(base, 1500)) {
+            found.push(base);
+            $('c-found').innerHTML = found.map((f) => `<button data-c="connect" data-addr="${f}">Verbinden mit ${f.replace('http://', '')}</button>`).join('');
+          }
+          done++;
+          status.textContent = `Suche in ${pre}.x … ${done}/254`;
+        }
+      };
+      await Promise.all(Array.from({ length: 48 }, worker));
+      if (found.length || scanAbort) break;
+    }
+    if (!scanAbort) status.textContent = found.length ? `${found.length} Bridge gefunden – antippen zum Verbinden` : 'Keine Bridge gefunden – Adresse bitte eingeben';
+  }
+}
+window.appBack = () => {
+  if (st.connOpen) { closeConn(); return true; }
+  if (st.screen !== 'main' || st.scroll !== 0) { press('C'); return true; }
+  return false;
+};
+
+window.addEventListener('resize', () => layout());
+window.addEventListener('orientationchange', () => setTimeout(layout, 200));
+
+// ------------------------------------------------------------ Datenquellen
+function bridgeBase() { return S.bridgeUrl || (location.protocol.startsWith('http') ? '' : 'http://localhost:8080'); }
+let es = null;
+function stopBridge() { if (es) { es.close(); es = null; } st.bridge.ok = false; st.bridge.zusi = false; }
+function startBridge() {
+  stopBridge();
+  try { es = new EventSource(bridgeBase() + '/events'); } catch (e) { flash('Bridge-Adresse ungültig', 'warn'); return; }
+  es.onopen = () => { st.bridge.ok = true; render(); };
+  es.onerror = () => { st.bridge.ok = false; st.bridge.zusi = false; render(); };
+  es.addEventListener('status', (e) => {
+    const s = JSON.parse(e.data);
+    const was = st.bridge.zusi;
+    st.bridge.ok = true;
+    Object.assign(st.bridge, { zusi: s.zusi, version: s.version, error: s.error });
+    if (s.zusi && !was) flash('Verbindung zu Zusi ' + (s.version || '') + ' hergestellt', 'ok', 4500, 'info');
+    if (!s.zusi) { st.live = { v: null, km: null, time: null, date: null, weg: null, vStrecke: null, afb: null, at: 0 }; }
+    render();
+  });
+  es.addEventListener('ftd', (e) => {
+    const d = JSON.parse(e.data), L = st.live;
+    if (d[1] != null) L.v = d[1];
+    if (d[0x23] != null) L.time = d[0x23];
+    if (d[0x4B] != null) L.date = d[0x4B];
+    if (d[0x61] != null) L.km = d[0x61];
+    if (d[0x19] != null) L.weg = d[0x19];
+    if (d[0x4D] != null) L.vStrecke = d[0x4D];
+    if (d[0x17] != null) L.afb = d[0x17];
+    L.at = Date.now();
+    updatePosition();
+    render();
+  });
+  es.addEventListener('prog', (e) => {
+    const p = JSON.parse(e.data), b = st.bridge;
+    Object.assign(b, { zugnummer: p.zugnummer, zugdatei: p.zugdatei, ladepause: p.ladepause });
+    if (p.xml && p.xmlRev !== b.xmlRev) {
+      b.xmlRev = p.xmlRev;
+      try {
+        const { key, f } = libAdd(p.xml, p.xmlSource === 'Zusi' ? 'Zusi (live)' : p.xmlSource, false);
+        b.zusiKey = key;
+        if (st.loggedKey === key) {
+          // gleicher Zug: Fahrplan aktualisieren, Steuerungsart beibehalten
+          const ctl = st.ctl, gw = st.gw;
+          loadFahrplan(f); st.ctl = ctl; st.gw = gw; buildView(); updatePosition();
+        } else if (S.autoLogin) anmelden(key, true);
+        else flash(`Zusi: Zug ${zugTitel(f) || key} bereit – Taste 1 „Zug“, dann E`, 'ok', 8000, 'info');
+      } catch (err) { flash('Buchfahrplan von Zusi fehlerhaft: ' + err.message, 'warn', 7000); }
+    } else if (!p.xml) b.zusiKey = null;
+    render();
+  });
+}
+
+// Demo: simulierte Fahrt auf einer fiktiven Strecke
+const DEMO_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<Zusi><Info DateiTyp="Buchfahrplan" Version="A.1" MinVersion="A.1"/>
+<Buchfahrplan Gattung="RE" Nummer="4711" Zuglauf="Nussyhausen Hbf - Bad Musterstadt" BR="146" Masse="412000" spMax="44.4444" Bremsh="1.48" Laenge="168.4" kmStart="12.4" BremsstellungZug="1">
+<FplZeile FplLaufweg="0"><FplvMax vMax="16.6667"/><Fplkm km="12.4"/><FplName FplNameText="Nussyhausen Hbf"/><FplAnk Ank="2026-10-29 07:58:00"/><FplAbf Abf="2026-10-29 08:00:00"/></FplZeile>
+<FplZeile FplLaufweg="260"><Fplkm km="12.66"/><FplName FplNameText="Asig N1"/></FplZeile>
+<FplZeile FplLaufweg="900"><FplvMax vMax="27.7778"/><Fplkm km="13.3"/></FplZeile>
+<FplZeile FplLaufweg="1500"><FplvMax vMax="33.3333"/><Fplkm km="13.9"/><FplName FplNameText="Bk Nussyhausen Ost"/></FplZeile>
+<FplZeile FplLaufweg="2600"><Fplkm km="15.0"/><FplName FplNameText="Sbk 150"/><FplSignaltyp FplSignaltypNr="10"/></FplZeile>
+<FplZeile FplLaufweg="3700"><FplvMax vMax="22.2222"/><Fplkm km="16.1"/></FplZeile>
+<FplZeile FplLaufweg="4100"><Fplkm km="16.5"/><FplName FplNameText="Esig"/><FplSignaltyp FplSignaltypNr="7"/></FplZeile>
+<FplZeile FplLaufweg="4900"><Fplkm km="17.3"/><FplName FplNameText="Waldheim"/><FplAnk Ank="2026-10-29 08:05:00"/><FplAbf Abf="2026-10-29 08:05:30"/></FplZeile>
+<FplZeile FplLaufweg="5150"><Fplkm km="17.55"/><FplName FplNameText="Asig"/></FplZeile>
+<FplZeile FplLaufweg="5600"><FplvMax vMax="38.8889"/><Fplkm km="18.0"/></FplZeile>
+<FplZeile FplLaufweg="7400"><Fplkm km="19.8"/><FplName FplNameText="Tunnel Eichberg"/><FplSaegelinien FplAnzahl="1"/></FplZeile>
+<FplZeile FplLaufweg="9000"><Fplkm km="21.4"/><FplName FplNameText="Sbk 214"/><FplSignaltyp FplSignaltypNr="10"/></FplZeile>
+<FplZeile FplLaufweg="11800"><Fplkm km="24.2"/><FplName FplNameText="Bk Eichenau"/><FplAbf Abf="2026-10-29 08:10:00"/></FplZeile>
+<FplZeile FplLaufweg="13000"><FplvMax vMax="27.7778"/><Fplkm km="25.4"/><FplNameRechts FplNameText="Brücke"/></FplZeile>
+<FplZeile FplLaufweg="14500"><Fplkm km="26.9"/><FplName FplNameText="Esig"/><FplSignaltyp FplSignaltypNr="7"/></FplZeile>
+<FplZeile FplLaufweg="15200"><Fplkm km="27.6"/><FplName FplNameText="Lindenfeld"/><FplAnk Ank="2026-10-29 08:13:30"/><FplAbf Abf="2026-10-29 08:14:30"/></FplZeile>
+<FplZeile FplLaufweg="15450"><Fplkm km="27.85"/><FplName FplNameText="Asig"/></FplZeile>
+<FplZeile FplLaufweg="16000"><FplvMax vMax="33.3333"/><Fplkm km="28.4" FplSprung="1" FplkmNeu="3.2"/><FplName FplNameText="Abzw Lindenfeld Nord"/><FplAbf Abf="2026-10-29 08:15:30"/></FplZeile>
+<FplZeile FplLaufweg="19000"><Fplkm km="6.2"/><FplName FplNameText="Sbk 62"/><FplSignaltyp FplSignaltypNr="10"/></FplZeile>
+<FplZeile FplLaufweg="21500"><FplvMax vMax="44.4444"/><Fplkm km="8.7"/></FplZeile>
+<FplZeile FplLaufweg="24600"><FplvMax vMax="27.7778"/><Fplkm km="11.8"/></FplZeile>
+<FplZeile FplLaufweg="25000"><Fplkm km="12.2"/><FplName FplNameText="Esig"/><FplSignaltyp FplSignaltypNr="7"/></FplZeile>
+<FplZeile FplLaufweg="25800"><Fplkm km="13.0"/><FplName FplNameText="Bad Musterstadt Ost"/><FplAnk Ank="2026-10-29 08:20:30"/><FplAbf Abf="2026-10-29 08:21:00"/></FplZeile>
+<FplZeile FplLaufweg="26050"><Fplkm km="13.25"/><FplName FplNameText="Asig"/></FplZeile>
+<FplZeile FplLaufweg="28200"><FplvMax vMax="16.6667"/><Fplkm km="15.4"/></FplZeile>
+<FplZeile FplLaufweg="28500"><Fplkm km="15.7"/><FplName FplNameText="Esig"/><FplSignaltyp FplSignaltypNr="7"/></FplZeile>
+<FplZeile FplLaufweg="29300"><Fplkm km="16.5"/><FplName FplNameText="Bad Musterstadt"/><FplAnk Ank="2026-10-29 08:25:00"/><FplRichtungswechsel/></FplZeile>
+</Buchfahrplan></Zusi>`;
+
+const demo = { timer: null, fpl: null, weg: 0, v: 0, t: 0, dwellUntil: null, lastTs: 0 };
+function demoKm(weg) {
+  const R = demo.fpl.rows;
+  for (let j = 0; j < R.length - 1; j++) {
+    const a = R[j], b = R[j + 1];
+    if (weg <= b.laufweg) return a.kmA + (b.km - a.kmA) * (weg - a.laufweg) / ((b.laufweg - a.laufweg) || 1);
+  }
+  return R[R.length - 1].km;
+}
+function startDemo() {
+  stopDemo();
+  demo.fpl = libAdd(DEMO_XML, 'Demo', false).f;
+  const R = demo.fpl.rows;
+  Object.assign(demo, { weg: 0, v: 0, t: R[0].abf - 50 / 86400, dwellUntil: R[0].abf, lastTs: performance.now() });
+  st.live = { v: 0, km: R[0].km, time: demo.t % 1, date: Math.floor(demo.t), weg: 0, vStrecke: R[0].vmax, afb: null, at: Date.now() };
+  demo.timer = setInterval(demoTick, 100);
+  if (S.autoLogin) anmelden('4711', true);
+  else flash('Demo-Fahrt bereit – Taste 1 „Zug“, 4711, E', 'ok', 8000, 'info');
+}
+function stopDemo() { if (demo.timer) clearInterval(demo.timer); demo.timer = null; }
+function demoTick() {
+  const now = performance.now();
+  let dt = Math.min(0.5, (now - demo.lastTs) / 1000) * S.demoSpeed;
+  demo.lastTs = now;
+  const R = demo.fpl?.rows; if (!R || st.source !== 'demo') return;
+  const steps = Math.ceil(dt / 0.1);
+  dt /= steps;
+  for (let s = 0; s < steps; s++) {
+    demo.t += dt / 86400;
+    if (demo.dwellUntil != null) {
+      if (demo.t < demo.dwellUntil) { demo.v = 0; continue; }
+      demo.dwellUntil = null;
+    }
+    const end = R[R.length - 1].laufweg;
+    if (demo.weg >= end - 0.5) { demo.v = 0; continue; }
+    // zulässige Geschwindigkeit an der Position und vorausschauend bremsen
+    let j = 0; while (j < R.length - 1 && R[j + 1].laufweg <= demo.weg + 0.01) j++;
+    let target = (R[j].vEff ?? 60) / 3.6 * 0.97;
+    const b = 0.55;
+    for (let k = j + 1; k < R.length; k++) {
+      const d = R[k].laufweg - demo.weg; if (d > 4000) break;
+      if (R[k].vEff != null && R[k].vChange) target = Math.min(target, Math.sqrt(Math.pow(R[k].vEff / 3.6 * 0.97, 2) + 2 * b * Math.max(0, d - 30)));
+      if (R[k].halt) { target = Math.min(target, Math.sqrt(2 * b * Math.max(0, d - 1)) + (d > 3 ? 0.6 : 0)); break; }
+    }
+    if (demo.v < target) demo.v = Math.min(target, demo.v + 0.5 * dt);
+    else demo.v = Math.max(target, demo.v - 0.9 * dt);
+    demo.weg += demo.v * dt;
+    // Halt erreicht?
+    for (let k = j + 1; k < R.length; k++) {
+      const d = R[k].laufweg - demo.weg; if (d > 10) break;
+      if (R[k].halt && d <= 1.2 && demo.v < 2) {
+        demo.weg = R[k].laufweg; demo.v = 0;
+        demo.dwellUntil = R[k].abf != null ? Math.max(R[k].abf, demo.t + 25 / 86400) : null;
+        if (R[k].abf == null) demo.dwellUntil = 1e9;
+        break;
+      }
+    }
+  }
+  const L = st.live;
+  L.v = demo.v; L.km = demoKm(demo.weg); L.time = demo.t - Math.floor(demo.t); L.date = Math.floor(demo.t); L.weg = demo.weg; L.at = Date.now();
+  let j = 0; while (j < R.length - 1 && R[j + 1].laufweg <= demo.weg) j++;
+  L.vStrecke = R[j].vEff != null ? R[j].vEff / 3.6 : null;
+  updatePosition();
+  render();
+}
+
+function setSource(src, restart) {
+  if (src === 'zusi' && !S.bridgeUrl && !location.protocol.startsWith('http')) { openConn(); return; }
+  if (src === st.source && !restart) return;
+  stopDemo();
+  if (src !== 'zusi') stopBridge();
+  // Demo-Zug abmelden, wenn die Demo verlassen wird
+  if (st.fpl && st.fpl.origin === 'Demo' && (src !== 'demo' || restart)) { st.fpl = null; st.loggedKey = null; buildView(); }
+  st.source = src;
+  S.source = src; saveS();
+  st.live = { v: null, km: null, time: null, date: null, weg: null, vStrecke: null, afb: null, at: 0 };
+  st.scroll = 0;
+  if (src === 'demo') startDemo();
+  else if (src === 'zusi') { startBridge(); flash('Datenquelle: Zusi 3 über Bridge', ''); }
+  else flash('Offline – Fahrplandateien über G ▸ 3 einlesen', '');
+  if (st.fpl && st.ctl === 'ortung' && !ortungMoeglich()) st.ctl = st.fpl.hasTimes ? 'zeit' : 'manuell';
+  render();
+}
+
+// Uhr im Offline-Modus: Echtzeit
+setInterval(() => {
+  if (st.source === 'offline') {
+    const d = new Date();
+    st.live.time = (d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds()) / 86400;
+    st.live.date = dayNum(d.getFullYear(), d.getMonth() + 1, d.getDate());
+    if (st.fpl) updatePosition();
+  }
+  // Zeitsteuerung ohne neue Live-Daten weiterlaufen lassen
+  if (st.source === 'zusi' && st.ctl === 'zeit' && st.zeit.run) updatePosition();
+  // Vorschau springt nach 10 s zum Ortsmarker zurück
+  if (st.scroll !== 0 && st.screen === 'main' && Date.now() - st.scrollAt > 10000) st.scroll = 0;
+  // Zusi ohne neue Daten: Uhr nicht einfrieren lassen (Server sendet nur Änderungen)
+  render();
+}, 1000);
+
+// ------------------------------------------------------------ Start
+async function detectBridge() {
+  if (!location.protocol.startsWith('http') && !S.bridgeUrl) return false;
+  try {
+    const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 1500);
+    const r = await fetch(bridgeBase() + '/api/state', { signal: ctl.signal, cache: 'no-store' });
+    clearTimeout(to);
+    const j = await r.json();
+    return j.bridge === 'nussy-ebula';
+  } catch (e) { return false; }
+}
+
+(async function init() {
+  libLoad();
+  buildKeys();
+  layout();
+  if (S.boot) startBoot();
+  let src = S.source;
+  if (src === 'auto' || src === 'zusi') {
+    const ok = await detectBridge();
+    src = ok ? 'zusi' : (src === 'zusi' && (S.bridgeUrl || location.protocol.startsWith('http')) ? 'zusi' : 'demo');
+  }
+  setSource(src, true);
+  if (IS_APP && !S.bridgeUrl) openConn();
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>

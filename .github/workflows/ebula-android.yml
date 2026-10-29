@@ -1,0 +1,29 @@
+name: EBuLa Android-App
+
+on:
+  push:
+    paths:
+      - 'zusi-ebula/**'
+      - '.github/workflows/ebula-android.yml'
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: APK bauen
+        working-directory: zusi-ebula/android
+        run: ./gradlew --no-daemon assembleRelease
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EBuLa-Android-APK
+          path: zusi-ebula/android/app/build/outputs/apk/ebula/release/app-ebula-release.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Fahrpult-Android-APK
+          path: zusi-ebula/android/app/build/outputs/apk/fahrpult/release/app-fahrpult-release.apk

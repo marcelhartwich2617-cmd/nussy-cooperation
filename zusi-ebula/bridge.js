@@ -327,6 +327,7 @@ const PUBLIC = path.join(__dirname, 'public');
 const STATIC_TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.webmanifest': 'application/manifest+json',
   '.png': 'image/png', '.svg': 'image/svg+xml', '.xml': 'application/xml; charset=utf-8',
+  '.json': 'application/json; charset=utf-8', '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.m4a': 'audio/mp4',
 };
 const server = http.createServer((req, res) => {
   let url;
@@ -358,12 +359,12 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     return res.end(DEBUG_HTML);
   }
-  // Statische Dateien der Anzeige (index.html, Manifest, Icons …)
-  const name = url.pathname === '/' ? 'index.html' : url.pathname.slice(1);
-  if (/^[\w.-]+$/.test(name) && STATIC_TYPES[path.extname(name)]) {
+  // Statische Dateien der Anzeige (index.html, Manifest, Icons, eigene Töne in sounds/ …)
+  const name = url.pathname === '/' ? 'index.html' : decodeURIComponent(url.pathname.slice(1));
+  if (/^(sounds\/)?[\w-][\w. -]*$/.test(name) && STATIC_TYPES[path.extname(name).toLowerCase()]) {
     fs.readFile(path.join(PUBLIC, name), (err, data) => {
       if (err) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end(name + ' fehlt'); }
-      res.writeHead(200, { 'Content-Type': STATIC_TYPES[path.extname(name)], 'Cache-Control': 'no-cache' });
+      res.writeHead(200, { 'Content-Type': STATIC_TYPES[path.extname(name).toLowerCase()], 'Cache-Control': 'no-cache' });
       res.end(data);
     });
     return;

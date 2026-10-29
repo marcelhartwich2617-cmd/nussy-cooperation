@@ -1478,6 +1478,42 @@ const SND = (() => {
     on: (t) => { snap(t, 1800, 0.6, 0.02); body(t, 120, 0.5, 0.06); piezo(t + 0.2, 2000, 0.06, 0.13); piezo(t + 0.29, 2730, 0.14, 0.13); },
     off: (t) => { piezo(t, 2730, 0.06, 0.13); piezo(t + 0.09, 1700, 0.12, 0.13); snap(t + 0.24, 1600, 0.45, 0.02); },
   };
+  // Eigene Tondateien: sounds/sounds.json ordnet den Tönen Dateien zu, z. B. { "key": "taste.wav" }.
+  // XMLHttpRequest statt fetch, damit es auch in der App (file://) funktioniert.
+  const custom = {};
+  function get(url, type) {
+    return new Promise((ok, fail) => {
+      const x = new XMLHttpRequest();
+      x.open('GET', url); x.responseType = type;
+      x.onload = () => (x.status === 200 || (x.status === 0 && x.response) ? ok(x.response) : fail(new Error(url)));
+      x.onerror = () => fail(new Error(url));
+      x.send();
+    });
+  }
+  function loadCustom() {
+    get('sounds/sounds.json', 'json').then((map) => {
+      for (const [n, file] of Object.entries(map || {})) {
+        if (!P[n] || typeof file !== 'string') continue;
+        get('sounds/' + encodeURIComponent(file), 'arraybuffer')
+          .then((buf) => new Promise((ok, fail) => init().decodeAudioData(buf, ok, fail)))
+          .then((b) => { custom[n] = { b, from: leadIn(b) }; })
+          .catch(() => console.warn('EBuLa: Tondatei nicht lesbar:', file));
+      }
+    }).catch(() => { /* keine eigenen Töne – synthetisch */ });
+  }
+  // Stille am Dateianfang überspringen, damit der Ton ohne Verzögerung auf den Tastendruck folgt
+  function leadIn(b) {
+    const d = b.getChannelData(0);
+    let peak = 0;
+    for (let i = 0; i < d.length; i++) peak = Math.max(peak, Math.abs(d[i]));
+    for (let i = 0; i < d.length; i++) if (Math.abs(d[i]) > peak * 0.05) return Math.max(0, i / b.sampleRate - 0.002);
+    return 0;
+  }
+  function sample(t, c) {
+    const s = ctx.createBufferSource();
+    s.buffer = c.b; s.connect(out); s.start(t, c.from);
+  }
+  loadCustom();
   function vibrate(ms) {
     if (!S.vibra) return;
     try {
@@ -1491,8 +1527,13 @@ const SND = (() => {
       else if (name === 'err' || name === 'warn') vibrate(name === 'err' ? [40, 60, 40] : [60, 80, 60, 80, 60]);
       if (!S.sound || (name !== 'key' && !S.meldeton)) return;
       if (name === 'warn') { if (Date.now() - lastWarn < 10000) return; lastWarn = Date.now(); }
-      try { init(); P[name](ctx.currentTime + 0.005); } catch (e) { /* kein Ton */ }
+      try {
+        init();
+        const t = ctx.currentTime + 0.005;
+        if (custom[name]) sample(t, custom[name]); else P[name](t);
+      } catch (e) { /* kein Ton */ }
     },
+    eigene: () => Object.keys(custom),
   };
 })();
 let kbdT = null;

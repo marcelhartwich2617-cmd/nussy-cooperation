@@ -1,0 +1,29 @@
+Eigene Töne für die Nussy EBuLa
+================================
+
+Hier kannst du eigene Tondateien (WAV, MP3, OGG oder M4A) ablegen. Sie ersetzen die
+synthetischen Töne. Die Dateien werden NICHT ins Git-Repo übernommen (siehe .gitignore),
+bleiben also nur auf diesem PC und in der hier gebauten APK.
+
+1. Tondateien in diesen Ordner kopieren.
+2. Eine Datei sounds.json anlegen, die den Tönen die Dateien zuordnet, zum Beispiel:
+
+   {
+     "key":  "taste.wav",
+     "ok":   "quittung.wav",
+     "err":  "fehler.wav",
+     "warn": "stoerung.wav",
+     "on":   "einschalten.wav",
+     "off":  "ausschalten.wav"
+   }
+
+   key  = jeder Tastendruck
+   ok   = Bestätigung (z. B. Zug angemeldet)
+   err  = Fehler / ungültige Eingabe
+   warn = neue Störung
+   on   = Gerät einschalten
+   off  = Gerät ausschalten
+
+   Fehlt ein Eintrag, wird für diesen Ton weiter der synthetische Ton gespielt.
+
+3. Browser/iPad: Seite neu laden. Android-App: APK neu bauen (die Töne werden in die App gepackt).

@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
@@ -51,7 +53,7 @@ public class MainActivity extends Activity {
         s.setTextZoom(100);
         s.setUserAgentString(s.getUserAgentString() + " NussyEBuLa/1.0");
 
-        web.addJavascriptInterface(new AppInterface(), "NussyApp");
+        web.addJavascriptInterface(new AppInterface((Vibrator) getSystemService(VIBRATOR_SERVICE)), "NussyApp");
         web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -154,6 +156,33 @@ public class MainActivity extends Activity {
 
     /** Wird im JavaScript als window.NussyApp angeboten. */
     public static class AppInterface {
+        private final Vibrator vibrator;
+
+        AppInterface(Vibrator vibrator) {
+            this.vibrator = vibrator;
+        }
+
+        /** Haptische Rückmeldung der Tasten. Muster wie navigator.vibrate: "an,aus,an,…" in ms. */
+        @JavascriptInterface
+        @SuppressWarnings("deprecation")
+        public void vibrate(String pattern) {
+            if (vibrator == null || !vibrator.hasVibrator()) return;
+            try {
+                String[] parts = pattern.split(",");
+                long[] wave = new long[parts.length + 1];
+                for (int i = 0; i < parts.length; i++) wave[i + 1] = Math.max(0, Long.parseLong(parts[i].trim()));
+                if (Build.VERSION.SDK_INT >= 26) {
+                    vibrator.vibrate(parts.length == 1
+                            ? VibrationEffect.createOneShot(wave[1], VibrationEffect.DEFAULT_AMPLITUDE)
+                            : VibrationEffect.createWaveform(wave, -1));
+                } else {
+                    vibrator.vibrate(wave, -1);
+                }
+            } catch (Exception ignored) {
+                // ungültiges Muster
+            }
+        }
+
         /** IPv4-Adresse im WLAN, damit die Anzeige das passende Netz nach der Bridge durchsuchen kann. */
         @JavascriptInterface
         public String getLocalIp() {

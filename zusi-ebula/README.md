@@ -31,6 +31,10 @@ Zusi 3 (TCP-Server, Port 1436) ──► bridge.js (Node.js) ──► Browser /
 - **Tag-/Nachtmodus**, Helligkeit, Bildschirm aus, **Drehen um 90° / 180° / 270°** (UD) für ein hochkant montiertes iPad,
   Zeilenhöhe, Filter „nur Betriebsstellen“ und Vollbild
 - Bedienbar per **Touch** (Tasten, Softkeys, Wischen im Fahrplan), **Maus** und **Tastatur**
+- **Gerätetöne wie am Bordgerät**, live erzeugt ohne Sounddateien: Klicken der Folientaste mit Piezo-Quittungston,
+  Bestätigungston (z. B. Zug angemeldet), Fehlerton (ungültige Eingabe), dreifacher Meldeton bei einer neuen Störung,
+  Töne beim Ein- und Ausschalten. Dazu kommt eine kurze **Vibration** bei Tastendruck (Android).
+  Tastenton, Lautstärke, Meldetöne und Vibration lassen sich unter Systemdienste einstellen.
 
 ## Installation
 

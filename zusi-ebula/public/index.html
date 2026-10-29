@@ -521,7 +521,7 @@ function finishFahrplan(f) {
   }
   f.hasTimes = rows.some((r) => r.t != null);
   f.hasWeg = rows.length > 1 && rows.every((r) => r.laufweg != null);
-  f.hasGleis = rows.some((r) => /^[123]$/.test(r.gleis || ''));
+  f.hasGleis = rows.some((r) => /^[23]$/.test(r.gleis || ''));
   // Tagesbezug, falls Zeiten ohne Datum
   const t0 = rows.find((r) => r.t != null);
   f.baseDay = t0 ? Math.floor(t0.t) : null;
@@ -627,11 +627,9 @@ function loadFahrplan(f) {
 }
 
 // ------------------------------------------------------------ Sichtbare Zeilen (Filter, Gleiswechsel)
-function gleisOk(r) {
-  const g = parseInt(r.gleis, 10);
-  if (!(g >= 1 && g <= 3)) return true;
-  return (g & (st.gw === 'l' ? 2 : 1)) !== 0;
-}
+// Zusi-Buchfahrplan „FplRglGgl“: 2 = Zeile gilt nur im Regelgleis, 3 = nur im Gegengleis, sonst für beide Gleise
+function gleisOf(r) { const g = parseInt(r.gleis, 10); return g === 2 ? 'r' : g === 3 ? 'l' : null; }
+function gleisOk(r, gw = st.gw) { const g = gleisOf(r); return g == null || g === gw; }
 function rowVisible(r) {
   if (!gleisOk(r)) return false;
   if (S.filter === 'alle') return true;
@@ -670,29 +668,55 @@ function simTime() {
   return best;
 }
 
-function locateKm(km) {
-  const rows = st.fpl.rows, n = rows.length;
-  const seg = (j) => {
-    if (!gleisOk(rows[j]) || !gleisOk(rows[j + 1])) return null;
-    const k1 = rows[j].kmA, k2 = rows[j + 1].km;
-    if (k1 == null || k2 == null) return null;
-    const tol = 0.03;
-    if (km < Math.min(k1, k2) - tol || km > Math.max(k1, k2) + tol) return null;
-    return j + (k2 === k1 ? 0 : clamp((km - k1) / (k2 - k1), 0, 1));
-  };
-  if (st.pos.init) {
-    const c = Math.floor(st.pos.p);
-    for (let j = Math.max(0, c - 1); j <= Math.min(n - 2, c + 60); j++) { const r = seg(j); if (r != null && r >= st.pos.p - 0.6) return r; }
-    for (let j = Math.max(0, c - 4); j < c - 1; j++) { const r = seg(j); if (r != null) return r; }
+// Ortung: Abschnitte zwischen aufeinanderfolgenden Zeilen mit Kilometrierung, die im Gleis gw gelten.
+// Zeilen des anderen Gleises oder ohne km werden übersprungen, damit keine Lücken entstehen.
+function kmSegments(gw) {
+  const f = st.fpl, key = 'seg_' + gw;
+  if (f[key]) return f[key];
+  const idx = f.rows.filter((r) => r.km != null && gleisOk(r, gw)).map((r) => r.i), segs = [];
+  for (let k = 0; k < idx.length - 1; k++) {
+    const a = f.rows[idx[k]], b = f.rows[idx[k + 1]];
+    if (a.kmA == null) continue;
+    segs.push({ i0: a.i, i1: b.i, k1: a.kmA, k2: b.km, lang: Math.abs(b.km - a.kmA) > 5 });
   }
-  // Globale Suche – mehrere Treffer: am nächsten zur fahrplanmäßigen Position
+  return (f[key] = segs);
+}
+function locateKmOn(km, gw) {
+  const tol = 0.03;
+  const hit = (s) => (km < Math.min(s.k1, s.k2) - tol || km > Math.max(s.k1, s.k2) + tol ? null
+    : s.i0 + (s.i1 - s.i0) * (s.k2 === s.k1 ? 0 : clamp((km - s.k1) / (s.k2 - s.k1), 0, 1)));
+  const segs = kmSegments(gw);
+  // Treffer in sehr langen Abschnitten (> 5 km, z. B. km-Sprung am Fahrplananfang) nur, wenn es keinen anderen gibt
+  const best = (list) => list.filter((r) => !r.lang).concat(list.filter((r) => r.lang)).map((r) => r.p);
+  if (st.pos.init) {
+    const p0 = st.pos.p, near = [];
+    for (const s of segs) {
+      if (s.i1 < p0 - 4 || s.i0 > p0 + 60) continue;
+      const r = hit(s);
+      if (r != null) near.push({ p: r, lang: s.lang, fwd: r >= p0 - 0.6 });
+    }
+    // bevorzugt vorwärts (in Fahrtrichtung), sonst knapp zurück
+    const fwd = best(near.filter((c) => c.fwd).sort((a, b) => a.p - b.p));
+    if (fwd.length) return fwd[0];
+    const back = best(near.filter((c) => !c.fwd).sort((a, b) => b.p - a.p));
+    if (back.length) return back[0];
+  }
+  // Globale Suche – mehrere Treffer: am nächsten zur bisherigen bzw. fahrplanmäßigen Position
   const cand = [];
-  for (let j = 0; j < n - 1; j++) { const r = seg(j); if (r != null) cand.push(r); }
+  for (const s of segs) { const r = hit(s); if (r != null) cand.push({ p: r, lang: s.lang }); }
   if (!cand.length) return null;
   const t = simTime();
   const ref = st.pos.init ? st.pos.p : ((t != null ? timePosAt(t) : null) ?? 0);
-  cand.sort((a, b) => Math.abs(a - ref) - Math.abs(b - ref));
-  return cand[0];
+  cand.sort((a, b) => (a.lang - b.lang) || (Math.abs(a.p - ref) - Math.abs(b.p - ref)));
+  return cand[0].p;
+}
+function locateKm(km) {
+  const r = locateKmOn(km, st.gw);
+  if (r != null || !st.fpl.hasGleis) return r;
+  // Passt die Kilometrierung nur zum anderen Gleis: Gleiswechsel erkennen und umschalten
+  const other = st.gw === 'r' ? 'l' : 'r', r2 = locateKmOn(km, other);
+  if (r2 != null) { st.gw = other; buildView(); toast(other === 'l' ? 'Gegengleis erkannt  /l' : 'Regelgleis erkannt  /r'); }
+  return r2;
 }
 
 // Fahrplanzeit -> Position (für die Zeitsteuerung)

@@ -87,6 +87,41 @@ Tastatur: Ziffern, Enter (E), Esc (C), Pfeiltasten, Bild↑/↓ (V>0/V=0), Pos1 
 LEDs: **KBD** leuchtet bei Tastendruck. **TEMP** ist grün bei Live-Daten, gelb wenn die Bridge läuft, aber Zusi nicht
 verbunden ist, und rot ohne Verbindung zur Bridge. **GPS** ist durchgestrichen, wenn nicht über die Kilometrierung geortet wird.
 
+## Handy-App
+
+Auf Handys schaltet die Anzeige automatisch auf ein **Handy-Layout** um: kein Gerätegehäuse, der Fahrplan füllt den
+Bildschirm, darunter (im Querformat rechts daneben) liegen große Touch-Tasten. Unter **Menü ▸ Layout** lässt sich das
+auch fest einstellen („EBuLa-Gerät“ oder „Handy“).
+
+### Android
+
+1. Die Datei `EBuLa-Zusi3.apk` aufs Handy laden. Sie liegt als Artefakt **EBuLa-Android-APK** bei jedem Lauf der
+   GitHub-Action „EBuLa Android-App“ bereit, oder du baust sie selbst (siehe unten).
+2. Die APK öffnen. Android fragt, ob Installationen aus dieser Quelle erlaubt sind: einmal zulassen.
+3. Die App **EBuLa** starten. Beim ersten Start fragt sie nach der Bridge: die Adresse aus dem `start.bat`-Fenster
+   eintragen (z. B. `192.168.0.23:8080`) oder **„Im WLAN suchen“** antippen. Die App sucht die Bridge dann selbst im WLAN.
+4. Die Adresse wird gespeichert. Später lässt sie sich unter **Menü ▸ Bridge-Adresse** ändern.
+
+Die App läuft im Vollbild und hält den Bildschirm an. Die Zurück-Taste entspricht der Taste C. Fahrplandateien lassen
+sich über „Datei“ auch direkt vom Handy laden. Die Demo funktioniert ohne Netz.
+
+Selbst bauen (Android SDK und JDK 17 nötig):
+```
+cd zusi-ebula/android
+./gradlew assembleRelease      # Ergebnis: app/build/outputs/apk/release/app-release.apk
+```
+Die APK ist mit einem Debug-Schlüssel signiert. Das reicht zum direkten Installieren, aber nicht für den Play Store.
+Wird sie auf einem anderen Rechner gebaut, hat sie eine andere Signatur. Dann die alte App vorher deinstallieren.
+
+### iPhone
+
+Eine App für den App Store braucht einen Mac und ein Apple-Entwicklerkonto. Stattdessen läuft die EBuLa als
+**Web-App vom Home-Bildschirm**:
+
+1. Auf dem iPhone in Safari die Adresse der Bridge öffnen (z. B. `http://192.168.0.23:8080`).
+2. **Teilen ▸ „Zum Home-Bildschirm“**.
+3. Die EBuLa startet dann wie eine App im Vollbild, mit eigenem Icon.
+
 ## Ohne Zusi
 
 `public/index.html` lässt sich auch direkt im Browser öffnen. Dann startet die Demo-Fahrt. Über Taste 3 lässt sich jede
@@ -100,3 +135,5 @@ verbunden ist, und rot ohne Verbindung zur Bridge. **GPS** ist durchgestrichen, 
   0x23 Uhrzeit digital, 0x4B Datum, 0x4D Streckenhöchstgeschwindigkeit und 0x61 Kilometrierung Zugspitze.
   Programmdaten: Zugdatei, Zugnummer, Ladepause und Buchfahrplan (XML).
 - `public/index.html`: die komplette Anzeige in einer Datei (HTML, CSS und JavaScript), ohne Internetzugang.
+- `android/`: Android-App (WebView ohne zusätzliche Bibliotheken). Sie übernimmt `public/` direkt als App-Inhalt.
+- `public/manifest.webmanifest` und `sw.js`: Web-App-Manifest, Icons und Offline-Cache für die Home-Bildschirm-Installation.

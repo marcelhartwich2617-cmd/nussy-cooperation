@@ -1,0 +1,36 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'de.nussy.ebula'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'de.nussy.ebula'
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+    }
+
+    // Die Anzeige wird direkt aus zusi-ebula/public übernommen – eine Quelle für Browser und App
+    sourceSets {
+        main {
+            assets.srcDirs = ['../../public']
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // Zum direkten Installieren (ohne Play Store) mit dem Debug-Schlüssel signiert
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

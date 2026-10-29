@@ -9,8 +9,13 @@
 <meta name="apple-mobile-web-app-title" content="EBuLa">
 <meta name="theme-color" content="#000000">
 <title>EBuLa für Zusi 3</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
 <style>
 :root {
+  --cv: 58px; --ck: 171px; --ca: 712px; --cb: 836px;
+  --fs-v: 19px; --fs-km: 17px; --fs-name: 19px; --fs-halt: 21px; --fs-time: 19px;
   --frame: #26282c;
   --frame-edge: #141518;
   --pink: #e3a6ae;
@@ -102,12 +107,12 @@ html, body {
 .col-line.thin { border-left-width: 1px; opacity: .45; }
 .row { position: absolute; left: 0; width: 100%; font-variant-numeric: tabular-nums; }
 .row > div { position: absolute; top: 0; height: 100%; display: flex; align-items: center; overflow: hidden; white-space: nowrap; }
-.r-v { left: 0; width: 58px; justify-content: center; font-weight: 700; font-size: 19px; }
-.r-km { left: 60px; width: 109px; justify-content: flex-end; padding-right: 9px; font-size: 17px; }
-.r-name { left: 173px; width: 537px; padding-left: 12px; font-size: 19px; gap: 10px; }
-.r-an { left: 714px; width: 120px; justify-content: center; font-size: 19px; }
-.r-ab { left: 838px; width: 112px; justify-content: center; font-size: 19px; }
-.row.halt .r-name .nm { font-weight: 700; font-size: 21px; }
+.r-v { left: 0; width: var(--cv); justify-content: center; font-weight: 700; font-size: var(--fs-v); }
+.r-km { left: calc(var(--cv) + 2px); width: calc(var(--ck) - var(--cv) - 2px); justify-content: flex-end; padding-right: 9px; font-size: var(--fs-km); }
+.r-name { left: calc(var(--ck) + 2px); width: calc(var(--ca) - var(--ck) - 2px); padding-left: 12px; font-size: var(--fs-name); gap: 10px; }
+.r-an { left: calc(var(--ca) + 2px); width: calc(var(--cb) - var(--ca) - 2px); justify-content: center; font-size: var(--fs-time); }
+.r-ab { left: calc(var(--cb) + 2px); right: 0; justify-content: center; font-size: var(--fs-time); }
+.row.halt .r-name .nm { font-weight: 700; font-size: var(--fs-halt); }
 .row.halt .r-an, .row.halt .r-ab { font-weight: 700; }
 .row.halt { background: var(--halt-bg); }
 .row.pass .r-ab { font-style: italic; }
@@ -172,6 +177,54 @@ sup.s { font-size: 11px; margin-left: 1px; vertical-align: 6px; color: var(--scr
 .help b { display: inline-block; min-width: 54px; color: var(--accent); }
 .help p { margin: 0 0 3px; break-inside: avoid; }
 #fileinp { display: none; }
+
+/* Handy-Layout: ohne Gerätegehäuse, Touch-Leiste statt Tasten */
+#device.phone { left: 0; top: 0; border-radius: 0; box-shadow: none; background: var(--scr-bg); }
+#device.phone #outline, #device.phone #keys, #device.phone .led, #device.phone .ledlbl, #device.phone #sensor, #device.phone #soft { display: none; }
+#device.phone #screen { border: 0; border-radius: 0; }
+#toolbar { display: none; position: absolute; z-index: 20; background: var(--soft-bg); gap: 6px; padding: 6px; }
+#device.phone #toolbar { display: grid; }
+.tb { background: var(--soft-btn); border: 1px solid #6c7783; color: var(--soft-txt); font: 700 15px/1.05 "Helvetica Neue", Arial, sans-serif; border-radius: 7px; display: flex; align-items: center; justify-content: center; text-align: center; box-shadow: inset 1px 1px 0 #e7ecf0, inset -1px -1px 0 #7d8893; cursor: pointer; min-width: 0; }
+.tb.arrow { font-size: 19px; }
+.tb:active { filter: brightness(.8); }
+.phone #h-zug { font-size: 18px; } .phone #h-uhr { font-size: 20px; } .phone #h-vsp { font-size: 19px; } .phone #h-lauf { font-size: 15px; }
+.phone .hc { padding: 0 6px; } .phone .hc.b { font-size: 12.5px; }
+.phone .page { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.phone .page h2 { font-size: 16px; height: 34px; line-height: 34px; padding: 0 10px; }
+.phone .page h2 small { display: none; }
+.phone .list { top: 34px; }
+.phone #graf canvas { top: 34px; }
+.phone .kv { grid-template-columns: 44% 56%; font-size: 15px; padding: 4px 10px; }
+.phone .li { font-size: 15px; height: 34px; padding: 0 10px; }
+.phone .li .c2, .phone .li .c3, .phone .li .c4 { width: 50px; }
+.phone .li .c5 { width: 36px; }
+.phone .li .c1 small { display: none; }
+.phone .help { columns: 1; font-size: 13.5px; padding: 6px 10px; }
+.phone #msgbox { font-size: 14px; padding: 0 8px; }
+.phone #icons { gap: 6px; font-size: 11px; right: 4px; }
+.phone #i-v { font-size: 14px; }
+.phone #empty { font-size: 16px; padding: 0 12px; }
+.phone .sig { font-size: 11px; }
+.phone .r-km { padding-right: 5px; } .phone .r-name { padding-left: 8px; gap: 6px; }
+.phone .sprung { display: block; position: absolute; right: 5px; bottom: 0; font-size: 10px; line-height: 1; }
+.phone .li > span:first-child { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.phone .li .val { font-size: 14px; padding-left: 8px; }
+.tb.small { font-size: 13px; }
+
+#conn { position: absolute; inset: 0; z-index: 45; background: rgba(0,0,0,.82); display: none; align-items: center; justify-content: center; }
+#conn.show { display: flex; }
+#conn .box { width: min(560px, 94%); max-height: 96%; overflow-y: auto; background: var(--scr-bg); color: var(--scr-fg); border: 2px solid var(--scr-line); border-radius: 6px; padding: 16px; font-size: 16px; }
+#conn h3 { margin: 0 0 8px; font-size: 20px; }
+#conn p { margin: 0 0 10px; color: var(--scr-dim); font-size: 14px; line-height: 1.4; }
+#conn p b { color: var(--scr-fg); }
+#conn input { width: 100%; font-size: 20px; padding: 10px; border: 2px solid var(--scr-line); background: #000; color: #fff; border-radius: 4px; -webkit-user-select: text; user-select: text; }
+.day #conn input { background: #fff; color: #000; }
+#conn .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+#conn button { flex: 1 1 120px; font-size: 16px; padding: 11px 8px; border-radius: 5px; border: 1px solid #6c7783; background: var(--soft-btn); color: var(--soft-txt); font-weight: 700; cursor: pointer; }
+#conn button.pri { background: #0a5cff; color: #fff; border-color: #0a5cff; }
+.phone #conn { align-items: flex-start; padding-top: 4vh; }
+#c-status { margin-top: 10px; font-size: 14px; min-height: 1.4em; color: var(--accent); }
+#c-found button { display: block; width: 100%; margin-top: 6px; background: #00691f; color: #fff; border-color: #00691f; }
 #toast { position: absolute; left: 50%; top: 210px; transform: translateX(-50%); z-index: 30; background: var(--accent); color: #000; font-size: 20px; font-weight: 700; padding: 10px 18px; border-radius: 4px; display: none; white-space: nowrap; }
 </style>
 </head>
@@ -194,17 +247,17 @@ sup.s { font-size: 11px; margin-left: 1px; vertical-align: 6px; color: var(--scr
         <div class="hc a vsep" id="h-lauf" style="left:171px;width:541px"></div>
         <div class="hc a vsep" id="h-uhr" style="left:712px;width:124px"></div>
         <div class="hc a vsep" id="h-vsp" style="left:836px;width:114px"></div>
-        <div class="hc b" style="left:0;width:171px">km<b id="h-km">–</b></div>
+        <div class="hc b" id="h-kmc" style="left:0;width:171px">km<b id="h-km">–</b></div>
         <div class="hc b vsep" style="left:171px;width:541px" id="h-info"></div>
         <div class="hc b vsep" style="left:712px;width:124px;justify-content:center" id="h-datum"></div>
         <div class="hc b vsep" style="left:836px;width:114px;justify-content:center" id="h-mode"></div>
       </div>
       <div id="tbl">
         <div id="rows"></div>
-        <div class="col-line" style="left:58px"></div>
-        <div class="col-line" style="left:171px"></div>
-        <div class="col-line" style="left:712px"></div>
-        <div class="col-line" style="left:836px"></div>
+        <div class="col-line" style="left:var(--cv)"></div>
+        <div class="col-line" style="left:var(--ck)"></div>
+        <div class="col-line" style="left:var(--ca)"></div>
+        <div class="col-line" style="left:var(--cb)"></div>
         <div id="marker"></div>
         <div id="scrollhint">Vorschau – St: zurück zur Position</div>
         <div id="empty"></div>
@@ -226,9 +279,17 @@ sup.s { font-size: 11px; margin-left: 1px; vertical-align: 6px; color: var(--scr
       </div>
       <div id="soft"></div>
       <div id="toast"></div>
+      <div id="toolbar"></div>
     </div>
     <div id="dim"></div>
     <div id="blank"></div>
+    <div id="conn"><div class="box">
+      <h3>Verbindung zur Bridge</h3>
+      <p>Auf dem Zusi-PC <b>start.bat</b> starten. Im Fenster steht die Adresse für das Tablet/Handy, z.&nbsp;B. <b>192.168.0.23:8080</b>. Handy und PC müssen im selben WLAN sein.</p>
+      <input id="c-addr" type="text" inputmode="url" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="192.168.0.23:8080">
+      <div class="btns"><button class="pri" data-c="connect">Verbinden</button><button data-c="scan" id="c-scanbtn">Im WLAN suchen</button><button data-c="demo">Demo</button><button data-c="close">Abbrechen</button></div>
+      <div id="c-status"></div><div id="c-found"></div>
+    </div></div>
   </div>
   <input type="file" id="fileinp" accept=".xml,.trn,text/xml,application/xml">
 </div>
@@ -241,11 +302,12 @@ sup.s { font-size: 11px; margin-left: 1px; vertical-align: 6px; color: var(--scr
  * ===================================================================== */
 
 const $ = (id) => document.getElementById(id);
+const IS_APP = /NussyEBuLa/i.test(navigator.userAgent);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // ------------------------------------------------------------ Einstellungen
-const DEF = { source: 'auto', dir: 'up', rot: 0, day: false, bright: 100, secs: true, demoSpeed: 1, filter: 'alle', sound: true, rowH: 38, bridgeUrl: '' };
+const DEF = { layout: 'auto', source: 'auto', dir: 'up', rot: 0, day: false, bright: 100, secs: true, demoSpeed: 1, filter: 'alle', sound: true, rowH: 38, bridgeUrl: '' };
 const S = Object.assign({}, DEF);
 try { Object.assign(S, JSON.parse(localStorage.getItem('ebula-settings') || '{}')); } catch (e) { /* privat */ }
 function saveS() { try { localStorage.setItem('ebula-settings', JSON.stringify(S)); } catch (e) { /* egal */ } }
@@ -618,6 +680,7 @@ function doRender() {
   renderTable();
   renderMsg();
   renderSoft();
+  renderToolbar();
   renderPages();
   renderLeds();
 }
@@ -663,7 +726,7 @@ function kmAtP(p) {
 
 function renderTable() {
   const box = $('rows'), f = st.fpl;
-  const H = S.rowH, TH = 458;
+  const H = S.rowH, TH = LAY.th;
   const up = S.dir === 'up';
   if (!f || !st.view.length) {
     box.innerHTML = '';
@@ -823,7 +886,7 @@ function halteListe() { return st.fpl ? st.fpl.rows.filter((r) => r.halt || r.pa
 function renderHalte() {
   const L = halteListe();
   st.sel.halte = clamp(st.sel.halte, 0, Math.max(0, L.length - 1));
-  const visible = 10, start = clamp(st.sel.halte - 4, 0, Math.max(0, L.length - visible));
+  const visible = Math.max(3, Math.floor((LAY.th - LAY.h2 - 28) / LAY.li)), start = clamp(st.sel.halte - Math.floor(visible / 2), 0, Math.max(0, L.length - visible));
   let html = '<div class="li head"><span class="c1">Betriebsstelle</span><span class="c2">An</span><span class="c3">Ab</span><span class="c4">Ist</span><span class="c5">+/−</span></div>';
   L.slice(start, start + visible).forEach((r, k) => {
     const i = start + k, a = st.actual[r.i] || {};
@@ -900,10 +963,7 @@ function renderGraf() {
 const MENU = [
   { l: 'Datenquelle', v: () => ({ zusi: 'Zusi 3 (Bridge)', demo: 'Demo-Fahrt', offline: 'Nur Datei (offline)' }[st.source]), ch: (d) => { const o = ['zusi', 'demo', 'offline']; setSource(o[(o.indexOf(st.source) + d + 3) % 3]); } },
   { l: 'Fahrplandatei laden …', a: () => $('fileinp').click() },
-  { l: 'Bridge-Adresse', v: () => S.bridgeUrl || 'automatisch (diese Seite)', a: () => {
-    const u = prompt('Adresse der Bridge (z. B. http://192.168.0.10:8080) – leer = automatisch', S.bridgeUrl || '');
-    if (u != null) { S.bridgeUrl = u.trim().replace(/\/+$/, ''); saveS(); if (st.source === 'zusi') startBridge(); }
-  } },
+  { l: 'Bridge-Adresse', v: () => S.bridgeUrl ? S.bridgeUrl.replace(/^https?:\/\//, '') : 'automatisch (diese Seite)', a: () => openConn() },
   { l: 'Zusi neu verbinden', a: () => { fetch(bridgeBase() + '/api/reconnect', { method: 'POST' }).then(() => flash('Neuverbindung angefordert', 'ok')).catch(() => flash('Bridge nicht erreichbar', 'warn')); } },
   { l: 'Laufrichtung der Anzeige', v: () => S.dir === 'up' ? 'aufwärts (EBuLa)' : 'abwärts', ch: () => { S.dir = S.dir === 'up' ? 'down' : 'up'; } },
   { l: 'Bildschirm drehen', v: () => S.rot + '°', ch: (d) => { S.rot = (S.rot + d * 90 + 360) % 360; layout(); } },
@@ -915,13 +975,18 @@ const MENU = [
   { l: 'Demo-Zeitraffer', v: () => '×' + S.demoSpeed, ch: (d) => { const o = [1, 2, 5, 10, 20]; S.demoSpeed = o[clamp(o.indexOf(S.demoSpeed) + d, 0, 4)] || 1; } },
   { l: 'Demo-Fahrt neu starten', a: () => setSource('demo', true) },
   { l: 'Tastenton', v: () => S.sound ? 'an' : 'aus', ch: () => { S.sound = !S.sound; } },
+  { l: 'Layout', v: () => ({ auto: 'automatisch', geraet: 'EBuLa-Gerät', handy: 'Handy' }[S.layout] || 'automatisch'), ch: (d) => { const o = ['auto', 'geraet', 'handy']; S.layout = o[(o.indexOf(S.layout) + d + 3) % 3]; saveS(); layout(); } },
+  { l: 'Position manuell vor (V>0)', a: () => { st.screen = 'main'; manualStep(1); } },
+  { l: 'Position manuell zurück (V=0)', a: () => { st.screen = 'main'; manualStep(-1); } },
+  { l: 'Hilfe / Tastenbelegung', a: () => { st.screen = 'info'; } },
   { l: 'Vollbild', a: () => toggleFullscreen() },
   { l: 'Ist-Zeiten zurücksetzen', a: () => { st.actual = {}; st.trace = []; flash('Ist-Zeiten gelöscht', 'ok'); } },
   { l: 'Alle Einstellungen zurücksetzen', a: () => { Object.assign(S, DEF); saveS(); layout(); buildView(); flash('Standardwerte geladen', 'ok'); } },
 ];
+if (IS_APP) MENU.splice(MENU.findIndex((m) => m.l === 'Vollbild'), 1);
 function renderMenu() {
   st.sel.menu = clamp(st.sel.menu, 0, MENU.length - 1);
-  const vis = 11, start = clamp(st.sel.menu - 5, 0, MENU.length - vis);
+  const vis = Math.min(MENU.length, Math.max(3, Math.floor((LAY.th - LAY.h2) / LAY.li))), start = clamp(st.sel.menu - Math.floor(vis / 2), 0, MENU.length - vis);
   $('menulist').innerHTML = MENU.slice(start, start + vis).map((m, k) => {
     const i = start + k;
     return `<div class="li${i === st.sel.menu ? ' sel' : ''}" data-mi="${i}"><span>${p2(i + 1)}&nbsp;&nbsp;${esc(m.l)}</span>${m.v ? `<span class="val">◄ ${esc(m.v())} ►</span>` : '<span class="val">E ▸</span>'}</div>`;
@@ -1010,7 +1075,7 @@ function handleKey(k) {
   if (st.screen === 'info') { if (k === 'E') st.screen = 'main'; return; }
   // Hauptansicht
   const n = st.view.length;
-  const page = Math.max(1, Math.floor(458 / S.rowH) - 2);
+  const page = Math.max(1, Math.floor(LAY.th / S.rowH) - 2);
   switch (k) {
     case 'up': st.scroll = clamp(st.scroll + (S.dir === 'up' ? 1 : -1), -n, n); break;
     case 'down': st.scroll = clamp(st.scroll - (S.dir === 'up' ? 1 : -1), -n, n); break;
@@ -1085,6 +1150,14 @@ function toggleFullscreen() {
 
 // Eingaben: Touch / Maus / Tastatur
 document.addEventListener('pointerdown', (e) => {
+  requestWakeLock();
+  if (e.target.closest('#conn')) {
+    const b = e.target.closest('[data-c]');
+    if (b) { e.preventDefault(); connAction(b.dataset.c, b.dataset.addr); }
+    return;
+  }
+  const tb = e.target.closest('.tb');
+  if (tb) { e.preventDefault(); const k = tb.dataset.k; if (/^[0-4]$/.test(k) && st.screen !== 'main') st.screen = 'main'; press(k); return; }
   const key = e.target.closest('.key');
   if (key) { e.preventDefault(); press(key.dataset.k); return; }
   const sk = e.target.closest('.sk');
@@ -1109,6 +1182,12 @@ $('tbl').addEventListener('wheel', (e) => { e.preventDefault(); press(e.deltaY <
 
 const KBMAP = { Enter: 'E', Escape: 'C', Backspace: 'C', ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', PageUp: 'V>0', PageDown: 'V=0', Home: 'St', s: 'S', i: 'i', t: 'St', h: 'hell', n: 'kontrast', u: 'UD', a: 'aus', f: 'fullscreen', '+': 'V>0', '-': 'V=0' };
 document.addEventListener('keydown', (e) => {
+  if (e.target && e.target.matches && e.target.matches('input, textarea')) {
+    if (e.key === 'Enter') { e.preventDefault(); connAction('connect'); }
+    if (e.key === 'Escape') closeConn();
+    return;
+  }
+  if (st.connOpen) { if (e.key === 'Escape') closeConn(); return; }
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   let k = /^[0-9]$/.test(e.key) ? e.key : KBMAP[e.key] || KBMAP[e.key.toLowerCase()];
   if (!k) return;
@@ -1136,14 +1215,189 @@ $('fileinp').addEventListener('change', async (e) => {
 
 // ------------------------------------------------------------ Skalierung / Drehung
 let scale = 1;
-function layout() {
-  const vw = window.innerWidth, vh = window.innerHeight;
-  const rot = S.rot % 180 !== 0;
-  const w = rot ? 820 : 1180, h = rot ? 1180 : 820;
-  scale = Math.min(vw / w, vh / h);
-  $('device').style.transform = `translate(-50%,-50%) rotate(${S.rot}deg) scale(${scale})`;
+const LAY = { phone: false, W: 950, th: 458, h2: 40, li: 38 };
+function isPhone() {
+  if (S.layout === 'handy') return true;
+  if (S.layout === 'geraet') return false;
+  return Math.min(window.innerWidth, window.innerHeight) < 600;
 }
-window.addEventListener('resize', layout);
+function box(id, l, t, w, h) {
+  const s = (typeof id === 'string' ? $(id) : id).style;
+  s.left = l + 'px'; s.top = t + 'px';
+  if (w != null) s.width = w + 'px';
+  if (h != null) s.height = h + 'px';
+  s.display = '';
+}
+function safeInsets() {
+  const d = document.createElement('div');
+  d.style.cssText = 'position:fixed;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
+  document.body.appendChild(d);
+  const c = getComputedStyle(d), r = [c.paddingTop, c.paddingRight, c.paddingBottom, c.paddingLeft].map((v) => parseFloat(v) || 0);
+  d.remove();
+  return r;
+}
+function layout() {
+  const vw = window.innerWidth, vh = window.innerHeight, dev = $('device');
+  const phone = isPhone();
+  LAY.phone = phone;
+  dev.classList.toggle('phone', phone);
+  let W, H, hdrH, msgH, th, aw;
+  const hdrCells = {};
+  if (!phone) {
+    const rot = S.rot % 180 !== 0;
+    scale = Math.min(vw / (rot ? 820 : 1180), vh / (rot ? 1180 : 820));
+    Object.assign(dev.style, { left: '50%', top: '50%', width: '1180px', height: '820px', transform: `translate(-50%,-50%) rotate(${S.rot}deg) scale(${scale})` });
+    box('screen', 150, 92, 950, 624);
+    aw = 950; hdrH = 70; msgH = 38; th = 458;
+    Object.assign(hdrCells, { 'h-zug': [0, 0, 171, 44], 'h-lauf': [171, 0, 541, 44], 'h-uhr': [712, 0, 124, 44], 'h-vsp': [836, 0, 114, 44],
+      'h-kmc': [0, 44, 171, 24], 'h-info': [171, 44, 541, 24], 'h-datum': [712, 44, 124, 24], 'h-mode': [836, 44, 114, 24] });
+    box('tbl', 0, 70, 944, 458); box('msg', 0, 528, 950, 38); box('soft', 0, 566, 950, 58);
+    $('msgbox').style.width = '650px'; $('icons').style.left = '660px';
+    setCols(58, 171, 712, 836, [19, 17, 19, 21, 19]);
+    LAY.h2 = 40; LAY.li = 38;
+  } else {
+    scale = 1;
+    const [iT, iR, iB, iL] = safeInsets();
+    Object.assign(dev.style, { left: '0', top: '0', width: vw + 'px', height: vh + 'px', transform: 'none' });
+    W = vw - iL - iR; H = vh - iT - iB;
+    box('screen', iL, iT, W, H);
+    const tbEl = $('toolbar');
+    LAY.h2 = 34; LAY.li = 34;
+    if (H > W) { // Hochformat
+      hdrH = 96; msgH = 32;
+      const tbH = 2 * 50 + 3 * 6;
+      aw = W; th = H - hdrH - msgH - tbH;
+      const a = Math.round(W * 0.36), b = Math.round(W * 0.74);
+      Object.assign(hdrCells, { 'h-zug': [0, 0, a, 44], 'h-uhr': [a, 0, b - a, 44], 'h-vsp': [b, 0, W - b, 44], 'h-lauf': [0, 44, W, 28],
+        'h-kmc': [0, 72, a, 22], 'h-mode': [a, 72, b - a, 22], 'h-datum': [b, 72, W - b, 22], 'h-info': null });
+      box(tbEl, 0, H - tbH, W, tbH);
+      tbEl.style.gridTemplateColumns = 'repeat(6, 1fr)'; tbEl.style.gridTemplateRows = 'repeat(2, 1fr)';
+      setCols(34, 94, W - 118, W - 59, [14, 13, 15.5, 17, 14]);
+    } else { // Querformat
+      hdrH = 64; msgH = 30;
+      const tbW = 2 * 60 + 3 * 6;
+      aw = W - tbW; th = H - hdrH - msgH;
+      const f = aw / 950, x = (v) => Math.round(v * f);
+      Object.assign(hdrCells, { 'h-zug': [0, 0, x(171), 40], 'h-lauf': [x(171), 0, x(541), 40], 'h-uhr': [x(712), 0, x(124), 40], 'h-vsp': [x(836), 0, aw - x(836), 40],
+        'h-kmc': [0, 40, x(171), 22], 'h-info': [x(171), 40, x(541), 22], 'h-datum': [x(712), 40, x(124), 22], 'h-mode': [x(836), 40, aw - x(836), 22] });
+      box(tbEl, aw, 0, tbW, H);
+      tbEl.style.gridTemplateColumns = 'repeat(2, 1fr)'; tbEl.style.gridTemplateRows = 'repeat(6, 1fr)';
+      const cb = aw - Math.max(64, x(114)), ca = cb - Math.max(64, x(124));
+      const fs = clamp(f * 1.15, 0.78, 1);
+      setCols(Math.max(40, x(58)), Math.max(100, x(171)), ca, cb, [19 * fs, 17 * fs, 19 * fs, 21 * fs, 19 * fs]);
+    }
+    box('tbl', 0, hdrH, aw, th); box('msg', 0, hdrH + th, aw, msgH);
+    $('msgbox').style.width = (aw - 150) + 'px'; $('icons').style.left = (aw - 146) + 'px';
+  }
+  box('hdr', 0, 0, aw, hdrH);
+  for (const [id, c] of Object.entries(hdrCells)) { if (c) box(id, ...c); else $(id).style.display = 'none'; }
+  for (const pg of document.querySelectorAll('.page')) box(pg, 0, hdrH, aw, th);
+  LAY.W = aw; LAY.th = th;
+  const cv = $('cv'); cv.width = aw; cv.height = Math.max(100, th - LAY.h2);
+  $('toast').style.top = Math.round(hdrH + th * 0.35) + 'px';
+  $('empty').style.top = Math.round(th * 0.3) + 'px';
+  softCache = ''; tbCache = '';
+  render();
+}
+function setCols(cv, ck, ca, cb, fs) {
+  const d = $('device').style;
+  [['--cv', cv], ['--ck', ck], ['--ca', ca], ['--cb', cb]].forEach(([k, v]) => d.setProperty(k, v + 'px'));
+  ['--fs-v', '--fs-km', '--fs-name', '--fs-halt', '--fs-time'].forEach((k, i) => d.setProperty(k, fs[i].toFixed(1) + 'px'));
+}
+
+// Touch-Leiste im Handy-Layout
+let tbCache = '';
+function renderToolbar() {
+  if (!LAY.phone) return;
+  const main = st.screen === 'main';
+  const key = st.screen + S.filter;
+  if (tbCache === key) return;
+  tbCache = key;
+  const items = [['1', 'Zug'], ['2', 'Halte'], ['0', 'Grafik'], ['3', 'Datei'], ['4', S.filter === 'alle' ? 'Filter<br>alle' : 'Filter<br>Bst'], ['S', 'Menü'],
+    ['C', main ? 'C' : 'Zurück', 0, !main], ['left', '◄', 1], ['up', '▲', 1], ['down', '▼', 1], ['right', '►', 1], main ? ['St', 'St'] : ['E', 'OK']];
+  $('toolbar').innerHTML = items.map(([k, l, ar, sm]) => `<div class="tb${ar ? ' arrow' : ''}${sm ? ' small' : ''}" data-k="${k}">${l}</div>`).join('');
+}
+
+// Bildschirm anlassen (Browser, falls unterstützt)
+let wakeLock = null;
+async function requestWakeLock() {
+  if (wakeLock || !('wakeLock' in navigator) || document.visibilityState !== 'visible') return;
+  try { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } catch (e) { /* nicht erlaubt */ }
+}
+document.addEventListener('visibilitychange', requestWakeLock);
+
+// Verbindungsdialog
+function openConn() {
+  st.connOpen = true;
+  $('conn').classList.add('show');
+  $('c-addr').value = (S.bridgeUrl || '').replace(/^https?:\/\//, '');
+  $('c-status').textContent = location.protocol === 'https:' ? 'Hinweis: Von einer https-Seite aus ist keine Verbindung zur Bridge möglich – die Adresse der Bridge direkt im Browser öffnen.' : '';
+  $('c-found').innerHTML = '';
+  $('c-scanbtn').style.display = location.protocol === 'https:' ? 'none' : '';
+}
+function closeConn() { st.connOpen = false; scanAbort = true; $('conn').classList.remove('show'); try { document.activeElement.blur(); } catch (e) { /* egal */ } }
+function normAddr(a) {
+  a = String(a || '').trim();
+  if (!a) return '';
+  if (!/^https?:\/\//i.test(a)) a = 'http://' + a;
+  try { const u = new URL(a); if (!u.port && u.protocol === 'http:') u.port = '8080'; return u.origin; } catch (e) { return null; }
+}
+async function probe(base, ms) {
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), ms);
+  try { const r = await fetch(base + '/api/state', { signal: ctl.signal, cache: 'no-store' }); const j = await r.json(); return j.bridge === 'nussy-ebula' ? j : null; }
+  catch (e) { return null; } finally { clearTimeout(to); }
+}
+let scanAbort = false;
+async function connAction(c, addr) {
+  const status = $('c-status');
+  if (c === 'close') return closeConn();
+  if (c === 'demo') { closeConn(); setSource('demo', true); return; }
+  if (c === 'connect') {
+    const a = addr || normAddr($('c-addr').value);
+    if (a === null) { status.textContent = 'Ungültige Adresse'; return; }
+    if (a === '' && !location.protocol.startsWith('http')) { status.textContent = 'Bitte die Adresse der Bridge eingeben'; return; }
+    status.textContent = 'Verbinde mit ' + (a || location.host) + ' …';
+    const j = await probe(a, 3000);
+    if (!j) { status.textContent = 'Keine Bridge erreichbar. Läuft start.bat? Selbes WLAN? Windows-Firewall erlaubt?'; return; }
+    S.bridgeUrl = a; saveS(); closeConn();
+    setSource('zusi', true);
+    return;
+  }
+  if (c === 'scan') {
+    scanAbort = false;
+    let ip = null;
+    try { ip = window.NussyApp && window.NussyApp.getLocalIp ? window.NussyApp.getLocalIp() : null; } catch (e) { /* kein App-Interface */ }
+    const prefixes = ip && /^\d+\.\d+\.\d+\.\d+$/.test(ip) ? [ip.split('.').slice(0, 3).join('.')] : ['192.168.178', '192.168.0', '192.168.1', '192.168.2', '10.0.0', '172.20.10'];
+    const port = (normAddr($('c-addr').value) || ':8080').split(':').pop() || '8080';
+    const found = [];
+    for (const pre of prefixes) {
+      const hosts = Array.from({ length: 254 }, (_, i) => `${pre}.${i + 1}`);
+      let done = 0;
+      const worker = async () => {
+        while (hosts.length && !scanAbort) {
+          const h = hosts.shift();
+          const base = `http://${h}:${port}`;
+          if (await probe(base, 1500)) {
+            found.push(base);
+            $('c-found').innerHTML = found.map((f) => `<button data-c="connect" data-addr="${f}">Verbinden mit ${f.replace('http://', '')}</button>`).join('');
+          }
+          done++;
+          status.textContent = `Suche in ${pre}.x … ${done}/254`;
+        }
+      };
+      await Promise.all(Array.from({ length: 48 }, worker));
+      if (found.length || scanAbort) break;
+    }
+    if (!scanAbort) status.textContent = found.length ? `${found.length} Bridge gefunden – antippen zum Verbinden` : 'Keine Bridge gefunden – Adresse bitte eingeben';
+  }
+}
+window.appBack = () => {
+  if (st.connOpen) { closeConn(); return true; }
+  if (st.screen !== 'main' || st.scroll !== 0) { press('C'); return true; }
+  return false;
+};
+
+window.addEventListener('resize', () => layout());
 window.addEventListener('orientationchange', () => setTimeout(layout, 200));
 
 // ------------------------------------------------------------ Datenquellen
@@ -1290,6 +1544,7 @@ function demoTick() {
 }
 
 function setSource(src, restart, keepFpl) {
+  if (src === 'zusi' && !S.bridgeUrl && !location.protocol.startsWith('http')) { openConn(); return; }
   if (src === st.source && !restart) return;
   stopDemo();
   if (src !== 'zusi') stopBridge();
@@ -1337,10 +1592,14 @@ async function detectBridge() {
 (async function init() {
   buildKeys();
   layout();
-  render();
   let src = S.source;
-  if (src === 'auto' || src === 'zusi') src = (await detectBridge()) ? 'zusi' : (src === 'zusi' ? 'zusi' : 'demo');
+  if (src === 'auto' || src === 'zusi') {
+    const ok = await detectBridge();
+    src = ok ? 'zusi' : (src === 'zusi' && (S.bridgeUrl || location.protocol.startsWith('http')) ? 'zusi' : 'demo');
+  }
   setSource(src, true);
+  if (IS_APP && !S.bridgeUrl) openConn();
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
 </body>

@@ -323,9 +323,17 @@ function scheduleFtd() {
   ftdTimer = setTimeout(() => { ftdTimer = null; broadcast('ftd', state.ftd); }, 150);
 }
 
-const INDEX = path.join(__dirname, 'public', 'index.html');
+const PUBLIC = path.join(__dirname, 'public');
+const STATIC_TYPES = {
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.webmanifest': 'application/manifest+json',
+  '.png': 'image/png', '.svg': 'image/svg+xml', '.xml': 'application/xml; charset=utf-8',
+};
 const server = http.createServer((req, res) => {
-  const url = new URL(req.url, 'http://x');
+  let url;
+  try { url = new URL(req.url, 'http://x'); } catch {
+    res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
+    return res.end('Ungültige Adresse');
+  }
   const cors = { 'Access-Control-Allow-Origin': '*' };
   if (url.pathname === '/events') {
     res.writeHead(200, { ...cors, 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
@@ -350,10 +358,12 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     return res.end(DEBUG_HTML);
   }
-  if (url.pathname === '/' || url.pathname === '/index.html') {
-    fs.readFile(INDEX, (err, data) => {
-      if (err) { res.writeHead(500); return res.end('public/index.html fehlt'); }
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+  // Statische Dateien der Anzeige (index.html, Manifest, Icons …)
+  const name = url.pathname === '/' ? 'index.html' : url.pathname.slice(1);
+  if (/^[\w.-]+$/.test(name) && STATIC_TYPES[path.extname(name)]) {
+    fs.readFile(path.join(PUBLIC, name), (err, data) => {
+      if (err) { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end(name + ' fehlt'); }
+      res.writeHead(200, { 'Content-Type': STATIC_TYPES[path.extname(name)], 'Cache-Control': 'no-cache' });
       res.end(data);
     });
     return;

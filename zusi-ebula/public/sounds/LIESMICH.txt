@@ -13,6 +13,7 @@ bleiben also nur auf diesem PC und in der hier gebauten APK.
      "ok":   "quittung.wav",
      "err":  "fehler.wav",
      "warn": "stoerung.wav",
+     "info": "info.wav",
      "on":   "einschalten.wav",
      "off":  "ausschalten.wav"
    }
@@ -21,6 +22,7 @@ bleiben also nur auf diesem PC und in der hier gebauten APK.
    ok   = Bestätigung (z. B. Zug angemeldet)
    err  = Fehler / ungültige Eingabe
    warn = neue Störung
+   info = neue Meldung (Fahrplan von Zusi, Zusi verbunden, neutrale Hinweise)
    on   = Gerät einschalten
    off  = Gerät ausschalten
 

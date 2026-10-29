@@ -1380,8 +1380,9 @@ function renderLeds() {
   if (!st.booting) stoerCodes = codes;
 }
 
-function flash(text, cls = '', ms = 4500) {
-  if (cls === 'ok') SND.play('ok'); else if (cls === 'warn') SND.play('err');
+// ton: Meldeton zur Meldung; ohne Angabe Bestätigung (ok), Fehler (warn) oder Info (neutral)
+function flash(text, cls = '', ms = 4500, ton) {
+  SND.play(ton || (cls === 'ok' ? 'ok' : cls === 'warn' ? 'err' : 'info'));
   st.msg = { text, cls, until: Date.now() + ms }; render(); setTimeout(render, ms + 50); }
 let toastT = null;
 function toast(text) { const t = $('toast'); t.textContent = text; t.style.display = 'block'; clearTimeout(toastT); toastT = setTimeout(() => { t.style.display = 'none'; }, 1300); }
@@ -1427,7 +1428,7 @@ function buildKeys() {
 // Töne des Bordgeräts, live synthetisiert (keine Sounddateien): Schnappscheibe der Folientaste,
 // Piezo-Summer (≈ 2,7 kHz Resonanz) und dumpfer Gehäuseanteil
 const SND = (() => {
-  let ctx = null, out = null, noise = null, lastWarn = 0;
+  let ctx = null, out = null, noise = null, lastWarn = 0, lastInfo = 0;
   function init() {
     if (!ctx) {
       ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1475,6 +1476,7 @@ const SND = (() => {
     ok: (t) => { piezo(t, 2730, 0.07, 0.15); piezo(t + 0.1, 3250, 0.13, 0.15); },
     err: (t) => { piezo(t, 1180, 0.13, 0.2); piezo(t + 0.18, 1180, 0.13, 0.2); },
     warn: (t) => { for (let i = 0; i < 3; i++) piezo(t + i * 0.24, 2300, 0.15, 0.18); },
+    info: (t) => { piezo(t, 1800, 0.12, 0.13); piezo(t + 0.16, 2400, 0.2, 0.11); },
     on: (t) => { snap(t, 1800, 0.6, 0.02); body(t, 120, 0.5, 0.06); piezo(t + 0.2, 2000, 0.06, 0.13); piezo(t + 0.29, 2730, 0.14, 0.13); },
     off: (t) => { piezo(t, 2730, 0.06, 0.13); piezo(t + 0.09, 1700, 0.12, 0.13); snap(t + 0.24, 1600, 0.45, 0.02); },
   };
@@ -1527,6 +1529,7 @@ const SND = (() => {
       else if (name === 'err' || name === 'warn') vibrate(name === 'err' ? [40, 60, 40] : [60, 80, 60, 80, 60]);
       if (!S.sound || (name !== 'key' && !S.meldeton)) return;
       if (name === 'warn') { if (Date.now() - lastWarn < 10000) return; lastWarn = Date.now(); }
+      if (name === 'info') { if (st.booting || Date.now() - lastInfo < 2000) return; lastInfo = Date.now(); }
       try {
         init();
         const t = ctx.currentTime + 0.005;
@@ -2002,7 +2005,7 @@ function startBridge() {
     const was = st.bridge.zusi;
     st.bridge.ok = true;
     Object.assign(st.bridge, { zusi: s.zusi, version: s.version, error: s.error });
-    if (s.zusi && !was) flash('Verbindung zu Zusi ' + (s.version || '') + ' hergestellt', 'ok');
+    if (s.zusi && !was) flash('Verbindung zu Zusi ' + (s.version || '') + ' hergestellt', 'ok', 4500, 'info');
     if (!s.zusi) { st.live = { v: null, km: null, time: null, date: null, weg: null, vStrecke: null, afb: null, at: 0 }; }
     render();
   });
@@ -2032,7 +2035,7 @@ function startBridge() {
           const ctl = st.ctl, gw = st.gw;
           loadFahrplan(f); st.ctl = ctl; st.gw = gw; buildView(); updatePosition();
         } else if (S.autoLogin) anmelden(key, true);
-        else flash(`Zusi: Zug ${zugTitel(f) || key} bereit – Taste 1 „Zug“, dann E`, 'ok', 8000);
+        else flash(`Zusi: Zug ${zugTitel(f) || key} bereit – Taste 1 „Zug“, dann E`, 'ok', 8000, 'info');
       } catch (err) { flash('Buchfahrplan von Zusi fehlerhaft: ' + err.message, 'warn', 7000); }
     } else if (!p.xml) b.zusiKey = null;
     render();
@@ -2089,7 +2092,7 @@ function startDemo() {
   st.live = { v: 0, km: R[0].km, time: demo.t % 1, date: Math.floor(demo.t), weg: 0, vStrecke: R[0].vmax, afb: null, at: Date.now() };
   demo.timer = setInterval(demoTick, 100);
   if (S.autoLogin) anmelden('4711', true);
-  else flash('Demo-Fahrt bereit – Taste 1 „Zug“, 4711, E', 'ok', 8000);
+  else flash('Demo-Fahrt bereit – Taste 1 „Zug“, 4711, E', 'ok', 8000, 'info');
 }
 function stopDemo() { if (demo.timer) clearInterval(demo.timer); demo.timer = null; }
 function demoTick() {

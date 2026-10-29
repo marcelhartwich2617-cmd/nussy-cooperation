@@ -1,6 +1,6 @@
 // Offline-Cache für die EBuLa-Web-App (nur auf https-Seiten aktiv)
-const CACHE = 'ebula-v3';
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-180.png'];
+const CACHE = 'ebula-v4';
+const FILES = ['./', './index.html', './fahrpult.html', './sound.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-180.png'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)));
   self.skipWaiting();

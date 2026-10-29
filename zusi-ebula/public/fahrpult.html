@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#000000">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Fahrpult für Zusi 3</title>
+<style>
+:root {
+  --bg: #0d141c; --panel: #16212d; --line: #2b3a4a; --txt: #e8eef4; --dim: #8597a8;
+  --zug: #3d9bff; --brems: #f2c200; --ok: #2fbf5b; --warn: #f2c200; --err: #e5322d; --blue: #2f7dff;
+  --needle: #ffffff; --lamp-off: #1d2833;
+}
+body.day {
+  --bg: #d9dee3; --panel: #c6ccd2; --line: #9aa6b1; --txt: #0d141c; --dim: #4a5866;
+  --needle: #0d141c; --lamp-off: #b3bcc5;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: #000; overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+body { font-family: "DejaVu Sans", "Segoe UI", Roboto, Arial, sans-serif; color: var(--txt); }
+
+/* Gerät: feste Arbeitsfläche 1280 × 800, wird auf das Fenster skaliert */
+#dev { position: absolute; left: 0; top: 0; width: 1280px; height: 800px; transform-origin: 0 0;
+  background: linear-gradient(#3a3f45, #2a2e33); border-radius: 26px; box-shadow: inset 0 0 0 2px #4b525a, inset 0 0 18px #000; }
+#screen { position: absolute; left: 64px; top: 40px; width: 1152px; height: 640px; background: var(--bg); border-radius: 6px;
+  box-shadow: 0 0 0 3px #111, 0 0 0 5px #50575f; overflow: hidden; }
+#screen.off > * { visibility: hidden; }
+
+/* Statuszeile */
+#top { position: absolute; left: 0; top: 0; right: 0; height: 46px; display: flex; align-items: center; gap: 14px; padding: 0 14px;
+  background: var(--panel); border-bottom: 1px solid var(--line); font-size: 20px; }
+#top .zug { font-weight: 700; min-width: 150px; }
+#top .msg { flex: 1; text-align: center; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#top .msg.warn { color: var(--warn); } #top .msg.err { color: var(--err); } #top .msg.ok { color: var(--ok); }
+#top .clock { font-variant-numeric: tabular-nums; font-weight: 700; min-width: 100px; text-align: right; }
+#top .conn { width: 14px; height: 14px; border-radius: 50%; background: var(--err); }
+#top .conn.ok { background: var(--ok); } #top .conn.demo { background: var(--blue); }
+
+/* Seiten */
+.page { position: absolute; left: 0; top: 46px; width: 1152px; height: 506px; display: none; }
+.page.show { display: block; }
+svg text { font-family: inherit; fill: var(--txt); }
+
+/* Rechte Spalte: Drücke und Energie */
+#instr { position: absolute; left: 760px; top: 14px; width: 376px; }
+.gauge { margin-bottom: 14px; }
+.gauge .hd { display: flex; justify-content: space-between; align-items: baseline; font-size: 17px; color: var(--dim); margin-bottom: 4px; }
+.gauge .hd b { color: var(--txt); font-size: 26px; font-variant-numeric: tabular-nums; }
+.gauge .hd small { font-size: 15px; color: var(--dim); margin-left: 4px; }
+.bar { position: relative; height: 22px; background: var(--lamp-off); border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+.bar .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--txt); transition: width .15s linear; }
+.bar .band { position: absolute; top: 0; bottom: 0; background: rgba(47, 191, 91, .28); }
+.bar .tick { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--dim); }
+.row2 { display: flex; gap: 12px; }
+.row2 .box { flex: 1; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; }
+.box .l { font-size: 15px; color: var(--dim); }
+.box .v { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.box .v small { font-size: 15px; color: var(--dim); font-weight: 400; }
+.hs.ein .v { color: var(--ok); } .hs.aus .v { color: var(--warn); }
+
+/* Leuchtmelder */
+#lamps { position: absolute; left: 0; right: 0; top: 552px; height: 52px; display: flex; gap: 8px; padding: 0 12px; align-items: center;
+  border-top: 1px solid var(--line); background: var(--panel); }
+.lamp { flex: 1; height: 40px; border-radius: 4px; background: var(--lamp-off); color: var(--dim); display: flex; align-items: center;
+  justify-content: center; font-size: 17px; font-weight: 700; border: 1px solid var(--line); }
+.lamp.on { color: #000; border-color: transparent; }
+.lamp.blink { animation: blink 1s steps(1) infinite; color: #000; border-color: transparent; }
+@keyframes blink { 50% { background: var(--lamp-off); color: var(--dim); } }
+.lamp.y.on, .lamp.y.blink { background: var(--warn); } .lamp.r.on, .lamp.r.blink { background: var(--err); color: #fff; }
+.lamp.b.on, .lamp.b.blink { background: var(--blue); color: #fff; } .lamp.w.on, .lamp.w.blink { background: #f4f4f4; }
+.lamp.zb { flex: 1.8; }
+
+/* Softkey-Beschriftung */
+#sklbl { position: absolute; left: 0; right: 0; bottom: 0; height: 36px; display: flex; border-top: 1px solid var(--line); }
+#sklbl div { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 16px; border-right: 1px solid var(--line); color: var(--txt); }
+#sklbl div:last-child { border-right: 0; }
+#sklbl div.act { background: var(--blue); color: #fff; }
+#sklbl div:empty { background: transparent; }
+
+/* Tasten am Gehäuse */
+.key { position: absolute; width: 100px; height: 64px; border-radius: 10px; border: 0; cursor: pointer; color: #cfd6dc; font: 700 20px inherit;
+  background: linear-gradient(#4a5057, #33383e); box-shadow: 0 3px 0 #1b1e21, inset 0 1px 0 #6b737b; }
+.key.pressed, .key:active { transform: translateY(2px); box-shadow: 0 1px 0 #1b1e21, inset 0 1px 0 #6b737b; background: linear-gradient(#3e444a, #2c3035); }
+.led { position: absolute; width: 12px; height: 12px; border-radius: 50%; background: #2a2f34; box-shadow: inset 0 1px 2px #000; }
+.led.on { background: #ffd23a; box-shadow: 0 0 8px #ffd23a; }
+.brand { position: absolute; right: 30px; top: 12px; font-size: 13px; color: #8a939b; letter-spacing: 1px; }
+
+/* Diagnose */
+#p-diag { padding: 14px; font-size: 16px; overflow: auto; }
+#p-diag h3 { margin: 0 0 8px; font-size: 18px; }
+#p-diag .cols { display: flex; gap: 18px; }
+#p-diag .cols > div { flex: 1; min-width: 0; }
+#p-diag table { border-collapse: collapse; width: 100%; }
+#p-diag td { border-bottom: 1px solid var(--line); padding: 4px 6px; font-variant-numeric: tabular-nums; }
+#p-diag pre { margin: 0; font-size: 13px; white-space: pre-wrap; word-break: break-all; color: var(--dim); max-height: 250px; overflow: auto; }
+#log div { padding: 3px 0; border-bottom: 1px solid var(--line); }
+
+/* Verbindungsdialog */
+#conn { position: absolute; inset: 0; background: rgba(0, 0, 0, .7); display: none; align-items: center; justify-content: center; z-index: 5; }
+#conn.show { display: flex; }
+#conn .dlg { width: 560px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 18px; font-size: 18px; }
+#conn input { width: 100%; font: inherit; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid var(--line); background: var(--bg); color: var(--txt); }
+#conn .btns { display: flex; gap: 10px; }
+#conn button { flex: 1; font: inherit; padding: 10px; border-radius: 5px; border: 1px solid var(--line); background: var(--bg); color: var(--txt); cursor: pointer; }
+#conn button.pri { background: var(--blue); color: #fff; border-color: var(--blue); }
+#c-st { font-size: 15px; color: var(--dim); min-height: 20px; }
+</style>
+</head>
+<body>
+<div id="dev">
+  <div class="brand">NUSSY · FAHRPULT</div>
+  <div class="led" id="led-kbd" style="left:30px;top:52px"></div>
+  <div id="screen">
+    <div id="top"><span class="conn" id="t-conn"></span><span class="zug" id="t-zug">–</span><span class="msg" id="t-msg"></span><span class="clock" id="t-clock">--:--:--</span></div>
+
+    <div class="page show" id="p-main">
+      <svg id="tacho" width="560" height="506" viewBox="0 0 560 506"></svg>
+      <svg id="kraft" width="190" height="506" viewBox="0 0 190 506" style="position:absolute;left:560px;top:0"></svg>
+      <div id="instr">
+        <div class="gauge" id="g-hl"></div>
+        <div class="gauge" id="g-bz"></div>
+        <div class="gauge" id="g-hbl"></div>
+        <div class="gauge" id="g-i"></div>
+        <div class="row2">
+          <div class="box"><div class="l">Fahrdraht</div><div class="v" id="v-u">–</div></div>
+          <div class="box hs" id="b-hs"><div class="l">Hauptschalter</div><div class="v" id="v-hs">–</div></div>
+          <div class="box"><div class="l">Fahrstufe</div><div class="v" id="v-fst">–</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="p-diag">
+      <div class="cols">
+        <div><h3>Meldungen</h3><div id="log"></div></div>
+        <div><h3>Werte von Zusi</h3><table id="raw"></table></div>
+      </div>
+      <h3 style="margin-top:12px">Sifa / Zugbeeinflussung (Rohdaten)</h3>
+      <pre id="nodes"></pre>
+    </div>
+
+    <div id="lamps">
+      <div class="lamp y" id="l-1000">1000 Hz</div>
+      <div class="lamp r" id="l-500">500 Hz</div>
+      <div class="lamp y" id="l-bef">Befehl 40</div>
+      <div class="lamp b" id="l-85">85</div>
+      <div class="lamp b" id="l-70">70</div>
+      <div class="lamp b" id="l-55">55</div>
+      <div class="lamp w" id="l-sifa">Sifa</div>
+      <div class="lamp r zb" id="l-zb">Zwangsbremsung</div>
+    </div>
+    <div id="sklbl"></div>
+
+    <div id="conn"><div class="dlg">
+      <b>Verbindung zur Bridge</b>
+      <div style="font-size:15px;color:var(--dim);margin-top:6px">Adresse aus dem start.bat-Fenster, z. B. 192.168.178.21:8080</div>
+      <input id="c-addr" placeholder="192.168.178.21:8080" inputmode="url" autocomplete="off">
+      <div id="c-st"></div>
+      <div class="btns"><button class="pri" data-c="ok">Verbinden</button><button data-c="demo">Demo</button><button data-c="close">Abbrechen</button></div>
+    </div></div>
+  </div>
+  <div id="keys"></div>
+</div>
+
+<script src="sound.js"></script>
+<script>
+'use strict';
+/* =====================================================================
+   Nussy Fahrpult – mittleres Führerstandsdisplay (Stil moderner E-Loks)
+   Daten: Zusi 3 → bridge.js → Server-Sent Events. Einstellungen für Bridge-Adresse
+   und Töne kommen aus der EBuLa (localStorage „ebula-settings“).
+   ===================================================================== */
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const IS_APP = /NussyEBuLa/i.test(navigator.userAgent);
+
+// Einstellungen: Bridge und Töne gemeinsam mit der EBuLa, Anzeige eigene
+const E = { bridgeUrl: '', sound: true, vol: 70, meldeton: true, vibra: true };
+try { Object.assign(E, JSON.parse(localStorage.getItem('ebula-settings') || '{}')); } catch (e) { /* privat */ }
+function saveE() { try { const o = JSON.parse(localStorage.getItem('ebula-settings') || '{}'); Object.assign(o, { bridgeUrl: E.bridgeUrl, sound: E.sound }); localStorage.setItem('ebula-settings', JSON.stringify(o)); } catch (e) { /* egal */ } }
+const F = { day: false, bright: 100, vmax: 0, fmax: 300, start: false };
+try { Object.assign(F, JSON.parse(localStorage.getItem('fahrpult-settings') || '{}')); } catch (e) { /* privat */ }
+function saveF() { try { localStorage.setItem('fahrpult-settings', JSON.stringify(F)); localStorage.setItem('ebula-start', F.start ? 'fahrpult' : ''); } catch (e) { /* egal */ } }
+
+const st = { page: 'main', source: null, booting: true, bridge: false, zusi: false, zug: '', msg: null, log: [], off: false, d: {}, at: 0 };
+const SND = EbulaSound(() => ({ sound: E.sound, vol: E.vol, meldeton: E.meldeton, vibra: E.vibra, quiet: st.booting }));
+
+/* Zuordnung der verschachtelten Zusi-Knoten (Zusi-3-TCP-Dokumentation).
+   Weicht eine Lok ab: im Bildschirm „Diagn.“ die Rohdaten ansehen und hier anpassen. */
+const SIFA = { node: 0x64, lm: 2, hupe: 3 };
+const ZB = { node: 0x65, betrieb: 3, zwang: 3, m1000: 5, u85: 6, m70: 7, o55: 8, m500: 10, befehl: 11 };
+
+// ------------------------------------------------------------------ Tacho (SVG)
+const NS = 'http://www.w3.org/2000/svg';
+const T = { cx: 280, cy: 262, r: 228 };
+function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+const ang = (v, vmax) => -135 + 270 * clamp(v, 0, vmax) / vmax;
+function pt(r, deg) { const a = deg * Math.PI / 180; return [T.cx + r * Math.sin(a), T.cy - r * Math.cos(a)]; }
+function arc(r, a0, a1) {
+  const [x0, y0] = pt(r, a0), [x1, y1] = pt(r, a1);
+  return `M${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 ${a1 - a0 > 180 ? 1 : 0} 1 ${x1.toFixed(1)},${y1.toFixed(1)}`;
+}
+let tachoMax = 0, needle = null, afbMark = null, vsArc = null, vsMark = null, vDigit = null, afbTxt = null;
+function buildTacho(vmax) {
+  tachoMax = vmax;
+  const s = $('tacho'); s.innerHTML = '';
+  el('circle', { cx: T.cx, cy: T.cy, r: T.r + 10, fill: 'var(--panel)', stroke: 'var(--line)', 'stroke-width': 2 }, s);
+  vsArc = el('path', { d: '', fill: 'none', stroke: 'var(--err)', 'stroke-width': 10, opacity: 0.85 }, s);
+  el('path', { d: arc(T.r - 2, -135, 135), fill: 'none', stroke: 'var(--dim)', 'stroke-width': 2 }, s);
+  const label = vmax <= 200 ? 20 : 50, minor = vmax <= 200 ? 5 : 10;
+  for (let v = 0; v <= vmax; v += minor) {
+    const a = ang(v, vmax), big = v % label === 0, mid = !big && v % (minor * 2) === 0;
+    const [x0, y0] = pt(T.r - 2, a), [x1, y1] = pt(T.r - (big ? 24 : mid ? 15 : 10), a);
+    el('line', { x1: x0, y1: y0, x2: x1, y2: y1, stroke: 'var(--txt)', 'stroke-width': big ? 3.5 : 2 }, s);
+    if (big) { const [tx, ty] = pt(T.r - 46, a); el('text', { x: tx, y: ty + 9, 'text-anchor': 'middle', 'font-size': 26, 'font-weight': 700 }, s).textContent = v; }
+  }
+  vsMark = el('path', { d: '', fill: 'var(--err)' }, s);
+  afbMark = el('path', { d: 'M0,0 L-11,-20 L11,-20 Z', fill: 'var(--warn)', stroke: '#000', 'stroke-width': 1, visibility: 'hidden' }, s);
+  needle = el('g', {}, s);
+  el('path', { d: `M${T.cx - 6},${T.cy + 28} L${T.cx - 3},${T.cy - T.r + 30} L${T.cx},${T.cy - T.r + 18} L${T.cx + 3},${T.cy - T.r + 30} L${T.cx + 6},${T.cy + 28} Z`, fill: 'var(--needle)' }, needle);
+  el('circle', { cx: T.cx, cy: T.cy, r: 16, fill: 'var(--needle)' }, s);
+  el('rect', { x: T.cx - 78, y: T.cy + 52, width: 156, height: 70, rx: 6, fill: 'var(--bg)', stroke: 'var(--line)', 'stroke-width': 2 }, s);
+  vDigit = el('text', { x: T.cx + 64, y: T.cy + 106, 'text-anchor': 'end', 'font-size': 56, 'font-weight': 700 }, s);
+  el('text', { x: T.cx, y: T.cy + 148, 'text-anchor': 'middle', 'font-size': 18, fill: 'var(--dim)' }, s).textContent = 'km/h';
+  afbTxt = el('text', { x: T.cx, y: T.cy + 182, 'text-anchor': 'middle', 'font-size': 24, 'font-weight': 700, fill: 'var(--warn)' }, s);
+  el('text', { x: 18, y: 496, 'font-size': 15, fill: 'var(--dim)' }, s).textContent = 'Skala ' + vmax;
+}
+function markAt(path, v, r0, r1, w) {
+  const a = ang(v, tachoMax), [x0, y0] = pt(r0, a - w), [x1, y1] = pt(r0, a + w), [x2, y2] = pt(r1, a);
+  path.setAttribute('d', `M${x0},${y0} L${x1},${y1} L${x2},${y2} Z`);
+}
+
+// ------------------------------------------------------------------ Zug-/Bremskraft (SVG)
+const K = { x: 70, y0: 40, h: 396, w: 54 };
+let kFill = null, kSoll = null, kTxt = null, kTicks = null;
+function buildKraft() {
+  const s = $('kraft'); s.innerHTML = '';
+  const mid = K.y0 + K.h / 2;
+  el('text', { x: K.x + K.w / 2, y: 24, 'text-anchor': 'middle', 'font-size': 17, fill: 'var(--dim)' }, s).textContent = 'Zug / Bremse';
+  el('rect', { x: K.x, y: K.y0, width: K.w, height: K.h, fill: 'var(--lamp-off)', stroke: 'var(--line)', 'stroke-width': 1.5 }, s);
+  kFill = el('rect', { x: K.x + 2, y: mid, width: K.w - 4, height: 0, fill: 'var(--zug)' }, s);
+  kTicks = el('g', {}, s);
+  for (let i = -4; i <= 4; i++) {
+    const y = mid - i * K.h / 8;
+    el('line', { x1: K.x - (i % 2 ? 6 : 12), y1: y, x2: K.x, y2: y, stroke: 'var(--dim)', 'stroke-width': i ? 1.5 : 3 }, kTicks);
+    if (i % 2 === 0) el('text', { x: K.x - 16, y: y + 6, 'text-anchor': 'end', 'font-size': 16, fill: 'var(--dim)' }, kTicks).textContent = Math.abs(i) * F.fmax / 4;
+  }
+  el('line', { x1: K.x, y1: mid, x2: K.x + K.w, y2: mid, stroke: 'var(--txt)', 'stroke-width': 2 }, s);
+  kSoll = el('path', { d: '', fill: 'var(--txt)', visibility: 'hidden' }, s);
+  kTxt = el('text', { x: K.x + K.w / 2, y: K.y0 + K.h + 34, 'text-anchor': 'middle', 'font-size': 26, 'font-weight': 700 }, s);
+  el('text', { x: K.x + K.w / 2, y: K.y0 + K.h + 52, 'text-anchor': 'middle', 'font-size': 14, fill: 'var(--dim)' }, s).textContent = 'kN';
+}
+
+// ------------------------------------------------------------------ Balkenanzeigen
+const G = {
+  hl: { id: 'g-hl', l: 'Hauptluftleitung', u: 'bar', max: 10, dec: 2, ticks: [5], band: null },
+  bz: { id: 'g-bz', l: 'Bremszylinder', u: 'bar', max: 10, dec: 2, ticks: [], band: null },
+  hbl: { id: 'g-hbl', l: 'Hauptluftbehälter', u: 'bar', max: 12, dec: 1, ticks: [], band: [8, 10] },
+  i: { id: 'g-i', l: 'Oberstrom', u: 'A', max: 600, dec: 0, ticks: [], band: null },
+};
+function buildGauges() {
+  for (const g of Object.values(G)) {
+    const pct = (v) => (v / g.max * 100) + '%';
+    $(g.id).innerHTML = `<div class="hd"><span>${g.l}</span><span><b>–</b><small>${g.u}</small></span></div>
+      <div class="bar">${g.band ? `<div class="band" style="left:${pct(g.band[0])};width:${pct(g.band[1] - g.band[0])}"></div>` : ''}<div class="fill"></div>${g.ticks.map((t) => `<div class="tick" style="left:${pct(t)}"></div>`).join('')}</div>`;
+    g.v = $(g.id).querySelector('b'); g.f = $(g.id).querySelector('.fill');
+  }
+}
+function setGauge(g, v) {
+  if (v == null || !isFinite(v)) { g.v.textContent = '–'; g.f.style.width = '0'; return; }
+  g.v.textContent = v.toFixed(g.dec).replace('.', ',');
+  g.f.style.width = clamp(v / g.max * 100, 0, 100) + '%';
+}
+
+// ------------------------------------------------------------------ Tasten und Softkeys
+const SOFT = [
+  { l: 'Fahren', a: () => go('main'), act: () => st.page === 'main' },
+  { l: 'Diagn.', a: () => go('diag'), act: () => st.page === 'diag' },
+  { l: () => (F.day ? 'Nacht' : 'Tag'), a: () => { F.day = !F.day; saveF(); render(); } },
+  { l: () => 'Hell ' + F.bright, a: () => { F.bright = F.bright <= 40 ? 100 : F.bright - 20; saveF(); render(); } },
+  { l: () => 'V ' + (F.vmax || 'auto'), a: () => { const o = [0, 160, 200, 250, 300]; F.vmax = o[(o.indexOf(F.vmax) + 1) % o.length]; saveF(); render(); } },
+  { l: () => 'F ' + F.fmax, a: () => { const o = [200, 300, 400]; F.fmax = o[(o.indexOf(F.fmax) + 1) % o.length]; saveF(); buildKraft(); render(); } },
+  { l: () => (st.source === 'demo' ? 'Zusi' : 'Demo'), a: () => setSource(st.source === 'demo' ? 'zusi' : 'demo') },
+  { l: 'Verb.', a: () => openConn() },
+  { l: () => (E.sound ? 'Ton an' : 'Ton aus'), a: () => { E.sound = !E.sound; saveE(); render(); } },
+  { l: 'EBuLa', a: () => { location.href = 'index.html?ebula'; } },
+];
+function buildKeys() {
+  // Softkeys genau unter ihren Beschriftungen (Bildschirm 1152 px breit, 10 Felder)
+  $('keys').innerHTML = SOFT.map((_, i) => `<button class="key" data-k="${i}" style="left:${Math.round(64 + i * 115.2 + 7.6)}px;top:704px">${(i + 1) % 10}</button>`).join('')
+    + '<button class="key" data-k="aus" style="left:6px;top:94px;width:52px;height:80px;font-size:15px">☀<br>aus</button>'
+    + '<button class="key" data-k="start" style="left:6px;top:200px;width:52px;height:80px;font-size:13px">Start<br>▸</button>';
+}
+let kbdT = null;
+function press(k) {
+  SND.play('key');
+  const led = $('led-kbd'); led.className = 'led on'; clearTimeout(kbdT); kbdT = setTimeout(() => { led.className = 'led'; }, 140);
+  const b = document.querySelector(`.key[data-k="${k}"]`);
+  if (b) { b.classList.add('pressed'); setTimeout(() => b.classList.remove('pressed'), 120); }
+  if (st.booting) return;
+  if (k === 'aus') { st.off = !st.off; SND.play(st.off ? 'off' : 'on'); render(); return; }
+  if (st.off) { st.off = false; SND.play('on'); render(); return; }
+  if (k === 'start') { F.start = !F.start; saveF(); flash(F.start ? 'App startet künftig mit dem Fahrpult' : 'App startet künftig mit der EBuLa', 'ok'); return; }
+  const s = SOFT[+k];
+  if (s) s.a();
+  render();
+}
+function go(p) { st.page = p; }
+
+document.addEventListener('pointerdown', (e) => {
+  if (e.target.closest('#conn')) { const b = e.target.closest('[data-c]'); if (b) { e.preventDefault(); connAction(b.dataset.c); } return; }
+  const k = e.target.closest('.key');
+  if (k) { e.preventDefault(); press(k.dataset.k); return; }
+  const sk = e.target.closest('#sklbl > div');
+  if (sk && sk.textContent) { e.preventDefault(); press(sk.dataset.k); }
+});
+document.addEventListener('keydown', (e) => {
+  if (e.target.matches && e.target.matches('input')) { if (e.key === 'Enter') connAction('ok'); if (e.key === 'Escape') closeConn(); return; }
+  if (/^[0-9]$/.test(e.key)) { press(String((+e.key + 9) % 10)); e.preventDefault(); }
+});
+window.appBack = () => {
+  if ($('conn').classList.contains('show')) { closeConn(); return true; }
+  if (st.page !== 'main') { go('main'); render(); return true; }
+  location.href = 'index.html?ebula';
+  return true;
+};
+
+// ------------------------------------------------------------------ Meldungen
+function flash(text, cls = '', ms = 5000, ton) {
+  SND.play(ton || (cls === 'ok' ? 'ok' : cls === 'err' ? 'err' : 'info'));
+  st.msg = { text, cls, until: Date.now() + ms };
+  logMsg(text);
+  render();
+}
+function logMsg(text) {
+  const t = new Date(), p = (n) => String(n).padStart(2, '0');
+  st.log.unshift(`${p(t.getHours())}:${p(t.getMinutes())}:${p(t.getSeconds())}  ${text}`);
+  st.log.length = Math.min(st.log.length, 40);
+}
+
+// ------------------------------------------------------------------ Datenquelle
+function bridgeBase() { return E.bridgeUrl || (location.protocol.startsWith('http') ? '' : null); }
+let es = null;
+function stopBridge() { if (es) { es.close(); es = null; } st.bridge = false; st.zusi = false; }
+function startBridge() {
+  stopBridge();
+  const base = bridgeBase();
+  if (base == null) { openConn(); return; }
+  try { es = new EventSource(base + '/events'); } catch (e) { flash('Bridge-Adresse ungültig', 'err'); return; }
+  es.onopen = () => { st.bridge = true; render(); };
+  es.onerror = () => { if (st.bridge) logMsg('Verbindung zur Bridge unterbrochen'); st.bridge = false; st.zusi = false; render(); };
+  es.addEventListener('status', (e) => {
+    const s = JSON.parse(e.data), was = st.zusi;
+    st.bridge = true; st.zusi = s.zusi;
+    if (s.zusi && !was) flash('Verbindung zu Zusi ' + (s.version || '') + ' hergestellt', 'ok', 5000, 'info');
+    if (!s.zusi && was) { flash('Verbindung zu Zusi getrennt', 'err'); st.d = {}; }
+    render();
+  });
+  es.addEventListener('ftd', (e) => { apply(JSON.parse(e.data)); });
+  es.addEventListener('prog', (e) => { const p = JSON.parse(e.data); st.zug = p.zugnummer || ''; render(); });
+}
+function setSource(src) {
+  stopBridge(); stopDemo();
+  st.source = src; st.d = {};
+  if (src === 'demo') { startDemo(); flash('Demo-Fahrt läuft', 'ok', 4000, 'info'); } else startBridge();
+  render();
+}
+
+// Werte übernehmen und Ereignisse für Meldungen erkennen
+let prevZwang = false, prevHs = null;
+function apply(d) {
+  st.d = d; st.at = Date.now();
+  const z = zbState(d);
+  if (z.zwang && !prevZwang) { flash('Zwangsbremsung', 'err', 8000, 'warn'); }
+  prevZwang = z.zwang;
+  const hs = d[0x13] != null ? d[0x13] > 0.5 : null;
+  if (prevHs != null && hs != null && hs !== prevHs) logMsg('Hauptschalter ' + (hs ? 'ein' : 'aus'));
+  prevHs = hs;
+  render();
+}
+function zbState(d) {
+  const nodes = d.nodes || {}, zb = nodes[ZB.node], b = zb && zb.n && zb.n[ZB.betrieb] ? zb.n[ZB.betrieb].a : {};
+  const sifa = nodes[SIFA.node] ? nodes[SIFA.node].a : {};
+  return {
+    name: zb && zb.a ? zb.a[1] : '',
+    m1000: b[ZB.m1000] || 0, u85: b[ZB.u85] || 0, m70: b[ZB.m70] || 0, o55: b[ZB.o55] || 0, m500: b[ZB.m500] || 0, befehl: b[ZB.befehl] || 0,
+    zwang: !!b[ZB.zwang] || sifa[SIFA.hupe] === 2,
+    sifa: sifa[SIFA.lm] || 0, sifaHupe: sifa[SIFA.hupe] || 0,
+  };
+}
+
+// ------------------------------------------------------------------ Demo-Fahrt
+const demo = { timer: null, t: 0, v: 0, hbl: 9.2, komp: false, last: 0 };
+function startDemo() { Object.assign(demo, { t: 0, v: 0, last: performance.now() }); demo.timer = setInterval(demoTick, 100); }
+function stopDemo() { if (demo.timer) clearInterval(demo.timer); demo.timer = null; }
+function demoTick() {
+  const now = performance.now(), dt = Math.min(0.5, (now - demo.last) / 1000); demo.last = now;
+  demo.t = (demo.t + dt) % 150;
+  const t = demo.t, vms = demo.v / 3.6;
+  let zk = 0, hl = 5, bz = 0, m1000 = 0, u85 = 0, sifa = 0; // zk: Zug-/Bremskraft in kN
+  // Ablauf: Halt – Anfahren auf 140 – Vorsignal Halt erwarten (1000 Hz) – Bremsen auf 85 – Weiterfahrt – Halt
+  if (t < 6) { bz = 3.6; }
+  else if (t < 48) { zk = Math.min(300, 6400 / Math.max(vms, 1)) * (demo.v < 140 ? 1 : 0.1); }
+  else if (t < 62) { zk = 28; }
+  else if (t < 85) { zk = demo.v > 85 ? -150 : 0; m1000 = t < 66 ? 1 : 0; u85 = 2; if (demo.v > 85) { hl = 4.4; bz = 0.9; } }
+  else if (t < 105) { zk = demo.v < 120 ? 180 : 25; u85 = 0; }
+  else if (t < 140) { zk = demo.v > 2 ? -170 : 0; hl = 4.0; bz = demo.v > 2 ? 1.4 : 3.6; }
+  else { bz = 3.6; }
+  sifa = (t % 30) > 27 ? 1 : 0;
+  const masse = 420; // t → kN / t = m/s²
+  const a = (zk - 3 - 0.0045 * demo.v * demo.v / 10 - (bz > 0.3 ? bz * 40 : 0) * (demo.v > 0 ? 1 : 0)) / masse;
+  demo.v = clamp(demo.v + a * 3.6 * dt, 0, 160);
+  if (demo.hbl < 8.2) demo.komp = true; if (demo.hbl > 10) demo.komp = false;
+  demo.hbl += (demo.komp ? 0.08 : -0.012) * dt * (zk !== 0 ? 1.6 : 1);
+  const U = 15300 + Math.sin(now / 900) * 120, P = Math.abs(zk) * vms; // kW
+  const tod = (8 * 3600 + 12 * 60 + performance.now() / 1000) / 86400;
+  apply({
+    1: demo.v / 3.6, 2: hl + Math.sin(now / 400) * 0.01, 3: bz, 4: demo.hbl, 9: zk * 1000, 0x0B: zk * 1000,
+    0x0D: P / (U / 1000) * 1.08 + 4, 0x0E: U, 0x13: 1, 0x15: zk > 0 ? Math.round(zk / 300 * 28) : 0,
+    0x17: t > 6 && t < 140 ? (t < 62 ? 140 : t < 85 ? 85 : 120) / 3.6 : 0, 0x23: tod % 1, 0x4D: (t > 62 && t < 85 ? 100 : 160) / 3.6,
+    nodes: { [SIFA.node]: { a: { [SIFA.lm]: sifa, [SIFA.hupe]: 0 }, n: {} },
+      [ZB.node]: { a: { 1: 'PZB90 (Demo)' }, n: { [ZB.betrieb]: { a: { [ZB.m1000]: m1000, [ZB.u85]: u85, [ZB.m70]: 0, [ZB.o55]: 0, [ZB.m500]: 0, [ZB.befehl]: 0, [ZB.zwang]: 0 }, n: {} } } } },
+  });
+  st.zug = 'RE 4711';
+}
+
+// ------------------------------------------------------------------ Darstellung
+let renderQueued = false;
+function render() { if (!renderQueued) { renderQueued = true; requestAnimationFrame(doRender); } }
+function doRender() {
+  renderQueued = false;
+  document.body.classList.toggle('day', F.day);
+  $('screen').classList.toggle('off', st.off);
+  $('screen').style.filter = F.bright < 100 ? `brightness(${F.bright / 100})` : '';
+  const d = st.d, live = st.source === 'demo' || (st.zusi && Date.now() - st.at < 5000);
+  // Statuszeile
+  $('t-conn').className = 'conn' + (st.source === 'demo' ? ' demo' : st.zusi ? ' ok' : '');
+  $('t-zug').textContent = st.zug ? 'Zug ' + st.zug.replace(/^Zug\s*/, '') : (st.source === 'demo' ? 'Demo' : '–');
+  const m = st.msg && Date.now() < st.msg.until ? st.msg : null;
+  const msgEl = $('t-msg');
+  msgEl.textContent = m ? m.text : st.source === 'demo' ? 'Demo-Fahrt' : !st.bridge ? 'Keine Verbindung zur Bridge – Taste 8 „Verb.“' : !st.zusi ? 'Warte auf Zusi 3 …' : '';
+  msgEl.className = 'msg ' + (m ? m.cls : (!st.bridge || !st.zusi) && st.source !== 'demo' ? 'warn' : '');
+  const tod = d[0x23];
+  if (tod != null) { const s = Math.round(tod * 86400) % 86400, p = (n) => String(n).padStart(2, '0'); $('t-clock').textContent = `${p(Math.floor(s / 3600))}:${p(Math.floor(s / 60) % 60)}:${p(s % 60)}`; }
+  else $('t-clock').textContent = '--:--:--';
+  // Seiten
+  $('p-main').classList.toggle('show', st.page === 'main');
+  $('p-diag').classList.toggle('show', st.page === 'diag');
+  // Softkeys
+  $('sklbl').innerHTML = SOFT.map((s, i) => `<div data-k="${i}" class="${s.act && s.act() ? 'act' : ''}">${typeof s.l === 'function' ? s.l() : s.l}</div>`).join('');
+  if (st.page === 'main') renderMain(d, live); else renderDiag(d);
+  renderLamps(d, live);
+}
+function renderMain(d, live) {
+  const v = live && d[1] != null ? Math.abs(d[1]) * 3.6 : null;
+  const vStr = live && d[0x4D] ? d[0x4D] * 3.6 : null;
+  const want = F.vmax || (vStr > 200 || (v || 0) > 190 ? (vStr > 250 ? 300 : 250) : vStr > 160 || (v || 0) > 155 ? 200 : 160);
+  if (want !== tachoMax) buildTacho(want);
+  needle.setAttribute('transform', `rotate(${ang(v || 0, tachoMax).toFixed(2)} ${T.cx} ${T.cy})`);
+  needle.setAttribute('visibility', v == null ? 'hidden' : 'visible');
+  vDigit.textContent = v == null ? '–' : Math.round(v);
+  const afb = live && d[0x17] > 0.1 ? d[0x17] * 3.6 : null;
+  if (afb != null) {
+    const a = ang(afb, tachoMax), [x, y] = pt(T.r + 8, a);
+    afbMark.setAttribute('transform', `translate(${x},${y}) rotate(${a})`); afbMark.setAttribute('visibility', 'visible');
+    afbTxt.textContent = 'AFB ' + Math.round(afb);
+  } else { afbMark.setAttribute('visibility', 'hidden'); afbTxt.textContent = ''; }
+  if (vStr != null && vStr < tachoMax) {
+    vsArc.setAttribute('d', arc(T.r + 4, ang(vStr, tachoMax), 135)); markAt(vsMark, vStr, T.r + 12, T.r - 30, 2.2);
+  } else { vsArc.setAttribute('d', ''); vsMark.setAttribute('d', ''); }
+  // Zug-/Bremskraft
+  const f = live && d[9] != null ? d[9] / 1000 : null, mid = K.y0 + K.h / 2;
+  if (f == null) { kFill.setAttribute('height', 0); kTxt.textContent = '–'; }
+  else {
+    const h = clamp(Math.abs(f) / F.fmax, 0, 1) * K.h / 2;
+    kFill.setAttribute('y', f >= 0 ? mid - h : mid); kFill.setAttribute('height', h);
+    kFill.setAttribute('fill', f >= 0 ? 'var(--zug)' : 'var(--brems)');
+    kTxt.textContent = (f < 0 ? '−' : '') + Math.abs(Math.round(f));
+  }
+  const fs = live && d[0x0B] != null ? d[0x0B] / 1000 : null;
+  if (fs != null && Math.abs(fs) > 1) {
+    const y = mid - clamp(fs / F.fmax, -1, 1) * K.h / 2, x = K.x + K.w;
+    kSoll.setAttribute('d', `M${x + 2},${y} L${x + 18},${y - 10} L${x + 18},${y + 10} Z`); kSoll.setAttribute('visibility', 'visible');
+  } else kSoll.setAttribute('visibility', 'hidden');
+  // Drücke, Strom, Spannung
+  setGauge(G.hl, live ? d[2] : null); setGauge(G.bz, live ? d[3] : null); setGauge(G.hbl, live ? d[4] : null); setGauge(G.i, live ? d[0x0D] : null);
+  const u = live ? d[0x0E] : null;
+  $('v-u').innerHTML = u == null ? '–' : `${(u > 100 ? u / 1000 : u).toFixed(1).replace('.', ',')}<small> kV</small>`;
+  const hs = live && d[0x13] != null ? d[0x13] > 0.5 : null;
+  $('b-hs').className = 'box hs' + (hs == null ? '' : hs ? ' ein' : ' aus');
+  $('v-hs').textContent = hs == null ? '–' : hs ? 'EIN' : 'AUS';
+  $('v-fst').textContent = live && d[0x15] != null ? Math.round(d[0x15]) : '–';
+}
+function lamp(id, v) { $(id).className = $(id).className.replace(/\s*\b(on|blink)\b/g, '') + (v >= 2 ? ' blink' : v ? ' on' : ''); }
+function renderLamps(d, live) {
+  const z = live ? zbState(d) : {};
+  lamp('l-1000', z.m1000); lamp('l-500', z.m500); lamp('l-bef', z.befehl);
+  lamp('l-85', z.u85); lamp('l-70', z.m70); lamp('l-55', z.o55);
+  lamp('l-sifa', z.sifaHupe ? 2 : z.sifa); lamp('l-zb', z.zwang ? 1 : 0);
+}
+const NAMES = { 1: 'Geschwindigkeit m/s', 2: 'Druck HL bar', 3: 'Druck Bremszylinder bar', 4: 'Druck HBL bar', 9: 'Zugkraft gesamt N', 11: 'Zugkraft-Soll N',
+  13: 'Oberstrom A', 14: 'Fahrleitungsspannung V', 19: 'Hauptschalter', 21: 'Fahrstufe', 23: 'AFB-Soll m/s', 35: 'Uhrzeit', 77: 'Streckenhöchstgeschw. m/s' };
+function renderDiag(d) {
+  $('log').innerHTML = st.log.length ? st.log.map((l) => `<div>${l.replace(/[<&]/g, (c) => (c === '<' ? '&lt;' : '&amp;'))}</div>`).join('') : '<div style="color:var(--dim)">Keine Meldungen</div>';
+  $('raw').innerHTML = Object.keys(NAMES).map((id) => `<tr><td>0x${(+id).toString(16).padStart(4, '0').toUpperCase()}</td><td>${NAMES[id]}</td><td style="text-align:right">${d[id] != null ? (+d[id]).toFixed(2) : '–'}</td></tr>`).join('');
+  $('nodes').textContent = JSON.stringify(d.nodes || {}, null, 1);
+}
+
+// ------------------------------------------------------------------ Verbindungsdialog
+function openConn() { $('conn').classList.add('show'); $('c-addr').value = (E.bridgeUrl || '').replace(/^https?:\/\//, ''); $('c-st').textContent = ''; }
+function closeConn() { $('conn').classList.remove('show'); try { document.activeElement.blur(); } catch (e) { /* egal */ } }
+function normAddr(a) {
+  a = String(a || '').trim(); if (!a) return '';
+  if (!/^https?:\/\//i.test(a)) a = 'http://' + a;
+  try { const u = new URL(a); if (!u.port && u.protocol === 'http:') u.port = '8080'; return u.origin; } catch (e) { return null; }
+}
+async function connAction(c) {
+  if (c === 'close') return closeConn();
+  if (c === 'demo') { closeConn(); setSource('demo'); return; }
+  const a = normAddr($('c-addr').value);
+  if (a === null) { $('c-st').textContent = 'Ungültige Adresse'; return; }
+  if (a === '' && !location.protocol.startsWith('http')) { $('c-st').textContent = 'Bitte die Adresse der Bridge eingeben'; return; }
+  $('c-st').textContent = 'Verbinde …';
+  try {
+    const ctl = new AbortController(); setTimeout(() => ctl.abort(), 3000);
+    const j = await (await fetch(a + '/api/state', { signal: ctl.signal, cache: 'no-store' })).json();
+    if (j.bridge !== 'nussy-ebula') throw new Error();
+  } catch (e) { $('c-st').textContent = 'Keine Bridge erreichbar. Läuft start.bat? Selbes WLAN?'; return; }
+  E.bridgeUrl = a; saveE(); closeConn(); setSource('zusi');
+}
+
+// ------------------------------------------------------------------ Skalierung und Start
+function layout() {
+  const s = Math.min(window.innerWidth / 1280, window.innerHeight / 800);
+  const dev = $('dev');
+  dev.style.transform = `translate(${(window.innerWidth - 1280 * s) / 2}px, ${(window.innerHeight - 800 * s) / 2}px) scale(${s})`;
+}
+window.addEventListener('resize', layout);
+window.addEventListener('orientationchange', () => setTimeout(layout, 200));
+let wakeLock = null;
+async function requestWakeLock() {
+  if (wakeLock || !('wakeLock' in navigator) || document.visibilityState !== 'visible') return;
+  try { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => { wakeLock = null; }); } catch (e) { /* nicht erlaubt */ }
+}
+document.addEventListener('pointerdown', requestWakeLock);
+
+buildKeys(); buildGauges(); buildKraft(); buildTacho(160); layout();
+SND.play('on');
+setTimeout(() => {
+  st.booting = false;
+  const q = new URLSearchParams(location.search);
+  setSource(q.has('demo') || bridgeBase() == null ? 'demo' : 'zusi');
+}, 600);
+setInterval(render, 1000);
+</script>
+</body>
+</html>

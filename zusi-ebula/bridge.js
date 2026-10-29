@@ -27,6 +27,15 @@ const DEFAULTS = {
   // Führerstandsanzeigen (DATA_FTD), die angefordert werden
   fsIds: [
     0x0001, // Geschwindigkeit m/s
+    0x0002, // Druck Hauptluftleitung bar
+    0x0003, // Druck Bremszylinder bar
+    0x0004, // Druck Hauptluftbehälter bar
+    0x0009, // Zugkraft gesamt N (negativ = elektrische Bremse)
+    0x000B, // Zugkraft-Soll gesamt N
+    0x000D, // Oberstrom A
+    0x000E, // Fahrleitungsspannung V
+    0x0013, // Hauptschalter
+    0x0015, // Fahrstufe
     0x0010, 0x0011, 0x0012, // Uhrzeit Stunde/Minute/Sekunde (Zeigerstellung)
     0x0017, // AFB-Sollgeschwindigkeit m/s
     0x0019, // Zurückgelegter Gesamtweg m
@@ -34,6 +43,8 @@ const DEFAULTS = {
     0x004B, // Datum (Tage seit 30.12.1899)
     0x004D, // Streckenhöchstgeschwindigkeit m/s
     0x0061, // Kilometrierung Zugspitze km
+    0x0064, // Status Sifa (Knoten)
+    0x0065, // Status Zugbeeinflussung PZB/LZB (Knoten)
   ],
   extraFsIds: [],
   // Programmdaten (DATA_PROG): Zugdatei, Zugnummer, Ladepause, Buchfahrplan (XML)
@@ -69,6 +80,7 @@ const state = {
   zusi: { connected: false, version: '', info: '', error: '', since: null },
   ftd: {}, // id -> Wert
   ftdSeen: {}, // id -> Länge des Attributs (Debug)
+  ftdNodes: {}, // id -> Knoten als Baum { a: {id: Wert}, n: {id: Baum} } (Sifa, Zugbeeinflussung …)
   prog: { zugdatei: '', zugnummer: '', ladepause: null, xml: '', xmlSource: '', xmlRev: 0 },
 };
 
@@ -126,6 +138,27 @@ function decodeString(data) {
   if (s.includes('\uFFFD')) s = data.toString('latin1'); // Zusi schreibt teils ANSI
   return s.replace(/^\uFEFF/, '').replace(/\0+$/, '');
 }
+// Verschachtelte Führerstandsanzeigen (z. B. Sifa, PZB/LZB) als Baum: Werte nach Länge gedeutet
+function attrValue(d) {
+  if (d.length === 1) return d[0];
+  if (d.length === 2) return d.readUInt16LE(0);
+  if (d.length === 4) return d.readFloatLE(0);
+  if (d.length === 8) return d.readDoubleLE(0);
+  return decodeString(d);
+}
+function nodeTree(n) {
+  const t = { a: {}, n: {} };
+  for (const a of n.attrs) t.a[a.id] = attrValue(a.data);
+  for (const c of n.nodes) t.n[c.id] = nodeTree(c);
+  return t;
+}
+// Zusi schickt teils nur geänderte Werte: neue Werte in den bekannten Baum übernehmen
+function mergeTree(old, neu) {
+  if (!old) return neu;
+  Object.assign(old.a, neu.a);
+  for (const [id, sub] of Object.entries(neu.n)) old.n[id] = mergeTree(old.n[id], sub);
+  return old;
+}
 const findAttr = (n, id) => n.attrs.find((a) => a.id === id);
 const findNode = (n, id) => n.nodes.find((c) => c.id === id);
 
@@ -164,6 +197,7 @@ function connectZusi() {
     if (state.zusi.connected) log('Verbindung zu Zusi getrennt');
     state.zusi.connected = false;
     state.ftd = {};
+    state.ftdNodes = {};
     broadcastStatus();
     reconnectTimer = setTimeout(connectZusi, 3000);
   });
@@ -205,7 +239,10 @@ function handleNode(n) {
         else if (a.data.length === 2) state.ftd[a.id] = a.data.readUInt16LE(0);
         else if (a.data.length === 1) state.ftd[a.id] = a.data[0];
       }
-      for (const sub of c.nodes) state.ftdSeen[sub.id] = 'Knoten';
+      for (const sub of c.nodes) {
+        state.ftdSeen[sub.id] = 'Knoten';
+        state.ftdNodes[sub.id] = mergeTree(state.ftdNodes[sub.id], nodeTree(sub));
+      }
       scheduleFtd();
     } else if (c.id === 0x000C) {
       handleProg(c);
@@ -318,9 +355,10 @@ function progPayload(withXml = true) {
 const broadcastStatus = () => broadcast('status', statusPayload());
 const broadcastProg = () => broadcast('prog', progPayload());
 let ftdTimer = null;
+function ftdPayload() { return { ...state.ftd, nodes: state.ftdNodes }; }
 function scheduleFtd() {
   if (ftdTimer) return;
-  ftdTimer = setTimeout(() => { ftdTimer = null; broadcast('ftd', state.ftd); }, 150);
+  ftdTimer = setTimeout(() => { ftdTimer = null; broadcast('ftd', ftdPayload()); }, 150);
 }
 
 const PUBLIC = path.join(__dirname, 'public');
@@ -342,13 +380,13 @@ const server = http.createServer((req, res) => {
     clients.add(res);
     send(res, 'status', statusPayload());
     send(res, 'prog', progPayload());
-    send(res, 'ftd', state.ftd);
+    send(res, 'ftd', ftdPayload());
     req.on('close', () => clients.delete(res));
     return;
   }
   if (url.pathname === '/api/state') {
     res.writeHead(200, { ...cors, 'Content-Type': 'application/json; charset=utf-8' });
-    return res.end(JSON.stringify({ status: statusPayload(), prog: progPayload(false), ftd: state.ftd, ftdSeen: state.ftdSeen, bridge: 'nussy-ebula' }));
+    return res.end(JSON.stringify({ status: statusPayload(), prog: progPayload(false), ftd: state.ftd, ftdSeen: state.ftdSeen, ftdNodes: state.ftdNodes, bridge: 'nussy-ebula' }));
   }
   if (url.pathname === '/api/reconnect' && req.method === 'POST') {
     connectZusi();
@@ -379,12 +417,14 @@ const DEBUG_HTML = `<!doctype html><html lang="de"><head><meta charset="utf-8"><
 table{border-collapse:collapse}td,th{border:1px solid #444;padding:4px 10px;text-align:left}th{background:#222}code{color:#9cf}</style></head>
 <body><h2>EBuLa Bridge – Diagnose</h2><div id="s"></div><h3>Führerstandsanzeigen (DATA_FTD)</h3>
 <table><thead><tr><th>ID (hex)</th><th>ID (dez)</th><th>Wert</th></tr></thead><tbody id="t"></tbody></table>
+<h3>Knoten (Sifa 0x0064, Zugbeeinflussung 0x0065 …) – Schlüssel = Attribut-ID dezimal</h3><pre id="n"></pre>
 <h3>Programmdaten</h3><pre id="p"></pre><script>
-const names={1:'Geschwindigkeit m/s',16:'Uhr Stunde',17:'Uhr Minute',18:'Uhr Sekunde',23:'AFB-Soll m/s',25:'Gesamtweg m',35:'Uhrzeit digital',75:'Datum',77:'Streckenhöchstgeschw. m/s',97:'Kilometrierung km'};
+const names={1:'Geschwindigkeit m/s',2:'Druck HL bar',3:'Druck Bremszylinder bar',4:'Druck HBL bar',9:'Zugkraft gesamt N',11:'Zugkraft-Soll gesamt N',13:'Oberstrom A',14:'Fahrleitungsspannung V',19:'Hauptschalter',21:'Fahrstufe',16:'Uhr Stunde',17:'Uhr Minute',18:'Uhr Sekunde',23:'AFB-Soll m/s',25:'Gesamtweg m',35:'Uhrzeit digital',75:'Datum',77:'Streckenhöchstgeschw. m/s',97:'Kilometrierung km'};
 async function tick(){try{const r=await fetch('/api/state');const j=await r.json();
 document.getElementById('s').innerHTML='Zusi: <b>'+(j.status.zusi?'verbunden':'nicht verbunden')+'</b> '+j.status.version+' ('+j.status.host+') '+(j.status.error||'');
 const ids=Object.keys(j.ftdSeen).map(Number).sort((a,b)=>a-b);
 document.getElementById('t').innerHTML=ids.map(id=>'<tr><td><code>0x'+id.toString(16).padStart(4,'0').toUpperCase()+'</code></td><td>'+id+'</td><td>'+(j.ftd[id]!==undefined?(+j.ftd[id]).toFixed(4):j.ftdSeen[id])+' <small>'+(names[id]||'')+'</small></td></tr>').join('');
+document.getElementById('n').textContent=JSON.stringify(j.ftdNodes,null,1);
 document.getElementById('p').textContent=JSON.stringify(j.prog,null,2);}catch(e){document.getElementById('s').textContent='Bridge nicht erreichbar'}}
 setInterval(tick,500);tick();</script></body></html>`;
 

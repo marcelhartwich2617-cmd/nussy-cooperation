@@ -112,6 +112,27 @@ LEDs: **KBD** leuchtet bei Tastendruck, **TEMP** leuchtet gelb, solange eine St�
 Im Handy-Layout liegen Zug, FSD, GW, Zeit, G und St sowie C, Pfeile und E als Touch-Tasten unten. Für die Zugnummer
 erscheint ein Ziffernblock. i und S erreichst du über das Grundmenü (G ▸ 6 und G ▸ 2).
 
+## Fahrpult-Anzeige (mittlerer Bildschirm)
+
+`fahrpult.html` ist das mittlere Führerstandsdisplay im Stil moderner E-Loks (TRAXX, Vectron, BR 147). Es läuft über
+dieselbe Bridge wie die EBuLa und nutzt dieselben Töne und dieselbe Bridge-Adresse:
+
+- **Tacho** mit Nadel und Digitalwert, AFB-Sollgeschwindigkeit (gelbe Marke), Streckenhöchstgeschwindigkeit (rote Marke
+  und roter Bogen). Die Skala wählt sich automatisch (160/200/250/300) oder fest über Softkey 5.
+- **Zug-/Bremskraft** als Balken (blau = Zugkraft, gelb = elektrische Bremse) mit Soll-Marke, Skala über Softkey 6
+- **Drücke**: Hauptluftleitung, Bremszylinder, Hauptluftbehälter. Außerdem **Oberstrom**, **Fahrdrahtspannung**,
+  **Hauptschalter** und **Fahrstufe**
+- **Leuchtmelder**: PZB 1000 Hz, 500 Hz, Befehl 40, 85/70/55 (blinkend), Sifa und Zwangsbremsung
+- **Diagnose** (Softkey 2): Meldungen, alle Werte von Zusi und die Rohdaten von Sifa und PZB/LZB
+- Tag-/Nachtmodus, Helligkeit, Demo-Fahrt ohne Zusi und Wechsel zur EBuLa (Softkey 0)
+
+Öffnen: im Browser `http://<PC-IP>:8080/fahrpult.html` oder in der EBuLa über G ▸ 8. Die Taste **Start ▸** links am
+Gerät stellt ein, dass die App künftig gleich mit dem Fahrpult startet.
+
+Die Melder werden aus den verschachtelten Zusi-Daten „Status Sifa“ (0x0064) und „Status Zugbeeinflussung“ (0x0065)
+gelesen. Die Zuordnung steht oben in `fahrpult.html` (`SIFA`, `ZB`). Zeigt eine Lok falsche Melder, im Bildschirm
+„Diagn.“ oder unter `/debug` die Rohdaten ansehen und die Zuordnung anpassen.
+
 ## Handy-App
 
 Auf Handys schaltet die Anzeige automatisch auf ein **Handy-Layout** um: kein Gerätegehäuse, der Fahrplan füllt den

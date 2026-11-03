@@ -173,14 +173,26 @@ cd zusi-ebula/android
 Die APK ist mit einem Debug-Schlüssel signiert. Das reicht zum direkten Installieren, aber nicht für den Play Store.
 Wird sie auf einem anderen Rechner gebaut, hat sie eine andere Signatur. Dann die alte App vorher deinstallieren.
 
-### iPhone
+### iPhone und iPad
 
-Eine App für den App Store braucht einen Mac und ein Apple-Entwicklerkonto. Stattdessen läuft die EBuLa als
-**Web-App vom Home-Bildschirm**:
+**Sofort, ohne Installation (empfohlen):**
+1. Auf dem Zusi-PC `start.bat` starten. Im Fenster erscheint ein **QR-Code**. Größer und für alle Netzwerke steht er
+   unter `http://localhost:8080/install`.
+2. Den QR-Code mit der **Kamera-App** des iPhones scannen und den Hinweis antippen. Die EBuLa öffnet sich in Safari.
+3. **Teilen ▸ „Zum Home-Bildschirm“ ▸ Hinzufügen**. Ab jetzt startet die EBuLa über ihr Icon im Vollbild wie eine App.
 
-1. Auf dem iPhone in Safari die Adresse der Bridge öffnen (z. B. `http://192.168.0.23:8080`).
-2. **Teilen ▸ „Zum Home-Bildschirm“**.
-3. Die EBuLa startet dann wie eine App im Vollbild, mit eigenem Icon.
+**Als echte iOS-App (`ios/`):**
+Die GitHub-Action „EBuLa iOS-App“ baut bei jeder Änderung eine unsignierte `EBuLa-Zusi3.ipa` (Artefakt
+**EBuLa-iOS-IPA**). Apple lässt Apps nur signiert auf das Gerät:
+- **Sideloadly** oder **AltStore** (Windows/Mac) installieren, das iPhone per Kabel anschließen, die IPA hineinziehen und
+  mit der eigenen (kostenlosen) Apple-ID signieren. Auf dem iPhone unter *Einstellungen ▸ Allgemein ▸ VPN und
+  Geräteverwaltung* dem Entwickler vertrauen und ab iOS 16 den *Entwicklermodus* einschalten. Mit kostenloser Apple-ID
+  läuft die App 7 Tage, danach neu signieren (AltStore macht das automatisch).
+- Mit einem Apple-Entwicklerkonto (99 €/Jahr) lässt sich das Projekt in Xcode öffnen und über TestFlight verteilen:
+  `brew install xcodegen && cd zusi-ebula/ios && xcodegen generate && open EBuLa.xcodeproj`.
+
+Beim ersten Verbinden fragt iOS nach dem Zugriff auf das **lokale Netzwerk**: zulassen, sonst findet die App die
+Bridge nicht. Die App hält den Bildschirm an, läuft im Vollbild und gibt bei Tasten eine haptische Rückmeldung.
 
 ## Ohne Zusi
 
@@ -195,5 +207,7 @@ Eine App für den App Store braucht einen Mac und ein Apple-Entwicklerkonto. Sta
   0x23 Uhrzeit digital, 0x4B Datum, 0x4D Streckenhöchstgeschwindigkeit und 0x61 Kilometrierung Zugspitze.
   Programmdaten: Zugdatei, Zugnummer, Ladepause und Buchfahrplan (XML).
 - `public/index.html`: die komplette Anzeige in einer Datei (HTML, CSS und JavaScript), ohne Internetzugang.
+- `ios/`: iOS-App (Swift, WKWebView, Projekt per XcodeGen). Sie liefert `public/` über ein eigenes `ebula://`-Schema aus.
+- `vendor/qrcode.js`: QR-Code-Generator (Kazuhiko Arase, MIT-Lizenz) für den QR-Code der Bridge.
 - `android/`: Android-App (WebView ohne zusätzliche Bibliotheken). Sie übernimmt `public/` direkt als App-Inhalt.
 - `public/manifest.webmanifest` und `sw.js`: Web-App-Manifest, Icons und Offline-Cache für die Home-Bildschirm-Installation.

@@ -1,0 +1,50 @@
+name: EBuLa
+options:
+  bundleIdPrefix: de.nussy
+  deploymentTarget:
+    iOS: "15.0"
+targets:
+  EBuLa:
+    type: application
+    platform: iOS
+    scheme: {}
+    sources:
+      - path: EBuLa
+      # Die Anzeige wird direkt aus zusi-ebula/public übernommen – eine Quelle für Browser, Android und iOS
+      - path: ../public
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: de.nussy.ebula
+        PRODUCT_NAME: EBuLa
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "5.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: NO
+    info:
+      path: EBuLa/Info.plist
+      properties:
+        CFBundleDisplayName: EBuLa
+        LSRequiresIPhoneOS: true
+        UILaunchScreen: {}
+        UIRequiresFullScreen: true
+        UIStatusBarHidden: true
+        UIViewControllerBasedStatusBarAppearance: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        # Verbindung zur Bridge per http im WLAN
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+          NSAllowsLocalNetworking: true
+        NSLocalNetworkUsageDescription: Die EBuLa verbindet sich im WLAN mit der Bridge auf dem Zusi-PC, um Fahrplan und Live-Daten zu empfangen.
+        ITSAppUsesNonExemptEncryption: false

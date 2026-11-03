@@ -1,0 +1,36 @@
+name: EBuLa iOS-App
+
+on:
+  push:
+    paths:
+      - 'zusi-ebula/**'
+      - '.github/workflows/ebula-ios.yml'
+  workflow_dispatch:
+
+jobs:
+  ipa:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: XcodeGen installieren
+        run: brew install xcodegen
+      - name: Xcode-Projekt erzeugen
+        working-directory: zusi-ebula/ios
+        run: xcodegen generate
+      - name: App bauen (unsigniert, zum Sideloaden)
+        working-directory: zusi-ebula/ios
+        run: |
+          xcodebuild -project EBuLa.xcodeproj -scheme EBuLa -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+      - name: IPA packen
+        working-directory: zusi-ebula/ios
+        run: |
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/EBuLa.app Payload/
+          ls Payload/EBuLa.app Payload/EBuLa.app/public
+          zip -qry EBuLa-Zusi3.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: EBuLa-iOS-IPA
+          path: zusi-ebula/ios/EBuLa-Zusi3.ipa

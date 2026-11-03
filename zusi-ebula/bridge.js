@@ -17,6 +17,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { execFile } = require('child_process');
+const qrcode = require('./vendor/qrcode.js');
 
 // ---------------------------------------------------------------- Konfiguration
 const DEFAULTS = {
@@ -393,6 +394,10 @@ const server = http.createServer((req, res) => {
     res.writeHead(204, cors);
     return res.end();
   }
+  if (url.pathname === '/install' || url.pathname === '/qr') {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+    return res.end(installPage());
+  }
   if (url.pathname === '/debug') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     return res.end(DEBUG_HTML);
@@ -428,6 +433,63 @@ document.getElementById('n').textContent=JSON.stringify(j.ftdNodes,null,1);
 document.getElementById('p').textContent=JSON.stringify(j.prog,null,2);}catch(e){document.getElementById('s').textContent='Bridge nicht erreichbar'}}
 setInterval(tick,500);tick();</script></body></html>`;
 
+// ---------------------------------------------------------------- QR-Code für Handy/Tablet
+function makeQr(text) {
+  const qr = qrcode(0, 'M');
+  qr.addData(text);
+  qr.make();
+  return qr;
+}
+// Zwei QR-Zeilen pro Textzeile (Halbblock ▀): oben = Vordergrund, unten = Hintergrund
+function qrTerminal(text) {
+  const qr = makeQr(text), n = qr.getModuleCount(), quiet = 2;
+  const dark = (r, c) => r >= 0 && c >= 0 && r < n && c < n && qr.isDark(r, c);
+  const lines = [];
+  for (let r = -quiet; r < n + quiet; r += 2) {
+    let line = '  ';
+    for (let c = -quiet; c < n + quiet; c++) line += `\x1b[${dark(r, c) ? 30 : 97};${dark(r + 1, c) ? 40 : 107}m▀`;
+    lines.push(line + '\x1b[0m');
+  }
+  return lines.join('\n');
+}
+function displayUrls() {
+  const rank = (ip) => (ip.startsWith('192.168.') ? 0 : ip.startsWith('10.') ? 1 : ip.startsWith('172.') ? 2 : 3);
+  return lanAddresses().sort((a, b) => rank(a) - rank(b)).map((ip) => `http://${ip}:${cfg.httpPort}/`);
+}
+function installPage() {
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const urls = displayUrls();
+  const codes = urls.length
+    ? urls.map((u) => `<figure>${makeQr(u).createSvgTag({ cellSize: 6, margin: 4, scalable: true })}<figcaption>${esc(u)}</figcaption></figure>`).join('')
+    : '<p>Kein Netzwerk gefunden – ist der PC mit dem WLAN/LAN verbunden?</p>';
+  return `<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EBuLa aufs Handy</title><style>
+body{font:16px/1.5 system-ui,sans-serif;background:#111;color:#eee;margin:0;padding:24px;max-width:900px}
+h1{font-size:26px;margin:0 0 4px}.sub{color:#aaa;margin:0 0 20px}
+.codes{display:flex;flex-wrap:wrap;gap:20px;margin:16px 0 24px}
+figure{margin:0;background:#fff;color:#000;padding:12px;border-radius:10px;text-align:center}
+figure svg{width:260px;height:260px;display:block}figcaption{font:600 15px ui-monospace,Consolas,monospace;margin-top:6px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.card{background:#1c1f24;border:1px solid #333;border-radius:10px;padding:14px 18px}
+.card h2{font-size:19px;margin:0 0 8px}ol{margin:0;padding-left:20px}li{margin:4px 0}b{color:#fff}
+</style></head><body>
+<h1>EBuLa aufs Handy oder Tablet</h1><p class="sub">Handy/Tablet ins selbe WLAN wie diesen PC, dann den QR-Code mit der Kamera scannen.</p>
+<div class="codes">${codes}</div>
+<div class="cols">
+<div class="card"><h2>iPhone / iPad</h2><ol>
+<li>Kamera-App öffnen und den QR-Code scannen, Hinweis antippen – die EBuLa öffnet sich in Safari.</li>
+<li>Unten auf <b>Teilen</b> (Viereck mit Pfeil) tippen.</li>
+<li><b>„Zum Home-Bildschirm“</b> ▸ <b>Hinzufügen</b>.</li>
+<li>Ab jetzt die EBuLa über das Icon starten – sie läuft im Vollbild wie eine App.</li></ol></div>
+<div class="card"><h2>Android</h2><ol>
+<li>QR-Code mit der Kamera scannen und die Seite in Chrome öffnen.</li>
+<li>Menü (⋮) ▸ <b>„Zum Startbildschirm hinzufügen“</b>.</li>
+<li>Oder die Android-App (APK) installieren und dort die Adresse unter dem QR-Code eintragen.</li></ol></div>
+</div>
+<p class="sub" style="margin-top:20px">Klappt es nicht? Windows-Firewall: Node.js im <b>privaten</b> Netzwerk zulassen. Diagnose: <a style="color:#9cf" href="/debug">/debug</a></p>
+</body></html>`;
+}
+
 // ---------------------------------------------------------------- Start
 function log(msg) { console.log(`[${new Date().toLocaleTimeString('de-DE')}] ${msg}`); }
 
@@ -452,7 +514,14 @@ if (require.main === module) {
     for (const ip of lanAddresses()) console.log(`  Auf iPad/Tablet:    http://${ip}:${cfg.httpPort}`);
     console.log(`  Diagnose:           http://localhost:${cfg.httpPort}/debug`);
     console.log(`  Zusi TCP-Server:    ${cfg.zusiHost}:${cfg.zusiPort}`);
+    console.log(`  QR-Code fürs Handy: http://localhost:${cfg.httpPort}/install`);
     console.log('==============================================================');
+    const url = displayUrls()[0];
+    if (url && cfg.qrImFenster !== false) {
+      console.log('  iPhone/Android: QR-Code mit der Kamera scannen, dann „Zum Home-Bildschirm“\n');
+      console.log(qrTerminal(url));
+      console.log(`\n  ${url}\n`);
+    }
     connectZusi();
   });
 }

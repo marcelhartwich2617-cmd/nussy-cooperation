@@ -1005,7 +1005,7 @@ function renderHeader() {
   $('h-km').textContent = !f ? '' : st.live.km != null && st.source !== 'offline' ? fmtKm(st.live.km, 2) : (f.hasKm && st.pos.init ? fmtKm(kmAtP(st.pos.p), 1) : '–');
   $('h-kmc').style.visibility = f ? 'visible' : 'hidden';
   $('h-datum').textContent = t != null && t > 1000 ? fmtDate(t) : '';
-  $('h-mode').textContent = !f ? '' : (st.ctl === 'zeit' ? (st.zeit.run ? 'Zeit ▶' : 'Zeit ‖') : CTL_NAME[st.ctl]) + (f.hasGleis || st.gw === 'l' ? '  /' + st.gw : '');
+  $('h-mode').textContent = !f ? '' : (st.ctl === 'zeit' ? (st.zeit.run ? 'Zeit läuft' : 'Zeit Halt') : CTL_NAME[st.ctl]) + (f.hasGleis || st.gw === 'l' ? '  /' + st.gw : '');
   let info = '';
   if (f) {
     const m = f.meta, parts = [];
@@ -1165,7 +1165,7 @@ function renderPages() {
 // Bildschirmtastatur für Ziffern im Handy-Layout
 function padHtml() {
   return ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'].map((d) => `<div class="tb" data-k="${d}">${d}</div>`).join('') +
-    '<div class="tb small" data-k="C">⌫ C</div><div class="tb small" data-k="E">E ✓</div>';
+    '<div class="tb small" data-k="C">C</div><div class="tb small" data-k="E">E</div>';
 }
 
 function renderZugPage() {
@@ -1349,7 +1349,7 @@ function renderInfo() {
   const keys = [
     ['1 Zug', 'Zug anmelden (Zugnummer)'], ['2 FSD', 'Zugdaten und Halteliste'], ['6 GW', 'Gleiswechsel Regel-/Gegengleis'], ['7 Zeit', 'Steuerungsart: Ortung / Zeit / Manuell'], ['0 G', 'Grundmenü'],
     ['St', 'Störungsübersicht'], ['V>0 V=0', 'Abhilfetexte Fahrt / Stillstand'], ['i', 'Information (diese Seite)'], ['S', 'Systemdienste'],
-    ['☀aus', 'Bildschirm aus'], ['☀', 'Helligkeit'], ['◑', 'Kontrast Tag/Nacht'], ['UD', 'Display umschalten (drehen)'],
+    ['aus', 'Bildschirm aus'], ['Hell', 'Helligkeit'], ['Kontrast', 'Tag/Nacht'], ['UD', 'Display umschalten (drehen)'],
     ['▲ ▼', 'Vorschau / Ortsmarker'], ['◄ ►', 'seitenweise blättern'], ['E', 'Bestätigen / Zeitsteuerung'], ['C', 'Zurück / Löschen'],
     ['KBD', 'Tastendruck'], ['TEMP', 'Warnung: Störung vorhanden'], ['GPS', 'durchgestrichen = keine Ortung'],
   ];
@@ -1453,9 +1453,9 @@ function endBoot() {
 // ------------------------------------------------------------ Tasten
 const KEYS = [
   // obere Reihe
-  { id: 'aus', label: '☀<br>aus', x: 172, y: 18 }, { id: 'S', label: 'S', x: 274, y: 18 }, { id: 'i', label: 'i', x: 373, y: 18 },
+  { id: 'aus', label: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M3 13l1.4-1.4M11.6 4.4L13 3"/></svg>aus', x: 172, y: 18 }, { id: 'S', label: 'S', x: 274, y: 18 }, { id: 'i', label: 'i', x: 373, y: 18 },
   { id: 'St', label: 'St', x: 473, y: 18, wide: true }, { id: 'V>0', label: 'V&gt;0', x: 651, y: 18 }, { id: 'V=0', label: 'V=0', x: 747, y: 18 },
-  { id: 'hell', label: '☀', x: 831, y: 18 }, { id: 'kontrast', label: '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.5a6.5 6.5 0 0 0 0 13z" fill="currentColor"/></svg>', x: 924, y: 18 }, { id: 'UD', label: 'UD', x: 1010, y: 18 },
+  { id: 'hell', label: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M3 13l1.4-1.4M11.6 4.4L13 3"/></svg>', x: 831, y: 18 }, { id: 'kontrast', label: '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 1.5a6.5 6.5 0 0 0 0 13z" fill="currentColor"/></svg>', x: 924, y: 18 }, { id: 'UD', label: 'UD', x: 1010, y: 18 },
   // rechte Spalte
   { id: 'C', label: 'C', x: 1112, y: 110 }, { id: 'left', label: '◄', x: 1112, y: 212 }, { id: 'right', label: '►', x: 1112, y: 312 },
   { id: 'up', label: '▲', x: 1112, y: 414 }, { id: 'down', label: '▼', x: 1112, y: 516 }, { id: 'E', label: 'E', x: 1112, y: 636 },
@@ -1834,7 +1834,7 @@ function renderToolbar() {
   if (tbCache === key) return;
   tbCache = key;
   const items = [['nav1', 'Zug'], ['nav2', 'FSD', !f], ['nav6', 'GW /' + st.gw, !f], ['nav7', 'Zeit', !f], ['nav0', 'G'], ['St', 'St'],
-    ['C', main ? 'C' : 'Zurück'], ['left', '◄', 0, 1], ['up', '▲', 0, 1], ['down', '▼', 0, 1], ['right', '►', 0, 1], ['E', main && f && st.ctl === 'zeit' ? (st.zeit.run ? 'E ‖' : 'E ▶') : 'E']];
+    ['C', main ? 'C' : 'Zurück'], ['left', '◄', 0, 1], ['up', '▲', 0, 1], ['down', '▼', 0, 1], ['right', '►', 0, 1], ['E', main && f && st.ctl === 'zeit' ? (st.zeit.run ? 'E Halt' : 'E Start') : 'E']];
   $('toolbar').innerHTML = items.map(([k, l, dis, ar]) => `<div class="tb${ar ? ' arrow' : ''}${dis ? ' dis' : ''}${l.length > 5 ? ' small' : ''}" data-k="${k}">${l}</div>`).join('');
 }
 

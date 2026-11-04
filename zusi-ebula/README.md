@@ -99,8 +99,8 @@ Nach dem Blättern (▲ ▼ ◄ ►) springt die Anzeige nach 10 s von selbst zu
 | V>0 / V=0 | Abhilfetext zur Störung: kurz während der Fahrt / ausführlich im Stillstand |
 | i | Information zur aktuellen Seite |
 | S | Systemdienste (Einstellungen) |
-| ☀ aus | Bildschirm aus / an |
-| ☀ / ◐ | Helligkeit / Kontrast (Tag- und Nachtdarstellung) |
+| Sonne „aus“ | Bildschirm aus / an |
+| Sonne / Halbkreis | Helligkeit / Kontrast (Tag- und Nachtdarstellung) |
 | UD | Display umschalten (um 90° drehen, z. B. für ein hochkant montiertes iPad) |
 | ◄ ► | seitenweise blättern / Werte ändern |
 | E / C | bestätigen / zurück bzw. Ziffer löschen |

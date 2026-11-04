@@ -362,6 +362,8 @@ sup.s { font-size: 11px; margin-left: 1px; vertical-align: 6px; color: var(--scr
 
 const $ = (id) => document.getElementById(id);
 const IS_APP = /NussyEBuLa/i.test(navigator.userAgent);
+// Auf einer https-Webseite blockiert der Browser die http-Verbindung zur Bridge: dort nur Demo und Fahrplandateien
+const WEB_ONLY = location.protocol === 'https:' && !IS_APP;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -1255,7 +1257,7 @@ function renderGrund() {
 }
 
 const MENU = [
-  { l: 'Datenquelle', v: () => ({ zusi: 'Zusi 3 (Bridge)', demo: 'Demo-Fahrt', offline: 'Nur Dateien (offline)' }[st.source]), ch: (d) => { const o = ['zusi', 'demo', 'offline']; setSource(o[(o.indexOf(st.source) + d + 3) % 3]); } },
+  { l: 'Datenquelle', v: () => ({ zusi: 'Zusi 3 (Bridge)', demo: 'Demo-Fahrt', offline: 'Nur Dateien (offline)' }[st.source]), ch: (d) => { const o = WEB_ONLY ? ['demo', 'offline'] : ['zusi', 'demo', 'offline']; setSource(o[(o.indexOf(st.source) + d + o.length) % o.length]); } },
   { l: 'Bridge-Adresse', v: () => S.bridgeUrl ? S.bridgeUrl.replace(/^https?:\/\//, '') : 'automatisch (diese Seite)', a: () => openConn() },
   { l: 'Zusi neu verbinden', a: () => { fetch(bridgeBase() + '/api/reconnect', { method: 'POST' }).then(() => flash('Neuverbindung angefordert', 'ok')).catch(() => flash('Bridge nicht erreichbar', 'warn')); } },
   { l: 'Zug von Zusi automatisch anmelden', v: () => S.autoLogin ? 'an' : 'aus (Zugnummer eingeben)', ch: () => { S.autoLogin = !S.autoLogin; } },
@@ -1280,6 +1282,7 @@ const MENU = [
   { l: 'Alle Einstellungen zurücksetzen', a: () => { Object.assign(S, DEF); saveS(); layout(); buildView(); flash('Standardwerte geladen', 'ok'); } },
 ];
 if (IS_APP) MENU.splice(MENU.findIndex((m) => m.l === 'Vollbild'), 1);
+if (WEB_ONLY) for (const l of ['Bridge-Adresse', 'Zusi neu verbinden', 'Zug von Zusi automatisch anmelden']) MENU.splice(MENU.findIndex((m) => m.l === l), 1);
 function renderMenu() {
   st.sel.menu = clamp(st.sel.menu, 0, MENU.length - 1);
   const vis = Math.min(MENU.length, Math.max(3, Math.floor((LAY.th - LAY.h2) / LAY.li))), start = clamp(st.sel.menu - Math.floor(vis / 2), 0, MENU.length - vis);
@@ -1721,7 +1724,7 @@ $('fileinp').addEventListener('change', async (e) => {
   try {
     const buf = await file.arrayBuffer();
     let text = new TextDecoder('utf-8').decode(buf);
-    if (text.includes('�')) text = new TextDecoder('windows-1252').decode(buf);
+    if (text.includes('\uFFFD')) text = new TextDecoder('windows-1252').decode(buf);
     const { key } = libAdd(text, 'Datei ' + file.name, true);
     if (st.source === 'demo') setSource('offline', false);
     anmelden(key);
@@ -2117,12 +2120,14 @@ async function detectBridge() {
   layout();
   if (S.boot) startBoot();
   let src = S.source;
-  if (src === 'auto' || src === 'zusi') {
+  if (WEB_ONLY && src !== 'offline') src = 'demo';
+  else if (src === 'auto' || src === 'zusi') {
     const ok = await detectBridge();
     src = ok ? 'zusi' : (src === 'zusi' && (S.bridgeUrl || location.protocol.startsWith('http')) ? 'zusi' : 'demo');
   }
   setSource(src, true);
   if (IS_APP && !S.bridgeUrl) openConn();
+  if (WEB_ONLY) setTimeout(() => flash('Web-Version: Demo und Fahrplandateien (G ▸ 3). Live-Daten von Zusi über die Bridge am PC.', 'ok', 9000), 3200);
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>

@@ -1,0 +1,8 @@
+{
+  "zusiHost": "127.0.0.1",
+  "zusiPort": 1436,
+  "httpPort": 8080,
+  "clientName": "Nussy EBuLa",
+  "extraFsIds": [],
+  "datenVerzeichnisse": []
+}

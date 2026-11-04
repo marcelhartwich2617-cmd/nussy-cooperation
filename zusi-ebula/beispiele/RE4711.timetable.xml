@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Zusi><Info DateiTyp="Buchfahrplan" Version="A.1" MinVersion="A.1"/>
+<Buchfahrplan Gattung="RE" Nummer="4711" Zuglauf="Nussyhausen Hbf - Bad Musterstadt" BR="146" Masse="412000" spMax="44.4444" Bremsh="1.48" Laenge="168.4" kmStart="12.4" BremsstellungZug="1">
+<FplZeile FplLaufweg="0"><FplvMax vMax="16.6667"/><Fplkm km="12.4"/><FplName FplNameText="Nussyhausen Hbf"/><FplAnk Ank="2026-10-29 07:58:00"/><FplAbf Abf="2026-10-29 08:00:00"/></FplZeile>
+<FplZeile FplLaufweg="260"><Fplkm km="12.66"/><FplName FplNameText="Asig N1"/></FplZeile>
+<FplZeile FplLaufweg="900"><FplvMax vMax="27.7778"/><Fplkm km="13.3"/></FplZeile>
+<FplZeile FplLaufweg="1500"><FplvMax vMax="33.3333"/><Fplkm km="13.9"/><FplName FplNameText="Bk Nussyhausen Ost"/></FplZeile>
+<FplZeile FplLaufweg="2600"><Fplkm km="15.0"/><FplName FplNameText="Sbk 150"/><FplSignaltyp FplSignaltypNr="10"/></FplZeile>
+<FplZeile FplLaufweg="3700"><FplvMax vMax="22.2222"/><Fplkm km="16.1"/></FplZeile>
+<FplZeile FplLaufweg="4100"><Fplkm km="16.5"/><FplName FplNameText="Esig"/><FplSignaltyp FplSignaltypNr="7"/></FplZeile>
+<FplZeile FplLaufweg="4900"><Fplkm km="17.3"/><FplName FplNameText="Waldheim"/><FplAnk Ank="2026-10-29 08:05:00"/><FplAbf Abf="2026-10-29 08:05:30"/></FplZeile>
+<FplZeile FplLaufweg="5150"><Fplkm km="17.55"/><FplName FplNameText="Asig"/></FplZeile>
+<FplZeile FplLaufweg="5600"><FplvMax vMax="38.8889"/><Fplkm km="18.0"/></FplZeile>
+<FplZeile FplLaufweg="7400"><Fplkm km="19.8"/><FplName FplNameText="Tunnel Eichberg"/><FplSaegelinien FplAnzahl="1"/></FplZeile>
+<FplZeile FplLaufweg="9000"><Fplkm km="21.4"/><FplName FplNameText="Sbk 214"/><FplSignaltyp FplSignaltypNr="10"/></FplZeile>
+<FplZeile FplLaufweg="11800"><Fplkm km="24.2"/><FplName FplNameText="Bk Eichenau"/><FplAbf Abf="2026-10-29 08:10:00"/></FplZeile>
+<FplZeile FplLaufweg="13000"><FplvMax vMax="27.7778"/><Fplkm km="25.4"/><FplNameRechts FplNameText="Brücke"/></FplZeile>
+<FplZeile FplLaufweg="14500"><Fplkm km="26.9"/><FplName FplNameText="Esig"/><FplSignaltyp FplSignaltypNr="7"/></FplZeile>
+<FplZeile FplLaufweg="15200"><Fplkm km="27.6"/><FplName FplNameText="Lindenfeld"/><FplAnk Ank="2026-10-29 08:13:30"/><FplAbf Abf="2026-10-29 08:14:30"/></FplZeile>
+<FplZeile FplLaufweg="15450"><Fplkm km="27.85"/><FplName FplNameText="Asig"/></FplZeile>
+<FplZeile FplLaufweg="16000"><FplvMax vMax="33.3333"/><Fplkm km="28.4" FplSprung="1" FplkmNeu="3.2"/><FplName FplNameText="Abzw Lindenfeld Nord"/><FplAbf Abf="2026-10-29 08:15:30"/></FplZeile>
+<FplZeile FplLaufweg="19000"><Fplkm km="6.2"/><FplName FplNameText="Sbk 62"/><FplSignaltyp FplSignaltypNr="10"/></FplZeile>
+<FplZeile FplLaufweg="21500"><FplvMax vMax="44.4444"/><Fplkm km="8.7"/></FplZeile>
+<FplZeile FplLaufweg="24600"><FplvMax vMax="27.7778"/><Fplkm km="11.8"/></FplZeile>
+<FplZeile FplLaufweg="25000"><Fplkm km="12.2"/><FplName FplNameText="Esig"/><FplSignaltyp FplSignaltypNr="7"/></FplZeile>
+<FplZeile FplLaufweg="25800"><Fplkm km="13.0"/><FplName FplNameText="Bad Musterstadt Ost"/><FplAnk Ank="2026-10-29 08:20:30"/><FplAbf Abf="2026-10-29 08:21:00"/></FplZeile>
+<FplZeile FplLaufweg="26050"><Fplkm km="13.25"/><FplName FplNameText="Asig"/></FplZeile>
+<FplZeile FplLaufweg="28200"><FplvMax vMax="16.6667"/><Fplkm km="15.4"/></FplZeile>
+<FplZeile FplLaufweg="28500"><Fplkm km="15.7"/><FplName FplNameText="Esig"/><FplSignaltyp FplSignaltypNr="7"/></FplZeile>
+<FplZeile FplLaufweg="29300"><Fplkm km="16.5"/><FplName FplNameText="Bad Musterstadt"/><FplAnk Ank="2026-10-29 08:25:00"/><FplRichtungswechsel/></FplZeile>
+</Buchfahrplan></Zusi>

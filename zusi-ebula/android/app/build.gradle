@@ -1,0 +1,57 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'de.nussy.ebula'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'de.nussy.ebula'
+        minSdk 24
+        targetSdk 34
+        versionCode 3
+        versionName '1.2'
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    // Zwei eigenständige Apps aus denselben Dateien: EBuLa und Fahrpult (lassen sich nebeneinander installieren)
+    flavorDimensions = ['app']
+    productFlavors {
+        ebula {
+            dimension 'app'
+            applicationId 'de.nussy.ebula'
+            resValue 'string', 'app_name', 'EBuLa'
+            buildConfigField 'String', 'START_PAGE', '"index.html"'
+        }
+        fahrpult {
+            dimension 'app'
+            applicationId 'de.nussy.fahrpult'
+            resValue 'string', 'app_name', 'Fahrpult'
+            buildConfigField 'String', 'START_PAGE', '"fahrpult.html"'
+        }
+    }
+
+    // Die Anzeige wird direkt aus zusi-ebula/public übernommen – eine Quelle für Browser und App
+    sourceSets {
+        main {
+            assets.srcDirs = ['../../public']
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // Zum direkten Installieren (ohne Play Store) mit dem Debug-Schlüssel signiert
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}

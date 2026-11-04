@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vordergrund des Fahrpult-Symbols: Skalenbogen, Teilstriche, Zeiger und Nabe (sichtbarer Bereich 66 × 66 dp in der Mitte) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Skalenbogen von 225° bis 135° (270°), Radius 24 um (54, 56) -->
+    <path
+        android:pathData="M37.03,72.97 A24,24 0 1,1 70.97,72.97"
+        android:strokeWidth="3.2"
+        android:strokeColor="#F2F2F6"
+        android:fillColor="#00000000" />
+    <!-- große Teilstriche -->
+    <path
+        android:pathData="M37.03,72.97 L41.27,68.73 M30,56 L36,56 M37.03,39.03 L41.27,43.27 M54,32 L54,38 M70.97,39.03 L66.73,43.27 M78,56 L72,56 M70.97,72.97 L66.73,68.73"
+        android:strokeWidth="3"
+        android:strokeColor="#F2F2F6" />
+    <!-- Zeiger -->
+    <path
+        android:pathData="M52.2,57.8 L66.5,41.6 L68.3,43.5 L55.8,61.2 Z"
+        android:fillColor="#F3E62A" />
+    <!-- Nabe -->
+    <path
+        android:pathData="M54,50 A6,6 0 1,1 53.99,50 Z"
+        android:fillColor="#D8D8E2" />
+</vector>

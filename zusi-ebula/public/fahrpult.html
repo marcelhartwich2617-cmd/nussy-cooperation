@@ -294,7 +294,7 @@ const MENU = [
   { l: 'Töne', v: () => (E.sound ? 'an' : 'aus'), a: () => { E.sound = !E.sound; saveE(); if (!E.sound) SND.stopAll(); } },
   { l: 'Führerstandstöne (Sifa, PZB)', v: () => (F.cab ? 'an' : 'aus'), a: () => { F.cab = !F.cab; saveF(); if (!F.cab) SND.stopAll(); } },
   { l: 'Lautstärke', v: () => E.vol + ' %', a: () => { E.vol = E.vol >= 100 ? 30 : E.vol + 10; saveE(); } },
-  { l: 'Bridge-Verbindung', v: () => (E.bridgeUrl || '').replace('http://', '') || (location.protocol.startsWith('http') ? location.host : '–'), a: () => openConn() },
+  { l: 'Bridge-Verbindung', v: () => (E.bridgeUrl || '').replace(/^https?:\/\//, '') || (location.protocol.startsWith('http') ? location.host : '–'), a: () => openConn() },
   { l: 'Datenquelle', v: () => (st.source === 'demo' ? 'Demo' : 'Zusi'), a: () => setSource(st.source === 'demo' ? 'zusi' : 'demo') },
   { l: 'Bildschirm aus', v: () => '', a: () => { st.off = true; openWin(null); SND.play('off'); } },
   ...(OWN_APP ? [] : [{ l: 'EBuLa öffnen', v: () => '', a: () => { location.href = 'index.html?ebula'; } }]),
@@ -599,10 +599,17 @@ function renderDiag(d, z) {
 
 // ------------------------------------------------------------------ Verbindungsdialog
 function openConn() { openWin('conn'); $('c-addr').value = (E.bridgeUrl || '').replace(/^https?:\/\//, ''); $('c-st').textContent = ''; $('c-found').innerHTML = ''; }
+// Auf einer https-Webseite (z. B. Vercel) geht nur der https-Zugang der Bridge (Port 8443)
+const HTTPS_PAGE = location.protocol === 'https:' && !/NussyEBuLa/i.test(navigator.userAgent);
 function normAddr(a) {
   a = String(a || '').trim(); if (!a) return '';
-  if (!/^https?:\/\//i.test(a)) a = 'http://' + a;
-  try { const u = new URL(a); if (!u.port && u.protocol === 'http:') u.port = '8080'; return u.origin; } catch (e) { return null; }
+  if (!/^https?:\/\//i.test(a)) a = (HTTPS_PAGE ? 'https://' : 'http://') + a;
+  try {
+    const u = new URL(a);
+    if (HTTPS_PAGE && u.protocol === 'http:') { u.protocol = 'https:'; if (!u.port || u.port === '8080') u.port = '8443'; }
+    if (!u.port) u.port = u.protocol === 'https:' ? '8443' : '8080';
+    return u.origin;
+  } catch (e) { return null; }
 }
 async function probe(base, ms) {
   const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), ms);
@@ -634,8 +641,8 @@ async function connAction(c, addr) {
       let done = 0;
       const worker = async () => {
         while (hosts.length && !scanAbort) {
-          const base = `http://${hosts.shift()}:8080`;
-          if (await probe(base, 1500)) { found.push(base); $('c-found').innerHTML = found.map((x) => `<button data-c="ok" data-addr="${x}">Verbinden mit ${x.replace('http://', '')}</button>`).join(''); }
+          const base = HTTPS_PAGE ? `https://${hosts.shift()}:8443` : `http://${hosts.shift()}:8080`;
+          if (await probe(base, 1500)) { found.push(base); $('c-found').innerHTML = found.map((x) => `<button data-c="ok" data-addr="${x}">Verbinden mit ${x.replace(/^https?:\/\//, '')}</button>`).join(''); }
           status.textContent = `Suche in ${pre}.x … ${++done}/254`;
         }
       };

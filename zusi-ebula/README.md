@@ -61,8 +61,9 @@ Die Bridge verbindet sich alle 3 Sekunden neu, Zusi und Bridge lassen sich also 
 |---|---|
 | `--zusi 192.168.0.10:1436` | Zusi läuft auf einem anderen PC |
 | `--port 8081` | anderer HTTP-Port für die Anzeige |
+| `--https-port 8444` | anderer HTTPS-Port (Standard 8443, `0` = aus) |
 
-Dieselben Werte lassen sich dauerhaft in `config.json` eintragen (`zusiHost`, `zusiPort`, `httpPort`).
+Dieselben Werte lassen sich dauerhaft in `config.json` eintragen (`zusiHost`, `zusiPort`, `httpPort`, `httpsPort`).
 Unter `datenVerzeichnisse` können zusätzliche Zusi-Datenordner für die Suche nach `*.timetable.xml` eingetragen werden.
 
 ### Diagnose
@@ -194,6 +195,30 @@ Die GitHub-Action „EBuLa iOS-App“ baut bei jeder Änderung eine unsignierte 
 Beim ersten Verbinden fragt iOS nach dem Zugriff auf das **lokale Netzwerk**: zulassen, sonst findet die App die
 Bridge nicht. Die App hält den Bildschirm an, läuft im Vollbild und gibt bei Tasten eine haptische Rückmeldung.
 
+## Web-Version (Vercel) – auch mit Zusi
+
+Die Anzeige lässt sich als normale Webseite betreiben, z. B. auf Vercel. Ohne PC laufen dort Demo und Fahrplandateien.
+
+**Bei Vercel einrichten (einmalig):** vercel.com ▸ *Add New… ▸ Project* ▸ das GitHub-Repository `nussy-cooperation`
+importieren ▸ als Projektnamen einen schwer erratbaren Namen wählen (z. B. `ebula-kn5xe46vzlnt`) ▸ **Root Directory:
+`zusi-ebula/public`**, Framework Preset **Other**, kein Build-Befehl ▸ *Deploy*. Unter *Settings ▸ Git* den
+**Production Branch** auf den Branch mit der EBuLa stellen (oder den Pull Request in `main` übernehmen). Danach
+aktualisiert Vercel die Seite bei jedem Push von selbst.
+
+**Mit Zusi verbinden:** Eine https-Webseite darf nicht mit `http://` sprechen. Die Bridge hat deshalb zusätzlich einen
+**https-Zugang auf Port 8443** mit eigenem Zertifikat. Das Zertifikat wird beim ersten Start im Ordner `zertifikate/`
+erzeugt (nicht weitergeben, nicht ins Repository) und muss einmal auf dem Gerät installiert werden:
+
+1. Auf dem iPad in Safari `http://<PC>:8080/install` öffnen ▸ **Zertifikat laden** ▸ *Erlauben*.
+2. *Einstellungen ▸ Profil geladen ▸ Installieren*.
+3. *Einstellungen ▸ Allgemein ▸ Info ▸ Zertifikatsvertrauenseinstellungen* ▸ „Nussy EBuLa Bridge CA“ einschalten.
+4. Auf der Vercel-Seite: G ▸ 2 Systemdienste ▸ **Bridge-Adresse** ▸ `https://<PC>:8443` (die Adresse steht im
+   `start.bat`-Fenster unter „Für Webseite/https“). Wer nur die IP eintippt, bekommt automatisch https und Port 8443.
+
+Android/Chrome: Zertifikat laden und unter *Einstellungen ▸ Sicherheit ▸ Verschlüsselung & Anmeldedaten ▸ Zertifikat
+installieren ▸ CA-Zertifikat* installieren. Chrome fragt beim ersten Verbinden, ob die Seite auf **Geräte im lokalen
+Netzwerk** zugreifen darf: *Zulassen*.
+
 ## Ohne Zusi
 
 `public/index.html` lässt sich auch direkt im Browser öffnen. Dann startet die Demo-Fahrt (Zug 4711). Über G ▸ 3 lässt sich jede
@@ -208,6 +233,7 @@ Bridge nicht. Die App hält den Bildschirm an, läuft im Vollbild und gibt bei T
   Programmdaten: Zugdatei, Zugnummer, Ladepause und Buchfahrplan (XML).
 - `public/index.html`: die komplette Anzeige in einer Datei (HTML, CSS und JavaScript), ohne Internetzugang.
 - `ios/`: iOS-App (Swift, WKWebView, Projekt per XcodeGen). Sie liefert `public/` über ein eigenes `ebula://`-Schema aus.
+- `zertifikat.js`: erzeugt Stammzertifikat und https-Serverzertifikat der Bridge (reines Node.js, ohne OpenSSL).
 - `vendor/qrcode.js`: QR-Code-Generator (Kazuhiko Arase, MIT-Lizenz) für den QR-Code der Bridge.
 - `android/`: Android-App (WebView ohne zusätzliche Bibliotheken). Sie übernimmt `public/` direkt als App-Inhalt.
 - `public/manifest.webmanifest` und `sw.js`: Web-App-Manifest, Icons und Offline-Cache für die Home-Bildschirm-Installation.

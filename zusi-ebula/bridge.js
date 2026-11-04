@@ -17,13 +17,17 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { execFile } = require('child_process');
+const https = require('https');
 const qrcode = require('./vendor/qrcode.js');
+const zertifikat = require('./zertifikat.js');
 
 // ---------------------------------------------------------------- Konfiguration
 const DEFAULTS = {
   zusiHost: '127.0.0.1',
   zusiPort: 1436,
   httpPort: 8080,
+  // https-Zugang, damit die EBuLa auch von einer https-Webseite (z. B. Vercel) aus verbinden kann; 0 = aus
+  httpsPort: 8443,
   clientName: 'Nussy EBuLa',
   // Führerstandsanzeigen (DATA_FTD), die angefordert werden
   fsIds: [
@@ -70,6 +74,7 @@ function loadConfig() {
       cfg.zusiHost = h || cfg.zusiHost;
       if (p) cfg.zusiPort = +p;
     } else if (a === '--port' && argv[i + 1]) cfg.httpPort = +argv[++i];
+    else if (a === '--https-port' && argv[i + 1]) cfg.httpsPort = +argv[++i];
     else if (a === '--debug') cfg.debug = true;
   }
   return cfg;
@@ -368,13 +373,26 @@ const STATIC_TYPES = {
   '.png': 'image/png', '.svg': 'image/svg+xml', '.xml': 'application/xml; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.m4a': 'audio/mp4',
 };
-const server = http.createServer((req, res) => {
+const CA_DIR = path.join(__dirname, 'zertifikate');
+let ca = null;
+function handleRequest(req, res) {
   let url;
   try { url = new URL(req.url, 'http://x'); } catch {
     res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
     return res.end('Ungültige Adresse');
   }
-  const cors = { 'Access-Control-Allow-Origin': '*' };
+  // Private-Network-Access: Chrome fragt vor Zugriffen einer öffentlichen Webseite auf das Heimnetz nach
+  const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Private-Network': 'true' };
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, { ...cors, 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': '*', 'Access-Control-Max-Age': '600' });
+    return res.end();
+  }
+  // Stammzertifikat der Bridge zum Installieren auf iPad/iPhone/Android
+  if ((url.pathname === '/zertifikat.crt' || url.pathname === '/zertifikat.pem') && ca) {
+    const der = url.pathname.endsWith('.crt');
+    res.writeHead(200, { 'Content-Type': der ? 'application/x-x509-ca-cert' : 'application/x-pem-file', 'Content-Disposition': `attachment; filename="Nussy-EBuLa-Bridge.${der ? 'crt' : 'pem'}"` });
+    return res.end(der ? ca.der : ca.certPem);
+  }
   if (url.pathname === '/events') {
     res.writeHead(200, { ...cors, 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
     res.write('retry: 2000\n\n');
@@ -414,7 +432,8 @@ const server = http.createServer((req, res) => {
   }
   res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
   res.end('Nicht gefunden');
-});
+}
+const server = http.createServer(handleRequest);
 setInterval(() => { for (const res of clients) res.write(': ping\n\n'); }, 15000);
 
 const DEBUG_HTML = `<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -456,6 +475,10 @@ function displayUrls() {
   const rank = (ip) => (ip.startsWith('192.168.') ? 0 : ip.startsWith('10.') ? 1 : ip.startsWith('172.') ? 2 : 3);
   return lanAddresses().sort((a, b) => rank(a) - rank(b)).map((ip) => `http://${ip}:${cfg.httpPort}/`);
 }
+function httpsUrls() {
+  if (!cfg.httpsPort || !ca) return [];
+  return displayUrls().map((u) => u.replace('http://', 'https://').replace(':' + cfg.httpPort + '/', ':' + cfg.httpsPort));
+}
 function installPage() {
   const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const urls = displayUrls();
@@ -486,6 +509,13 @@ figure svg{width:260px;height:260px;display:block}figcaption{font:600 15px ui-mo
 <li>Menü (⋮) ▸ <b>„Zum Startbildschirm hinzufügen“</b>.</li>
 <li>Oder die Android-App (APK) installieren und dort die Adresse unter dem QR-Code eintragen.</li></ol></div>
 </div>
+<div class="card" style="margin-top:20px"><h2>Webseite (z. B. Vercel) mit Zusi verbinden</h2>
+<p class="sub" style="margin:0 0 8px">Eine https-Webseite darf nur über https mit der Bridge sprechen. Dafür einmal das Zertifikat der Bridge auf dem iPad/iPhone installieren:</p><ol>
+<li>Diese Seite auf dem iPad in Safari öffnen (${esc((displayUrls()[0] || 'http://<IP-des-PCs>:' + cfg.httpPort + '/') + 'install')}) und hier tippen: <a style="color:#9cf" href="/zertifikat.crt"><b>Zertifikat laden</b></a> ▸ <b>Erlauben</b>.</li>
+<li><b>Einstellungen ▸ Profil geladen ▸ Installieren</b> (Code eingeben, nochmals Installieren).</li>
+<li><b>Einstellungen ▸ Allgemein ▸ Info ▸ Zertifikatsvertrauenseinstellungen</b> ▸ „Nussy EBuLa Bridge CA“ <b>einschalten</b>.</li>
+<li>In der Web-EBuLa: G ▸ 2 Systemdienste ▸ <b>Bridge-Adresse</b> ▸ <code>${esc(httpsUrls()[0] || 'https://<IP-des-PCs>:' + cfg.httpsPort)}</code> eintragen.</li></ol>
+<p class="sub" style="margin:8px 0 0">Android: Zertifikat laden, dann <b>Einstellungen ▸ Sicherheit ▸ Verschlüsselung &amp; Anmeldedaten ▸ Zertifikat installieren ▸ CA-Zertifikat</b>.</p></div>
 <p class="sub" style="margin-top:20px">Klappt es nicht? Windows-Firewall: Node.js im <b>privaten</b> Netzwerk zulassen. Diagnose: <a style="color:#9cf" href="/debug">/debug</a></p>
 </body></html>`;
 }
@@ -506,6 +536,16 @@ if (require.main === module) {
     console.error(e.code === 'EADDRINUSE' ? `Port ${cfg.httpPort} ist belegt – andere Portnummer mit --port wählen.` : e.message);
     process.exit(1);
   });
+  if (cfg.httpsPort) {
+    try {
+      ca = zertifikat.loadOrCreateCa(CA_DIR);
+      if (ca.neu) log('Neues Stammzertifikat erzeugt (Ordner zertifikate) – einmal auf iPad/Handy installieren, siehe /install');
+      const tls = zertifikat.serverCert(ca, lanAddresses());
+      https.createServer({ key: tls.key, cert: tls.cert }, handleRequest)
+        .on('error', (e) => log(`https-Port ${cfg.httpsPort} nicht verfügbar (${e.code || e.message}) – nur http aktiv`))
+        .listen(cfg.httpsPort);
+    } catch (e) { log('https-Zugang nicht möglich: ' + e.message); ca = null; }
+  }
   server.listen(cfg.httpPort, () => {
     console.log('==============================================================');
     console.log('  Nussy EBuLa – Fahrplananzeige für Zusi 3');
@@ -514,6 +554,7 @@ if (require.main === module) {
     for (const ip of lanAddresses()) console.log(`  Auf iPad/Tablet:    http://${ip}:${cfg.httpPort}`);
     console.log(`  Diagnose:           http://localhost:${cfg.httpPort}/debug`);
     console.log(`  Zusi TCP-Server:    ${cfg.zusiHost}:${cfg.zusiPort}`);
+    for (const u of httpsUrls()) console.log(`  Für Webseite/https: ${u}`);
     console.log(`  QR-Code fürs Handy: http://localhost:${cfg.httpPort}/install`);
     console.log('==============================================================');
     const url = displayUrls()[0];
